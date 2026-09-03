@@ -6,6 +6,22 @@ import { Spinner, EmptyState, Badge } from '../components/ui';
 import { formatWaktu } from '../lib/format';
 import { readSession } from '../lib/session';
 
+type Row = {
+  id: string;
+  senderId: string;
+  status: string;
+  fundingRequest?: { business?: { name?: string } | null } | null;
+  sender?: { id: string; profile?: { fullName?: string } | null } | null;
+  receiver?: { id: string; profile?: { fullName?: string } | null } | null;
+};
+
+type Msg = {
+  id: string;
+  senderId: string;
+  body: string;
+  createdAt: string;
+};
+
 export function ChatListPage() {
   const session = readSession();
   const { data, isLoading, isError } = useQuery({
@@ -146,19 +162,3 @@ function MessageInput({ connectionId }: { connectionId: string }) {
     </form>
   );
 }
-
-type Row = {
-  id: string;
-  senderId: string;
-  status: string;
-  fundingRequest?: { business?: { name?: string } | null } | null;
-  sender?: { id: string; profile?: { fullName?: string } | null } | null;
-  receiver?: { id: string; profile?: { fullName?: string } | null } | null;
-};
-
-type Msg = {
-  id: string;
-  senderId: string;
-  body: string;
-  createdAt: string;
-};
