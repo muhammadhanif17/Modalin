@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+enum Role {
+  UMKM
+  INVESTOR
+  ADMIN
+}
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+enum FundingStatus {
+  DRAFT
+  ACTIVE
+  NEGOTIATION
+  FUNDED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                 String @id @default(cuid())
+  email              String @unique @db.VarChar(254)
+  passwordHash       String @db.VarChar(255)
+  role               Role
+  profile            Profile?
+  business           Business?
+  investorPreference InvestorPreference?
+  portfolios         Portfolio[]
+  sentConnections    Connection[] @relation("connectionSender")
+  receivedConnections Connection[] @relation("connectionReceiver")
+  messages           Message[]
+  ratingsGiven       Rating[] @relation("ratingReviewer")
+  ratingsReceived    Rating[] @relation("ratingReviewed")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Profile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  fullName    String @db.VarChar(120)
+  phone       String? @db.VarChar(30)
+  avatarUrl   String? @db.VarChar(500)
+  bio         String? @db.Text
+  location    String? @db.VarChar(120)
+  isVerified  Boolean @default(false)
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Sector {
+  id          String @id @default(cuid())
+  name        String @unique @db.VarChar(80)
+  businesses  Business[]
+}
+
+model Business {
+  id              String @id @default(cuid())
+  ownerId         String @unique
+  name            String @db.VarChar(150)
+  description     String @db.Text
+  sectorId        String
+  location        String @db.VarChar(120)
+  establishedYear Int?
+  owner           User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  sector          Sector @relation(fields: [sectorId], references: [id])
+  fundingRequests FundingRequest[]
+}
+
+model FundingRequest {
+  id              String @id @default(cuid())
+  businessId      String
+  targetAmount    Decimal @db.Decimal(15, 2)
+  purpose         String @db.Text
+  cooperationType String @db.VarChar(80)
+  deadline        DateTime?
+  status          FundingStatus @default(DRAFT)
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  connections     Connection[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  @@index([status, createdAt])
+}
+
+model InvestorPreference {
+  id              String @id @default(cuid())
+  userId          String @unique
+  minimumAmount   Decimal @db.Decimal(15, 2)
+  maximumAmount   Decimal @db.Decimal(15, 2)
+  preferredLocation String? @db.VarChar(120)
+  cooperationType String? @db.VarChar(80)
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Portfolio {
+  id          String @id @default(cuid())
+  ownerId     String
+  title       String @db.VarChar(150)
+  description String? @db.Text
+  fileUrl     String @db.VarChar(500)
+  fileType    String @db.VarChar(80)
+  owner       User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model Connection {
+  id              String @id @default(cuid())
+  senderId        String
+  receiverId      String
+  fundingRequestId String?
+  status          ConnectionStatus @default(PENDING)
+  sender          User @relation("connectionSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver        User @relation("connectionReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  fundingRequest  FundingRequest? @relation(fields: [fundingRequestId], references: [id])
+  conversation    Conversation?
+  agreements      Agreement[]
+  @@unique([senderId, receiverId, fundingRequestId])
+}
+
+model Conversation {
+  id           String @id @default(cuid())
+  connectionId String @unique
+  connection  Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  messages    Message[]
+}
+
+model Message {
+  id             String @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String @db.Text
+  readAt         DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User @relation(fields: [senderId], references: [id])
+  createdAt      DateTime @default(now())
+  @@index([conversationId, createdAt])
+}
+
+model Agreement {
+  id              String @id @default(cuid())
+  connectionId    String
+  agreementNumber String @unique @db.VarChar(50)
+  amount          Decimal @db.Decimal(15, 2)
+  cooperationType String @db.VarChar(80)
+  startDate       DateTime
+  endDate         DateTime?
+  documentUrl     String? @db.VarChar(500)
+  status          String @default("DRAFT") @db.VarChar(30)
+  connection      Connection @relation(fields: [connectionId], references: [id])
+  signatures      AgreementSignature[]
+  ratings         Rating[]
+  createdAt       DateTime @default(now())
+}
+
+model AgreementSignature {
+  id           String @id @default(cuid())
+  agreementId  String
+  userId       String
+  signatureUrl String @db.VarChar(500)
+  signedAt     DateTime @default(now())
+  agreement    Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  @@unique([agreementId, userId])
+}
+
+model Rating {
+  id             String @id @default(cuid())
+  agreementId    String
+  reviewerId     String
+  reviewedUserId String
+  score          Int
+  review         String? @db.Text
+  agreement      Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  reviewer       User @relation("ratingReviewer", fields: [reviewerId], references: [id])
+  reviewedUser   User @relation("ratingReviewed", fields: [reviewedUserId], references: [id])
+  createdAt      DateTime @default(now())
+  @@unique([agreementId, reviewerId])
+}
