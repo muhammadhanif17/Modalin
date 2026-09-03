@@ -431,6 +431,24 @@ img { max-width: 100%; display: block; }
 .row-link .row-sub { color: var(--text-3); font-size: 13px; }
 .stack { display: grid; gap: 12px; }
 
+/* ---------- Admin / lists ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-box { text-align: center; }
+.stat-box small { display: block; color: var(--text-3); font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.stat-box strong { font-size: 26px; }
+.list { display: grid; gap: 10px; }
+.list-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md); }
+.btn-sm { padding: 6px 10px; font-size: 13px; }
+
+/* ---------- Onboarding for new users ---------- */
+.note { display: block; font-size: 13px; color: var(--text-3); }
+.note b { color: var(--text-2); }
+.field-grid { display: grid; gap: 12px; }
+
+@media (max-width: 700px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ---------- Loading ---------- */
 .spinner {
   width: 22px; height: 22px; margin: 0 auto;

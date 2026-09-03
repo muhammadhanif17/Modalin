@@ -11,12 +11,26 @@ import { MatchesPage } from './pages/Matches';
 import { ProfilePage } from './pages/Profile';
 import { ChatListPage, ConversationPage } from './pages/Chat';
 import { AgreementsPage } from './pages/Agreements';
+import { AdminPage } from './pages/Admin';
+import { InvestorPage } from './pages/Investor';
+import { PortfolioPage } from './pages/Portfolio';
 import { isAuthed } from './lib/api';
+import { readSession } from './lib/session';
 
 const queryClient = new QueryClient();
 
+type Role = 'UMKM' | 'INVESTOR' | 'ADMIN';
+
 function AuthGuard() {
   if (!isAuthed()) return <Navigate to="/login" replace />;
+  return <Outlet />;
+}
+
+function RoleGuard({ roles }: { roles: Role[] }) {
+  const session = readSession();
+  if (!session || !roles.includes(session.role)) {
+    return <Navigate to="/app/explore" replace />;
+  }
   return <Outlet />;
 }
 
@@ -34,6 +48,13 @@ function AppRoutes() {
           <Route path="chat" element={<ChatListPage />} />
           <Route path="chat/:id" element={<ConversationView />} />
           <Route path="agreements" element={<AgreementsPage />} />
+          <Route element={<RoleGuard roles={['ADMIN']} />}>
+            <Route path="admin" element={<AdminPage />} />
+          </Route>
+          <Route element={<RoleGuard roles={['INVESTOR']} />}>
+            <Route path="preferensi" element={<InvestorPage />} />
+            <Route path="rekam-danai" element={<PortfolioPage />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

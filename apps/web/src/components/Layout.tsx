@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { setToken, isAuthed } from '../lib/api';
+import { readSession } from '../lib/session';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function TopNav() {
   const authed = isAuthed();
+  const session = readSession();
   const navigate = useNavigate();
+  const role = session?.role;
   return (
     <header className="topnav">
       <div className="topnav-inner">
@@ -26,10 +29,17 @@ function TopNav() {
         <nav className="topnav-links" aria-label="Navigasi utama">
           {authed ? (
             <>
+              {role === 'ADMIN' && <Link to="/app/admin">Dashboard</Link>}
               <Link to="/app/explore">Jelajah</Link>
               <Link to="/app/matches">Cocok</Link>
               <Link to="/app/chat">Chat</Link>
               <Link to="/app/agreements">Perjanjian</Link>
+              {role === 'INVESTOR' && (
+                <>
+                  <Link to="/app/preferensi">Preferensi</Link>
+                  <Link to="/app/rekam-danai">Rekam danai</Link>
+                </>
+              )}
             </>
           ) : (
             <>
@@ -80,10 +90,19 @@ const APP_LINKS = [
 
 function BottomNav() {
   if (!isAuthed()) return null;
+  const session = readSession();
+  const role = session?.role;
+  const links = [...APP_LINKS];
+  if (role === 'INVESTOR') {
+    links.push({ to: '/app/preferensi', label: 'Preferensi', icon: '🎯' });
+  }
+  if (role === 'ADMIN') {
+    links.push({ to: '/app/admin', label: 'Admin', icon: '🛡️' });
+  }
   return (
     <nav className="bottomnav" aria-label="Navigasi bawah">
       <div className="bottomnav-inner">
-        {APP_LINKS.map((link) => (
+        {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
