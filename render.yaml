@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: modalin-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: ./apps/api
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_ISSUER
+        value: modalin-api
+      - key: JWT_AUDIENCE
+        value: modalin-web
+      - key: WEB_ORIGIN
+        sync: false
+      - key: API_PORT
+        value: "4000"
