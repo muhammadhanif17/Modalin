@@ -1,162 +1,247 @@
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { api } from '../lib/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { endpoints, type ChatMessage } from '../lib/api';
+import { subscribeToConversation, sendViaSocket } from '../lib/socket';
 import { Avatar } from '../components/ui/Avatar';
-import { Spinner, EmptyState, Badge } from '../components/ui';
-import { formatWaktu } from '../lib/format';
+import { Spinner, EmptyState, Notice } from '../components/ui';
+import { formatWaktu, formatTanggal } from '../lib/format';
 import { readSession } from '../lib/session';
 
-type Row = {
-  id: string;
-  senderId: string;
-  status: string;
-  fundingRequest?: { business?: { name?: string } | null } | null;
-  sender?: { id: string; profile?: { fullName?: string } | null } | null;
-  receiver?: { id: string; profile?: { fullName?: string } | null } | null;
-};
-
-type Msg = {
-  id: string;
-  senderId: string;
-  body: string;
-  createdAt: string;
-};
+/**
+ * Modul 5 di sisi klien — FR-08 (pesan real-time) dan FR-09 (indikator).
+ *
+ * Catatan: rute memakai conversationId, bukan connectionId. Versi sebelumnya
+ * mengirim connectionId ke endpoint percakapan sehingga selalu gagal.
+ */
 
 export function ChatListPage() {
-  const session = readSession();
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['connections'],
-    queryFn: () => api<Row[]>('/api/connections'),
-    staleTime: 20_000,
+    queryKey: ['conversations'],
+    queryFn: endpoints.conversations,
+    staleTime: 15_000,
   });
 
-  const accepted = (data ?? []).filter((c) => c.status === 'ACCEPTED');
+  const rows = data ?? [];
 
   return (
     <div className="shell" style={{ paddingBottom: 30 }}>
       <div className="page-head">
         <h1>Percakapan</h1>
-        <p>Bagikan detail dan bangun kepercayaan bersama calon mitra.</p>
+        <p>Ruang negosiasi terbuka setelah ketertarikan diterima.</p>
       </div>
 
       {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat percakapan" message="Coba lagi." />}
-      {!isLoading && !isError && accepted.length === 0 && (
+      {isError && <EmptyState icon="⚠️" title="Gagal memuat percakapan" message="Coba lagi sebentar lagi." />}
+      {!isLoading && !isError && rows.length === 0 && (
         <EmptyState
           icon="💬"
           title="Belum ada percakapan"
-          message="Temukan kecocokan lalu mulai obrolan dengan calon mitra."
+          message="Kirim ketertarikan ke calon mitra dulu. Ruang chat terbuka begitu mereka menerima."
           action={
             <Link className="btn btn-primary" to="/app/matches">
-              Lihat kecocokan
+              Lihat rekomendasi
             </Link>
           }
         />
       )}
-      {!isLoading && accepted.length > 0 && (
-        <div className="stack">
-          {accepted.map((conn) => {
-            const other =
-              conn.senderId === session?.id ? conn.receiver : conn.sender;
-            const name = other?.profile?.fullName ?? 'Mitra';
-            return (
-              <Link className="row-link" to={`/app/chat/${conn.id}`} key={conn.id}>
-                <Avatar name={name} seed={other?.id} size="md" />
-                <div className="row-main">
-                  <div className="row-title">{name}</div>
-                  <div className="row-sub">{conn.fundingRequest?.business?.name ?? 'Kemitraan'}</div>
-                </div>
-                <Badge tone="primary">Buka</Badge>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+
+      <div className="stack">
+        {rows.map((row) => (
+          <Link className="row-link" to={`/app/chat/${row.id}`} key={row.id}>
+            <Avatar name={row.partner.fullName ?? 'Mitra'} seed={row.partner.id} size="md" />
+            <div className="row-main">
+              <div className="row-title">{row.partner.fullName ?? 'Mitra'}</div>
+              <div className="row-sub">
+                {row.lastMessage ? row.lastMessage.body.slice(0, 60) : row.fundingRequest?.title ?? 'Kemitraan'}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flex: 'none' }}>
+              {row.lastMessage && (
+                <div className="opp-meta">{formatWaktu(row.lastMessage.createdAt)}</div>
+              )}
+              {/* FR-09 — indikator pesan belum dibaca */}
+              {row.unreadCount > 0 && <span className="dot">{row.unreadCount}</span>}
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
 
-export function ConversationPage({ connectionId }: { connectionId: string }) {
+export function ConversationPage({ conversationId }: { conversationId: string }) {
   const session = readSession();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const [live, setLive] = useState<ChatMessage[]>([]);
+  const [error, setError] = useState('');
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['messages', connectionId],
-    queryFn: () => api<Msg[]>(`/api/conversations/${connectionId}/messages`),
+    queryKey: ['messages', conversationId],
+    queryFn: () => endpoints.messages(conversationId),
     staleTime: 10_000,
   });
 
-  const { data: conn } = useQuery({
-    queryKey: ['connections'],
-    queryFn: () => api<Row[]>('/api/connections'),
+  const { data: conversations } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: endpoints.conversations,
   });
+  const meta = conversations?.find((c) => c.id === conversationId);
 
-  const rows = conn ?? [];
-  const thisConn = rows.find((c) => c.id === connectionId);
-  const other = thisConn
-    ? thisConn.senderId === session?.id
-      ? thisConn.receiver
-      : thisConn.sender
-    : null;
-  const otherName = other?.profile?.fullName ?? 'Mitra';
+  // FR-08 — pesan masuk lewat socket, tanpa memuat ulang halaman.
+  useEffect(() => {
+    const unsubscribe = subscribeToConversation(conversationId, (message) => {
+      setLive((prev) => (prev.some((m) => m.id === message.id) ? prev : [...prev, message]));
+    });
+    return unsubscribe;
+  }, [conversationId]);
+
+  // Tandai terbaca begitu ruang dibuka, supaya indikator FR-09 ikut turun.
+  useEffect(() => {
+    endpoints
+      .markRead(conversationId)
+      .then(() => qc.invalidateQueries({ queryKey: ['notifications'] }))
+      .catch(() => undefined);
+  }, [conversationId, qc]);
+
+  const messages = [...(data ?? []), ...live.filter((m) => !(data ?? []).some((d) => d.id === m.id))];
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
 
   if (isLoading) return <Spinner />;
-  if (isError) return <EmptyState icon="⚠️" title="Gagal memuat percakapan" message="Coba lagi." />;
+  if (isError) {
+    return (
+      <div className="shell">
+        <EmptyState
+          icon="🔒"
+          title="Percakapan tidak tersedia"
+          message="Ruang chat hanya terbuka untuk koneksi yang sudah diterima."
+          action={
+            <Link className="btn btn-outline" to="/app/chat">
+              Kembali
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
-  const messages = data ?? [];
+  const partnerName = meta?.partner.fullName ?? 'Mitra';
 
   return (
-    <div className="shell" style={{ paddingBottom: 20 }}>
+    <div className="shell" style={{ paddingBottom: 0 }}>
       <div style={{ padding: '14px 0' }}>
-        <Link className="btn btn-ghost" to="/app/chat">
+        <Link className="btn btn-ghost btn-sm" to="/app/chat">
           ← Kembali
         </Link>
       </div>
+
       <div className="chat-shell">
         <div className="chat-head">
-          <Avatar name={otherName} seed={other?.id} size="sm" />
-          <span>{otherName}</span>
+          <Avatar name={partnerName} seed={meta?.partner.id} size="sm" />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 700 }}>{partnerName}</div>
+            {meta?.fundingRequest && <div className="opp-meta">{meta.fundingRequest.title}</div>}
+          </div>
         </div>
+
         <div className="chat-body">
           {messages.length === 0 && (
             <p style={{ color: 'var(--text-3)', textAlign: 'center', margin: 'auto' }}>
-              Belum ada pesan. Sapa dulu untuk memulai.
+              Belum ada pesan. Sapa dulu untuk memulai negosiasi.
             </p>
           )}
-          {messages.map((m) => {
+          {messages.map((m, i) => {
             const mine = m.senderId === session?.id;
+            const prev = messages[i - 1];
+            const newDay =
+              !prev || new Date(prev.createdAt).toDateString() !== new Date(m.createdAt).toDateString();
             return (
-              <div key={m.id} className={`msg ${mine ? 'mine' : 'theirs'}`}>
-                {m.body}
-                <time>{formatWaktu(m.createdAt)}</time>
+              <div key={m.id}>
+                {newDay && (
+                  <div style={{ textAlign: 'center', margin: '12px 0' }}>
+                    <span className="badge badge-primary">{formatTanggal(m.createdAt)}</span>
+                  </div>
+                )}
+                <div className={`msg ${mine ? 'mine' : 'theirs'}`}>
+                  {m.body}
+                  <time>{formatWaktu(m.createdAt)}</time>
+                </div>
               </div>
             );
           })}
+          <div ref={bottomRef} />
         </div>
-        <MessageInput connectionId={connectionId} />
+
+        {error && <Notice tone="error" onClose={() => setError('')}>{error}</Notice>}
+        <MessageInput conversationId={conversationId} onError={setError} />
+      </div>
+
+      {/* CTA menuju penyusunan kesepakatan, sesuai layar ruang_negosiasi Stitch */}
+      <div className="action-shelf">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => navigate(`/app/agreements?conversation=${conversationId}`)}
+        >
+          Buat Dokumen SPK
+        </button>
       </div>
     </div>
   );
 }
 
-function MessageInput({ connectionId }: { connectionId: string }) {
+function MessageInput({
+  conversationId,
+  onError,
+}: {
+  conversationId: string;
+  onError: (message: string) => void;
+}) {
   const qc = useQueryClient();
+  const [value, setValue] = useState('');
+
   const { mutate, isPending } = useMutation({
-    mutationFn: (body: string) => api(`/api/conversations/${connectionId}/messages`, { method: 'POST', json: { body } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['messages', connectionId] }),
+    mutationFn: async (body: string) => {
+      // Coba socket dulu; kalau jaringan memblokir WebSocket, jatuh ke REST.
+      const sent = await sendViaSocket(conversationId, body);
+      if (!sent) await endpoints.sendMessage(conversationId, body);
+    },
+    onSuccess: () => {
+      setValue('');
+      qc.invalidateQueries({ queryKey: ['messages', conversationId] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (err) => onError(err instanceof Error ? err.message : 'Pesan gagal terkirim.'),
   });
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const input = e.currentTarget.elements.namedItem('body') as HTMLTextAreaElement;
-    const text = input.value.trim();
+    const text = value.trim();
     if (!text) return;
     mutate(text);
-    input.value = '';
   }
 
   return (
     <form className="chat-input" onSubmit={onSubmit}>
-      <textarea className="input" name="body" placeholder="Tulis pesan..." rows={1} />
-      <button className="btn btn-primary" type="submit" disabled={isPending}>
+      <textarea
+        className="input"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Tulis pesan…"
+        rows={1}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            onSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+          }
+        }}
+      />
+      <button className="btn btn-primary" type="submit" disabled={isPending || !value.trim()}>
         Kirim
       </button>
     </form>
