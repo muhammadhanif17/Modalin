@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="id" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#fef9ee;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;font-family:'Plus Jakarta Sans',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-surface": "#1d1c15", "secondary": "#2c694e", "secondary-container": "#aeeecb", "surface-tint": "#4d6356", "surface": "#fef9ee", "primary": "#000b04", "error": "#ba1a1a", "primary-fixed-dim": "#b4ccbb", "on-secondary-fixed": "#002114", "on-secondary": "#ffffff", "tertiary-container": "#002614", "surface-container-low": "#f8f3e8", "surface-container": "#f2ede2", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#002111", "on-secondary-fixed-variant": "#0e5138", "surface-bright": "#fef9ee", "on-primary-container": "#768d7e", "on-primary": "#ffffff", "on-primary-fixed": "#0a2015", "on-error-container": "#93000a", "on-tertiary-fixed-variant": "#224f37", "secondary-fixed": "#b1f0ce", "primary-fixed": "#d0e9d7", "tertiary-fixed-dim": "#a1d2b2", "on-surface-variant": "#424844", "on-secondary-container": "#316e52", "tertiary": "#000b04", "on-tertiary": "#ffffff", "primary-container": "#0f2419", "on-error": "#ffffff", "on-background": "#1d1c15", "error-container": "#ffdad6", "tertiary-fixed": "#bceecd", "background": "#fef9ee", "on-primary-fixed-variant": "#364c3f", "inverse-primary": "#b4ccbb", "surface-dim": "#dedacf", "outline": "#737973", "inverse-on-surface": "#f5f0e5", "surface-container-high": "#ede8dd", "secondary-fixed-dim": "#95d4b3", "inverse-surface": "#323029", "surface-variant": "#e7e2d7", "surface-container-highest": "#e7e2d7", "on-tertiary-container": "#639275", "outline-variant": "#c2c8c2" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter-desktop": "1.5rem", "space-sm": "0.75rem", "space-lg": "1.25rem", "container-max": "75rem", "space-2xs": "0.25rem", "space-md": "1rem", "gutter-mobile": "1rem", "space-xl": "1.5rem", "space-xs": "0.5rem", "space-2xl": "2rem", "space-4xl": "3.5rem", "space-3xl": "2.5rem", "touch-target-min": "3rem" }, fontFamily: { "label-sm": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "currency-display": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "title-md": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"] }, fontSize: { "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "currency-display": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface text-on-surface flex flex-col min-h-screen antialiased" style="background-color: rgb(254, 249, 238); color: rgb(29, 28, 21);"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_2px_12px_rgba(15,36,25,0.04)] pt-safe"><div class="h-16 px-4 flex items-center justify-between w-full border-b border-surface-container-high/60"><div class="flex items-center gap-2"><button aria-label="Kembali" class="w-10 h-10 flex items-center justify-center text-primary rounded-full hover:bg-surface-container-high active:scale-95 transition-all" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[22px]">arrow_back</span></button><div class="flex items-center gap-2 ml-1"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-secondary-fixed shrink-0"><span class="material-symbols-outlined text-[18px]">trending_up</span></div><div class="flex flex-col"><span class="font-bold text-[16px] text-primary leading-tight tracking-tight">Modalin</span><span class="font-label-sm text-[10px] text-secondary font-semibold uppercase tracking-wider">REGISTRASI AKUN</span></div></div></div><div class="flex items-center gap-2"><span class="font-label-sm text-[11px] text-secondary font-semibold bg-secondary-fixed/50 px-2.5 py-1 rounded-full whitespace-nowrap">Verifikasi OJK</span><button aria-label="Notifikasi" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-surface-container-high active:scale-95 transition-all shrink-0" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button></div></div></header><main class="flex-1 flex flex-col relative w-full px-gutter-mobile pb-safe bg-surface pt-14" style="background-color: rgb(254, 249, 238);"><div class="flex flex-col w-full pb-10">
+<!-- Progress Header Bar -->
+<div class="flex flex-col gap-2 pt-3 mb-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAE6DC] border border-[#DDD9CD] text-[#2C694E] font-semibold text-[12px]">
+<span class="w-2 h-2 rounded-full bg-[#2C694E]"></span>
+        Pengusaha UMKM
+      </span>
+
+</div>
+<div class="flex items-center gap-1.5">
+<span class="text-[12px] font-semibold text-[#424844]">Langkah 1 dari 3</span>
+<span class="inline-flex sm:hidden items-center text-[#2C694E]" title="OJK Diawasi">
+
+</span>
+</div>
+</div>
+<!-- Segmented / Fluid Progress Indicator -->
+<div class="w-full h-1.5 bg-[#E8E4D9] rounded-full overflow-hidden flex">
+<div class="h-full bg-[#0F2419] rounded-full transition-all duration-500 ease-out" style="width: 33.33%;"></div>
+</div>
+</div>
+<!-- Warm Narrative Intro Card -->
+<div class="bg-white rounded-2xl p-space-md shadow-sm mb-space-lg flex items-start gap-space-sm border border-[#E8E4D9]">
+<div class="w-11 h-11 rounded-xl bg-[#EAF5EE] text-[#0F2419] flex items-center justify-center shrink-0 border border-[#BCEECD]">
+<span class="material-symbols-outlined text-[22px] text-[#2C694E]">badge</span>
+</div>
+<div class="flex flex-col">
+<h1 class="font-headline-md text-[20px] text-[#0F2419] font-bold tracking-tight">Buat Akun Anda</h1>
+<p class="font-body-md text-[13px] text-[#424844] mt-1 leading-snug">
+      Isi data diri dasar Anda untuk memulai proses pendanaan usaha yang bermartabat dan transparan.
+    </p>
+</div>
+</div>
+<!-- Registration Form Fields -->
+<form class="flex flex-col gap-space-md" id="stepOneForm" onsubmit="event.preventDefault();">
+<!-- Field 1: Nama Lengkap -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-on-surface flex items-center justify-between" for="fullName">
+<span class="">Nama Lengkap <span class="text-error">*</span></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-normal">Sesuai KTP</span>
+</label>
+<div class="relative flex items-center">
+<div class="absolute left-4 pointer-events-none text-on-surface-variant flex items-center">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+<input class="w-full h-[52px] pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-lg text-body-lg shadow-sm focus:outline-none focus:bg-surface-bright transition-all" id="fullName" name="fullName" placeholder="Contoh: Budi Prasetyo" required="" type="text">
+</div>
+</div>
+<!-- Field 2: Email Aktif -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-on-surface" for="email">
+        Alamat Email <span class="text-error">*</span>
+</label>
+<div class="relative flex items-center">
+<div class="absolute left-4 pointer-events-none text-on-surface-variant flex items-center">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+<input class="w-full h-[52px] pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-lg text-body-lg shadow-sm focus:outline-none focus:bg-surface-bright transition-all" id="email" name="email" placeholder="nama@email.com" required="" type="email">
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Surat konfirmasi dan tanda terima resmi akan dikirim ke sini.</p>
+</div>
+<!-- Field 3: WhatsApp / Phone with Country Prefix -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-on-surface" for="phoneNumber">
+        Nomor WhatsApp / Telepon <span class="text-error">*</span>
+</label>
+<div class="flex items-center gap-2">
+<!-- Pinned Country Badge -->
+<div class="h-[52px] px-3.5 rounded-xl bg-surface-container-high text-on-surface font-label-lg text-label-lg flex items-center gap-1.5 shrink-0 shadow-sm">
+<span class="text-base leading-none">🇮🇩</span>
+<span class="">+62</span>
+</div>
+<div class="relative flex-1 flex items-center">
+<input class="w-full h-[52px] px-4 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-lg text-body-lg shadow-sm focus:outline-none focus:bg-surface-bright transition-all" id="phoneNumber" inputmode="numeric" name="phoneNumber" placeholder="812-3456-7890" required="" type="tel">
+</div>
+</div>
+<div class="flex items-center gap-1 text-secondary mt-0.5">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span class="font-body-sm text-body-sm">Untuk verifikasi OTP instan via WhatsApp.</span>
+</div>
+</div>
+<!-- Field 4: Kata Sandi -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-on-surface" for="password">
+        Kata Sandi <span class="text-error">*</span>
+</label>
+<div class="relative flex items-center">
+<div class="absolute left-4 pointer-events-none text-on-surface-variant flex items-center">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<input class="w-full h-[52px] pl-11 pr-12 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-lg text-body-lg shadow-sm focus:outline-none focus:bg-surface-bright transition-all" id="password" minlength="8" name="password" placeholder="Buat kata sandi akun" required="" type="password">
+<button aria-label="Tampilkan atau sembunyikan kata sandi" class="absolute right-3 w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container active:scale-95 transition-transform" id="togglePassword" type="button">
+<span class="material-symbols-outlined text-[20px]" id="passwordIcon">visibility</span>
+</button>
+</div>
+<div class="flex items-center justify-between px-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Minimal 8 karakter (huruf &amp; angka)</span>
+<div class="hidden items-center gap-1 font-label-sm text-label-sm text-secondary" id="pwdStrengthPill">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Kuat
+        </div>
+</div>
+</div>
+<!-- Terms Checkbox Card -->
+<div class="mt-space-xs p-space-sm rounded-xl bg-surface-container-low shadow-sm">
+<label class="flex items-start gap-3 cursor-pointer select-none">
+<div class="relative flex items-center justify-center mt-0.5">
+<input class="peer sr-only" id="termsCheckbox" required="" type="checkbox">
+<div class="w-5 h-5 rounded-md bg-surface-container-lowest peer-checked:bg-primary flex items-center justify-center shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-white text-[16px] opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-surface leading-snug">
+          Saya menyetujui 
+          <a class="text-secondary font-label-md text-label-md hover:underline font-semibold" href="#">Syarat &amp; Ketentuan</a> 
+          serta 
+          <a class="text-secondary font-label-md text-label-md hover:underline font-semibold" href="#">Kebijakan Privasi</a> 
+          Modalin.
+        </span>
+</label>
+</div>
+<!-- Sticky Bottom Commitment Zone -->
+<div class="mt-space-md flex flex-col gap-space-sm">
+<button class="w-full h-[52px] rounded-xl bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-transform hover:bg-secondary" id="submitBtn" type="submit">
+<span class="">Lanjut ke Verifikasi Identitas</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<!-- Trust & Security Microcopy Banner -->
+<div class="flex items-center justify-center gap-1.5 text-on-surface-variant py-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span class="font-body-sm text-body-sm text-center">
+          Data Anda dienkripsi dan dilindungi standar keamanan perbankan.
+        </span>
+</div>
+</div>
+</form>
+</div>
+<script>
+  (function() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordIcon = document.getElementById('passwordIcon');
+    const pwdStrengthPill = document.getElementById('pwdStrengthPill');
+    const phoneInput = document.getElementById('phoneNumber');
+
+    if (toggleBtn && passwordInput && passwordIcon) {
+      toggleBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        passwordIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+      });
+    }
+
+    if (passwordInput && pwdStrengthPill) {
+      passwordInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        const hasLetter = /[a-zA-Z]/.test(val);
+        const hasNumber = /[0-9]/.test(val);
+        if (val.length >= 8 && hasLetter && hasNumber) {
+          pwdStrengthPill.classList.remove('hidden');
+          pwdStrengthPill.classList.add('flex');
+        } else {
+          pwdStrengthPill.classList.add('hidden');
+          pwdStrengthPill.classList.remove('flex');
+        }
+      });
+    }
+
+    if (phoneInput) {
+      phoneInput.addEventListener('input', (e) => {
+        // Strip out non-numeric characters gracefully
+        let val = e.target.value.replace(/[^0-9]/g, '');
+        if (val.startsWith('0')) {
+          val = val.substring(1);
+        }
+        // Format lightly as typical Indonesian number 812-3456-7890
+        if (val.length > 7) {
+          e.target.value = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 12);
+        } else if (val.length > 3) {
+          e.target.value = val.slice(0, 3) + '-' + val.slice(3);
+        } else {
+          e.target.value = val;
+        }
+      });
+    }
+  })();
+</script></main>
+
+
+
+
+</body></html>
