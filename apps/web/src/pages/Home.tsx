@@ -8,7 +8,12 @@ import { formatRupiah } from '../lib/format';
 export function HomePage() {
   const { data } = useQuery({
     queryKey: ['landing'],
-    queryFn: () => api<LandingRow[]>('/api/funding-requests?limit=3').catch(() => [] as LandingRow[]),
+    // Landing boleh dilihat tanpa masuk, jadi kegagalan diperlakukan sebagai
+    // daftar kosong — bukan alasan menggagalkan seluruh halaman.
+    queryFn: () =>
+      api<{ items: LandingRow[] }>('/api/search?limit=3')
+        .then((r) => r.items)
+        .catch(() => [] as LandingRow[]),
     staleTime: 60_000,
   });
 

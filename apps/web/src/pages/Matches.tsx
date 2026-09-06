@@ -1,71 +1,110 @@
-import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import { OpportunityCard, OpportunityItem } from '../components/OpportunityCard';
+import { endpoints } from '../lib/api';
+import { OpportunityCard } from '../components/OpportunityCard';
 import { Spinner, EmptyState } from '../components/ui';
 
+/**
+ * FR-06 + FR-07 — hasil pencocokan otomatis.
+ *
+ * Skor dan urutannya datang apa adanya dari server; halaman ini tidak
+ * mengurutkan ulang atau mengarang angka. Kandidat di bawah ambang tetap
+ * ditampilkan sebagai alternatif informatif, bukan disembunyikan jadi layar
+ * kosong.
+ */
 export function MatchesPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['matches'],
-    queryFn: () => api<Row[]>('/api/matches'),
-    staleTime: 30_000,
+    queryFn: endpoints.matches,
+    staleTime: 15_000,
   });
-
-  const sorted = useMemo(() => {
-    const rows = data ?? [];
-    return [...rows].sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
-  }, [data]);
-
-  const items: OpportunityItem[] = sorted.map((row) => ({
-    id: row.id,
-    name: row.business?.name ?? 'Usaha',
-    sector: row.business?.sector?.name ?? 'Umum',
-    location: row.business?.location ?? '-',
-    description: row.business?.description ?? (row.purpose ?? ''),
-    targetAmount: Number(row.targetAmount ?? 0),
-    cooperationType: row.cooperationType ?? null,
-    ownerName: row.business?.owner?.profile?.fullName ?? null,
-    matchScore: row.matchScore ?? null,
-  }));
 
   return (
     <div className="shell">
       <div className="page-head">
-        <h1>Kecocokanmu</h1>
-        <p>Diurutkan dari yang paling sesuai berdasarkan kriteria membangun bersamamu.</p>
+        <h1>Rekomendasi untukmu</h1>
+        <p>
+          Dicocokkan dari sektor (40%), kebutuhan dana (30%), lokasi (10%), dan skor kepercayaan (20%).
+        </p>
       </div>
 
-      <div className="stack">
-        {isLoading && <Spinner />}
-        {isError && (
-          <EmptyState icon="⚠️" title="Gagal memuat kecocokan" message="Coba lagi sebentar lagi." />
-        )}
-        {!isLoading && !isError && items.length === 0 && (
-          <EmptyState
-            icon="💚"
-            title="Belum ada kecocokan"
-            message="Lengkapi profilmu agar sistem bisa menemukan mitra yang tepat."
-          />
-        )}
-        {items.map((item, i) => (
-          <OpportunityCard key={item.id} item={item} rank={i} />
-        ))}
-      </div>
+      {isLoading && <Spinner />}
+      {isError && <EmptyState icon="⚠️" title="Gagal memuat rekomendasi" message="Coba lagi sebentar lagi." />}
+
+      {/* Investor belum mengatur preferensi: tidak ada yang bisa dicocokkan */}
+      {data?.needsPreference && (
+        <EmptyState
+          icon="🎯"
+          title="Atur preferensi investasimu dulu"
+          message={data.emptyMessage ?? undefined}
+          action={
+            <Link className="btn btn-primary" to="/app/preferensi">
+              Atur preferensi
+            </Link>
+          }
+        />
+      )}
+
+      {data && !data.needsPreference && (
+        <div className="stack">
+          {data.rejectedByHardFilter > 0 && (
+            <p className="opp-meta">
+              {data.rejectedByHardFilter} peluang disaring lebih dulu karena skema kerja samanya tidak
+              beririsan dengan preferensimu.
+            </p>
+          )}
+
+          {data.recommended.length > 0 && (
+            <>
+              <div className="section-head">
+                <h2>Paling cocok</h2>
+                <span className="opp-meta">skor {data.minScore ?? 50} ke atas</span>
+              </div>
+              <div className="grid-3">
+                {data.recommended.map((item) => (
+                  <OpportunityCard key={item.id} item={item} match={item.match} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* FR-07: alternatif informatif ketika tidak ada yang lolos ambang */}
+          {data.recommended.length === 0 && data.alternatives.length > 0 && (
+            <EmptyState
+              icon="🌱"
+              title="Belum ada yang mencapai skor minimum"
+              message={data.emptyMessage ?? undefined}
+            />
+          )}
+
+          {data.alternatives.length > 0 && (
+            <>
+              <div className="section-head">
+                <h2>Alternatif terdekat</h2>
+                <span className="opp-meta">di bawah ambang, tapi masih relevan</span>
+              </div>
+              <div className="grid-3">
+                {data.alternatives.map((item) => (
+                  <OpportunityCard key={item.id} item={item} match={item.match} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {data.recommended.length === 0 && data.alternatives.length === 0 && (
+            <EmptyState
+              icon="🤝"
+              title="Belum ada mitra yang cocok"
+              message={data.emptyMessage ?? undefined}
+              action={
+                <Link className="btn btn-outline" to="/app/preferensi">
+                  Longgarkan preferensi
+                </Link>
+              }
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
-
-type Row = {
-  id: string;
-  targetAmount: number;
-  cooperationType: string;
-  purpose: string;
-  matchScore: number;
-  business?: {
-    name: string;
-    description: string;
-    location: string;
-    sector?: { name: string } | null;
-    owner?: { profile?: { fullName?: string } | null } | null;
-  } | null;
-};
