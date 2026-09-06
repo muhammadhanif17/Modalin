@@ -129,7 +129,9 @@ Autentikasi stateless via JWT, setiap request ke Application Layer diverifikasi 
 
 ## 5. Model Data
 
-Skema lengkap dan definitif: `modalin-erd.dbml` (13 tabel, 3 enum). Ringkasan berikut untuk orientasi cepat, bukan pengganti file dbml.
+Skema lengkap dan definitif: `modalin-erd.dbml` (**14 tabel, 8 enum**). Ringkasan berikut untuk orientasi cepat, bukan pengganti file dbml.
+
+Jumlahnya bertambah dari 13 tabel / 3 enum yang tercantum di versi awal dokumen ini. Tambahannya: tabel `Transaction` untuk FR-13, dan lima enum (`VerificationStatus`, `CooperationType`, `AgreementStatus`, `TransactionType`, `TransactionStatus`) karena aturannya berupa state machine yang lebih aman dijaga di level basis data daripada sebagai string bebas. Alasan tiap penyimpangan ditulis lengkap di header `modalin-erd.dbml`.
 
 ### 5.1 Entitas Identitas
 
@@ -238,10 +240,17 @@ Mobile-first: seluruh tata letak dirancang dari layar terkecil dulu, dengan bott
 
 ### 9.1 Design Tokens
 
-- Primary `#1D4ED8` (bright `#3B7CFA`), Accent `#EA580C` (bright `#F97316`)
-- Background `#F5F8FC`, Surface `#FFFFFF`, Ink `#0F1A2E`, Muted `#63708A`, Border `#E1E7F2`
-- Font: Plus Jakarta Sans (display/body), JetBrains Mono (angka/nominal uang)
-- Warna status verifikasi (hijau terverifikasi `#16A34A`, kuning menunggu `#B45309`, merah ditolak `#DC2626`) harus tetap terpisah secara visual dari warna brand primary/accent di atas, supaya warna tema dan warna status akun tidak ambigu.
+Diperbarui mengikuti `stitch_modalin_onboarding_flow_pwa/modalin_design_system/DESIGN.md`. Palet biru yang sebelumnya tercantum di sini (primary `#1D4ED8`, accent `#EA580C`) **sudah tidak dipakai**: repo sempat punya tiga sistem warna sekaligus (teal di `styles.css`, biru di sini, forest di DESIGN.md), dan yang menang adalah Stitch karena itulah acuan tampilan yang disepakati. Perubahan ini juga dicatat di README.
+
+Arah rasa: editorial fintech — kanvas kertas tulang, kartu putih bersih, hijau hutan dalam untuk aksi utama. Menghindari kesan pinjaman predatoris, tetap terbaca di bawah cahaya matahari tropis.
+
+- Kanvas `#F3EEE3` (Bone White), Surface `#FFFFFF`
+- Primary `#0F2419` (Deep Forest, hover `#2D6A4F`), Accent `#2D6A4F` (Rich Pine), Tint `#8FBFA0` (Soft Mint)
+- Ink `#16241D`, Muted `#4A5B52`, Border `#E2DDD2`, Input border `#D8D2C5`
+- Font: Plus Jakarta Sans untuk semua teks. Nominal Rupiah wajib `font-variant-numeric: tabular-nums` supaya kolom angka lurus. Headline tracking `-0.02em` sampai `-0.01em` dengan weight 700/800; body line-height 1.45–1.5 karena kata majemuk Bahasa Indonesia panjang.
+- Warna status verifikasi (hijau terverifikasi `#10B981`, kuning menunggu `#F59E0B`, merah ditolak `#EF4444`) harus tetap terpisah secara visual dari warna brand di atas, supaya warna tema dan warna status akun tidak ambigu.
+
+Metrik komponen: tombol tinggi 52px di mobile / 48px di desktop dengan radius 12px; kartu radius 16px padding 20px dengan bayangan hangat; chip dan badge full-rounded, chip terpilih berlatar forest; input tinggi 52px border 1.5px dengan prefix `Rp` menempel untuk kolom nominal; target sentuh minimum 48px; sticky action shelf 4.5rem; backdrop modal `rgba(15, 36, 25, 0.45)` dengan blur 4px.
 
 ## 10. Metodologi dan Urutan Build
 
@@ -269,8 +278,8 @@ Jadwal harian spesifik untuk deadline Babak Penyisihan (7 September 2026, 23:59 
 
 Belum final, putuskan pas atau sebelum bangun modul terkait:
 
-- Field spesifik per jenis kerja sama di form dokumen perjanjian (saat ini masih field generik yang sama untuk ketiga jenis).
-- Baseline Trust Score untuk akun baru/cold-start (saat ini bobot 20% flat tanpa perlakuan khusus akun baru).
+- ~~Field spesifik per jenis kerja sama di form dokumen perjanjian.~~ **DITUTUP.** `Agreement` kini punya kolom skema-spesifik nullable: `profitSharingRatio` (Bagi Hasil), `equityPercentage` (Penyertaan Modal), `interestRate` (Pinjaman). Hanya kolom yang relevan dengan `cooperationType` yang diisi dan dirender ke template PDF.
+- ~~Baseline Trust Score untuk akun baru/cold-start.~~ **DITUTUP dengan asumsi tercatat.** Akun baru mulai dari 0 tanpa perlakuan khusus, dan belum adanya rating dihitung 0 (bukan nilai netral 3/5) supaya akun baru tidak tampak lebih kredibel daripada yang sudah terbukti. Bobot 40 kelengkapan profil / 30 verifikasi / 30 rating ada di satu berkas, `apps/api/src/config/scoring.ts`, dan divalidasi berjumlah 100 saat boot.
 - Disclaimer verifikasi dana investor, dan peran Modalin saat terjadi sengketa antara UMKM dan investor (masih terbuka, belum ada rumah eksplisit di proposal).
 - Fitur moderasi/report konten: rekomendasikan satu kalimat hedge di bagian fitur terkait untuk babak ini, bukan dibangun sekarang.
 
