@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { setToken, isAuthed } from '../lib/api';
-import { readSession } from '../lib/session';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { setToken, isAuthed, endpoints } from '../lib/api';
+import { subscribeToNotifications, disconnectSocket } from '../lib/socket';
+import { readSession, saveSession } from '../lib/session';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,11 +15,47 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * FR-09 — indikator in-app. Angkanya diambil sekali saat aplikasi dibuka, lalu
+ * disegarkan setiap ada peristiwa dari socket, bukan lewat polling.
+ */
+function useNotifications() {
+  const qc = useQueryClient();
+  const authed = isAuthed();
+
+  const { data } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: endpoints.notifications,
+    enabled: authed,
+    staleTime: 20_000,
+  });
+
+  useEffect(() => {
+    if (!authed) return;
+    const refresh = () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
+    };
+    const unsubscribe = subscribeToNotifications({
+      onMessage: refresh,
+      onConnection: () => {
+        refresh();
+        qc.invalidateQueries({ queryKey: ['connections'] });
+      },
+    });
+    return unsubscribe;
+  }, [authed, qc]);
+
+  return data;
+}
+
 function TopNav() {
   const authed = isAuthed();
   const session = readSession();
   const navigate = useNavigate();
   const role = session?.role;
+  const notif = useNotifications();
+
   return (
     <header className="topnav">
       <div className="topnav-inner">
@@ -29,50 +68,57 @@ function TopNav() {
         <nav className="topnav-links" aria-label="Navigasi utama">
           {authed ? (
             <>
-              {role === 'ADMIN' && <Link to="/app/admin">Dashboard</Link>}
-              <Link to="/app/explore">Jelajah</Link>
-              <Link to="/app/matches">Cocok</Link>
+              {role === 'ADMIN' && <Link to="/app/admin">Admin</Link>}
+              <Link to="/app/beranda">Beranda</Link>
+              <Link to="/app/explore">Cari</Link>
+              {role === 'INVESTOR' && <Link to="/app/matches">Rekomendasi</Link>}
               <Link to="/app/chat">Chat</Link>
               <Link to="/app/agreements">Perjanjian</Link>
-              {role === 'INVESTOR' && (
-                <>
-                  <Link to="/app/preferensi">Preferensi</Link>
-                  <Link to="/app/rekam-danai">Rekam danai</Link>
-                </>
-              )}
             </>
           ) : (
-            <>
-              <Link to="/#cara">Cara kerja</Link>
-            </>
+            <Link to="/#cara">Cara kerja</Link>
           )}
         </nav>
         {authed ? (
-          <Link className="btn btn-soft" to="/app/profile">
+          <Link className="btn btn-soft btn-sm" to="/app/profile">
             Profil
           </Link>
         ) : (
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-            <Link className="btn btn-ghost hide-sm" to="/login">
+            <Link className="btn btn-ghost btn-sm hide-sm" to="/login">
               Masuk
             </Link>
-            <Link className="btn btn-primary" to="/register">
+            <Link className="btn btn-primary btn-sm" to="/register">
               Daftar
             </Link>
           </div>
         )}
       </div>
+      {notif && notif.pendingConnections > 0 && (
+        <div className="topbar-alert">
+          <Link to="/app/chat">
+            {notif.pendingConnections} ketertarikan menunggu responsmu →
+          </Link>
+        </div>
+      )}
     </header>
   );
 }
 
 export function LogoutButton() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   return (
     <button
       className="btn btn-outline btn-block"
       onClick={() => {
+        // Bersihkan token, sesi, cache, dan socket sekaligus supaya tidak ada
+        // data pengguna sebelumnya yang tertinggal di perangkat bersama.
         setToken(null);
+        saveSession(null);
+        disconnectSocket();
+        qc.clear();
+        endpoints.logout().catch(() => undefined);
         navigate('/login');
       }}
     >
@@ -81,34 +127,29 @@ export function LogoutButton() {
   );
 }
 
+/** Empat tab persis seperti bottom nav di Stitch: Beranda, Cari, Chat, Profil. */
 const APP_LINKS = [
-  { to: '/app/explore', label: 'Jelajah', icon: '🔍' },
-  { to: '/app/matches', label: 'Cocok', icon: '💚' },
+  { to: '/app/beranda', label: 'Beranda', icon: '🏠' },
+  { to: '/app/explore', label: 'Cari', icon: '🔍' },
   { to: '/app/chat', label: 'Chat', icon: '💬' },
-  { to: '/app/profile', label: 'Akun', icon: '👤' },
-];
+  { to: '/app/profile', label: 'Profil', icon: '👤' },
+] as const;
 
 function BottomNav() {
+  const notif = useNotifications();
   if (!isAuthed()) return null;
-  const session = readSession();
-  const role = session?.role;
-  const links = [...APP_LINKS];
-  if (role === 'INVESTOR') {
-    links.push({ to: '/app/preferensi', label: 'Preferensi', icon: '🎯' });
-  }
-  if (role === 'ADMIN') {
-    links.push({ to: '/app/admin', label: 'Admin', icon: '🛡️' });
-  }
+
   return (
     <nav className="bottomnav" aria-label="Navigasi bawah">
       <div className="bottomnav-inner">
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className={({ isActive }) => (isActive ? 'active' : '')}
-          >
-            <span aria-hidden="true">{link.icon}</span>
+        {APP_LINKS.map((link) => (
+          <NavLink key={link.to} to={link.to} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <span aria-hidden="true" style={{ position: 'relative' }}>
+              {link.icon}
+              {link.to === '/app/chat' && notif && notif.unreadMessages > 0 && (
+                <span className="dot dot-corner">{notif.unreadMessages}</span>
+              )}
+            </span>
             {link.label}
           </NavLink>
         ))}

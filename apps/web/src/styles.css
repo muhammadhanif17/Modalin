@@ -817,3 +817,28 @@ p, .body { line-height: 1.5; }
 .opp-row:last-child { border-bottom: 0; }
 .opp-name { font-weight: 700; }
 .opp-spec { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* --- Papan tanda tangan (FR-10, sentuh langsung tanpa aplikasi tambahan) --- */
+.sign-pad {
+  width: 100%;
+  display: block;
+  background: var(--surface);
+  border: 1.5px dashed var(--input-line);
+  border-radius: var(--r-md);
+  touch-action: none; /* cegah halaman ikut menggulir saat menggambar */
+  cursor: crosshair;
+}
+
+/* --- Titik notifikasi menempel di sudut ikon nav --- */
+.dot-corner { position: absolute; top: -6px; right: -10px; }
+
+/* --- Bilah peringatan di bawah topnav --- */
+.topbar-alert {
+  background: var(--warning-soft);
+  border-top: 1px solid var(--line);
+  padding: 8px var(--gutter);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.topbar-alert a { color: var(--warning-ink); }
