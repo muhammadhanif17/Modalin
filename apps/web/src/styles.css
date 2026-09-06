@@ -1,45 +1,66 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+/*
+ * Token diambil dari stitch_modalin_onboarding_flow_pwa/modalin_design_system/DESIGN.md.
+ * Menggantikan palet biru di ARCHITECTURE.md §9.1 — perubahan itu dicatat di
+ * README dan di §9.1 sendiri, jangan diubah diam-diam.
+ *
+ * Arah rasa: "editorial fintech" — kanvas kertas tulang, kartu putih bersih,
+ * hijau hutan dalam untuk aksi utama. Warna status sengaja dijaga terpisah dari
+ * warna brand supaya status akun tidak pernah ambigu dengan tema.
+ */
 :root {
-  /* Warna */
-  --bg: #fbf8f3;
-  --surface: #ffffff;
-  --surface-2: #f4efe7;
-  --surface-3: #ece4d8;
-  --text: #2c2a26;
-  --text-2: #6b655c;
-  --text-3: #9a9287;
-  --line: #e7dfd3;
-  --primary: #0e8a6d;
-  --primary-strong: #0b725a;
-  --primary-soft: #e1f2ec;
-  --accent: #e0873b;
-  --accent-soft: #fbeade;
-  --success: #2f9e63;
-  --success-soft: #e3f4ea;
-  --warning: #d99a2b;
-  --warning-soft: #faf0dc;
-  --danger: #c94f42;
-  --danger-soft: #fbece9;
+  /* Warna — botanical / bone */
+  --bg: #f3eee3;          /* Bone White, kanvas aplikasi */
+  --surface: #ffffff;     /* kartu dan sheet */
+  --surface-2: #ede8dd;
+  --surface-3: #e7e2d7;
+  --text: #16241d;        /* Deep Charcoal Green */
+  --text-2: #4a5b52;      /* Olive Charcoal */
+  --text-3: #8b9890;
+  --line: #e2ddd2;        /* hairline hangat */
+  --primary: #0f2419;     /* Deep Forest Green */
+  --primary-strong: #2d6a4f; /* dipakai sebagai hover primary */
+  --primary-soft: rgba(45, 106, 79, 0.08);
+  --accent: #2d6a4f;      /* Rich Pine, state aktif */
+  --accent-soft: rgba(45, 106, 79, 0.12);
+  --tint: #8fbfa0;        /* Soft Mint */
+  --success: #10b981;
+  --success-ink: #0d7a55;
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --warning: #f59e0b;
+  --warning-ink: #9a6304;
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --danger: #ef4444;
+  --danger-ink: #b91c1c;
+  --danger-soft: rgba(239, 68, 68, 0.12);
   --on-primary: #ffffff;
+  --input-line: #d8d2c5;
 
-  /* Radius */
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  --r-xl: 28px;
-  --r-pill: 999px;
+  /* Radius — kartu 16, tombol/input 12, chip penuh */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-pill: 9999px;
 
-  /* Bayangan */
-  --shadow-sm: 0 1px 2px rgba(44, 42, 38, 0.06);
-  --shadow-md: 0 6px 20px rgba(44, 42, 38, 0.08);
-  --shadow-lg: 0 16px 40px rgba(44, 42, 38, 0.12);
+  /* Bayangan hangat, bukan abu-abu steril */
+  --shadow-sm: 0 2px 8px -2px rgba(15, 36, 25, 0.05), 0 8px 16px -4px rgba(15, 36, 25, 0.03);
+  --shadow-md: 0 4px 12px -2px rgba(15, 36, 25, 0.08), 0 16px 28px -6px rgba(15, 36, 25, 0.06);
+  --shadow-lg: 0 12px 32px -4px rgba(15, 36, 25, 0.16), 0 24px 48px -8px rgba(15, 36, 25, 0.12);
 
-  /* Spacing */
-  --gutter: clamp(16px, 5vw, 40px);
-  --shell-w: 1120px;
+  /* Spacing & grid */
+  --gutter: clamp(16px, 5vw, 24px);
+  --shell-w: 1200px;      /* desktop 12 kolom, maks 75rem */
+  --tap: 48px;            /* touch target minimum */
+  --control-h: 52px;      /* tombol & input di mobile */
+  --shelf-h: 4.5rem;      /* sticky bottom action shelf */
 
   --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+@media (min-width: 1025px) {
+  :root { --control-h: 48px; }
 }
 
 * { box-sizing: border-box; }
@@ -510,3 +531,289 @@ img { max-width: 100%; display: block; }
   .stats { grid-template-columns: 1fr; }
   .page-with-nav { padding-bottom: 84px; }
 }
+
+/* =========================================================================
+   Lapisan Stitch
+   Menimpa metrik komponen agar persis mengikuti
+   stitch_modalin_onboarding_flow_pwa/modalin_design_system/DESIGN.md.
+   Ditaruh paling bawah supaya menang tanpa harus mengubah markup yang ada.
+   ========================================================================= */
+
+/* --- Tipografi: nominal Rupiah wajib tabular supaya kolom angka lurus --- */
+.opp-amount,
+.stat b,
+.stat-box b,
+.score,
+.money,
+[data-money] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+h1, h2 { letter-spacing: -0.02em; font-weight: 800; }
+h3, h4 { letter-spacing: -0.01em; font-weight: 700; }
+p, .body { line-height: 1.5; }
+
+/* --- Tombol: radius 12px, tinggi 52 mobile / 48 desktop, bukan pill --- */
+.btn {
+  border-radius: var(--r-md);
+  min-height: var(--control-h);
+  padding: 0 20px;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:hover:not(:disabled) { background: var(--primary-strong); }
+.btn-outline {
+  background: var(--surface);
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-soft, .btn-ghost { background: var(--primary-soft); color: var(--accent); border: 0; }
+.btn:disabled {
+  background: var(--line);
+  color: var(--text-3);
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-sm { min-height: 40px; padding: 0 14px; font-size: 14px; }
+
+/* --- Kartu: radius 16, padding 20, hairline + bayangan hangat --- */
+.card, .opp-card, .hero-panel, .stat-box {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(22, 36, 29, 0.06);
+  box-shadow: var(--shadow-sm);
+}
+.card-pad, .opp-card { padding: 20px; }
+
+/* --- Chip / filter pill: penuh, terpilih = latar hutan --- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip[aria-pressed='true'], .chip.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+.chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.chip-row::-webkit-scrollbar { display: none; }
+
+/* --- Badge status: pil rapat, 11px, tracking lebar --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.badge-success { background: var(--success-soft); color: var(--success-ink); }
+.badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
+.badge-danger  { background: var(--danger-soft);  color: var(--danger-ink); }
+.badge-primary { background: var(--primary-soft); color: var(--accent); }
+
+/* --- Input: tinggi 52, border 1.5, fokus pine + halo --- */
+.input, .textarea, select.input {
+  min-height: var(--control-h);
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--input-line);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+}
+.textarea { min-height: 120px; }
+.input:focus, .textarea:focus, select.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+}
+/* Prefix "Rp" yang menempel permanen di input nominal */
+.input-money { position: relative; display: block; }
+.input-money > .input { padding-left: 44px; font-variant-numeric: tabular-nums; }
+.input-money::before {
+  content: 'Rp';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  color: var(--text-2);
+  pointer-events: none;
+}
+/* Microcopy menenangkan di bawah input */
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* --- Checkbox & radio: 22px di dalam area sentuh 48px --- */
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+}
+.choice:has(input:checked) { border-color: var(--accent); background: var(--primary-soft); }
+.choice input { width: 22px; height: 22px; accent-color: var(--primary); flex: none; margin-top: 2px; }
+
+/* --- Semua kontrol interaktif hormati target sentuh minimum --- */
+.bottomnav a, .chip, .row-link, .list-row { min-height: var(--tap); }
+
+/* --- Bottom nav: Beranda / Cari / Chat / Profil --- */
+.bottomnav {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottomnav a { color: var(--text-2); }
+.bottomnav a.active { color: var(--primary); }
+
+/* --- Sticky action shelf: CTA utama di zona jempol --- */
+.action-shelf {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  min-height: var(--shelf-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+.action-shelf .btn { flex: 1; }
+
+/* --- Modal: backdrop hutan pekat + blur --- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: end center;
+  background: rgba(15, 36, 25, 0.45);
+  backdrop-filter: blur(4px);
+}
+.sheet {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: 24px var(--gutter) calc(24px + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-lg);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+@media (min-width: 768px) {
+  .backdrop { place-items: center; }
+  .sheet { border-radius: var(--r-xl); }
+}
+
+/* --- Meter pendanaan: track hairline, isi pine --- */
+.meter { height: 8px; border-radius: var(--r-pill); background: var(--line); overflow: hidden; }
+.meter > span { display: block; height: 100%; border-radius: var(--r-pill); background: var(--accent); }
+
+/* --- Indikator progres form bertahap --- */
+.steps { display: flex; gap: 8px; margin-bottom: 20px; }
+.steps > span { flex: 1; height: 4px; border-radius: var(--r-pill); background: var(--line); }
+.steps > span.done { background: var(--accent); }
+.steps > span.now { background: var(--primary); }
+
+/* --- Ikon info untuk istilah keuangan (NFR Usability) --- */
+.info-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+}
+
+/* --- Desktop: dua panel, filter kiri, peluang kanan --- */
+@media (min-width: 1025px) {
+  .two-pane {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .two-pane > aside { position: sticky; top: 84px; }
+}
+
+/* --- Titik notifikasi untuk pesan/koneksi baru (FR-09) --- */
+.dot {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* --- Grid angka di kartu peluang (Target Modal / Tenor / ROI) --- */
+.num-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.num-grid small {
+  display: block;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.num-grid b { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* --- Alasan kecocokan di kartu rekomendasi --- */
+.reasons { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.reasons li { color: var(--text-2); font-size: 13px; line-height: 1.45; }
+
+/* --- Baris peluang ringkas di landing --- */
+.opp-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.opp-row:last-child { border-bottom: 0; }
+.opp-name { font-weight: 700; }
+.opp-spec { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; }
