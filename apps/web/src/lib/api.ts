@@ -128,7 +128,7 @@ export const COOPERATION_HELP: Record<CooperationType, string> = {
   BAGI_HASIL:
     'Pemodal ikut menanggung untung-rugi usaha. Keuntungan dibagi sesuai porsi yang disepakati, tidak ada bunga tetap.',
   PENYERTAAN_MODAL:
-    'Pemodal menjadi pemilik sebagian usaha Anda. Ia berhak atas persentase kepemilikan dan ikut menanggung risiko jangka panjang.',
+    'Pemodal menjadi pemilik sebagian usahamu. Ia berhak atas persentase kepemilikan dan ikut menanggung risiko jangka panjang.',
   PINJAMAN:
     'Dana dikembalikan bertahap dalam jangka waktu tertentu beserta imbal hasil yang sudah disepakati di awal.',
 };
@@ -183,7 +183,35 @@ export type MatchResult = {
 
 export type MatchedOpportunity = Opportunity & { match: MatchResult };
 
-export type SearchResponse = { items: Opportunity[]; total: number; emptyMessage: string | null };
+/** Pemodal yang sudah mengisi kriteria investasinya — sisi kedua FR-05. */
+export type InvestorListing = {
+  id: string;
+  createdAt: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  location: string | null;
+  trustScore: number;
+  isVerified: boolean;
+  preference: {
+    minimumAmount: number;
+    maximumAmount: number;
+    preferredLocation: string | null;
+    preferredSector: Sector | null;
+    cooperationTypes: CooperationType[];
+  } | null;
+};
+
+/** Sisi mana yang sedang dicari: peluang usaha, atau pemodal. */
+export type SearchAudience = 'peluang' | 'pemodal';
+
+/**
+ * Union terdiskriminasi supaya `items` tidak pernah dibaca sebagai tipe yang
+ * salah — `audience` menentukan kartu mana yang dirender.
+ */
+export type SearchResponse =
+  | { audience: 'peluang'; items: Opportunity[]; total: number; emptyMessage: string | null }
+  | { audience: 'pemodal'; items: InvestorListing[]; total: number; emptyMessage: string | null };
 
 export type MatchesResponse = {
   needsPreference: boolean;

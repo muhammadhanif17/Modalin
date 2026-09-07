@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { COOPERATION_HELP, COOPERATION_LABEL, endpoints, type CooperationType } from '../lib/api';
+import {
+  COOPERATION_HELP,
+  COOPERATION_LABEL,
+  endpoints,
+  type CooperationType,
+  type SearchAudience,
+} from '../lib/api';
 import { OpportunityCard } from '../components/OpportunityCard';
+import { InvestorCard } from '../components/InvestorCard';
 import { Spinner, EmptyState } from '../components/ui';
+import { readSession } from '../lib/session';
 
 /**
  * FR-05 — pencarian dan filter manual.
@@ -21,7 +29,40 @@ const SORTS = [
 
 const COOPERATION_TYPES: CooperationType[] = ['BAGI_HASIL', 'PENYERTAAN_MODAL', 'PINJAMAN'];
 
+/**
+ * Salinan per sisi pencarian. FR-05 dua arah: investor mencari peluang usaha,
+ * UMKM mencari pemodal. Sebelumnya /search hanya pernah mengembalikan peluang,
+ * jadi UMKM melihat halaman yang bukan untuknya — lengkap dengan usahanya
+ * sendiri di dalam daftar.
+ */
+const AUDIENCE_COPY = {
+  peluang: {
+    title: 'Cari peluang',
+    lead: 'Saring berdasarkan sektor, kebutuhan dana, lokasi, skema, dan skor kepercayaan.',
+    keyword: 'Cari nama atau deskripsi usaha',
+    amountLabel: 'Kebutuhan dana',
+    found: (n: number) => `${n} peluang ditemukan`,
+    emptyTitle: 'Tidak ada peluang yang cocok',
+  },
+  pemodal: {
+    title: 'Cari pemodal',
+    lead: 'Saring berdasarkan sektor yang diminati, rentang dana, lokasi, skema, dan skor kepercayaan.',
+    keyword: 'Cari nama atau fokus investasi',
+    amountLabel: 'Dana yang kamu butuhkan',
+    found: (n: number) => `${n} pemodal ditemukan`,
+    emptyTitle: 'Tidak ada pemodal yang cocok',
+  },
+} as const;
+
 export function ExplorePage() {
+  const session = readSession();
+  // UMKM default ke sisi pemodal, investor dan tamu ke sisi peluang. Tetap bisa
+  // ditukar manual — kedua sisi boleh ditelusuri siapa pun.
+  const [audience, setAudience] = useState<SearchAudience>(
+    session?.role === 'UMKM' ? 'pemodal' : 'peluang',
+  );
+  const copy = AUDIENCE_COPY[audience];
+
   const [q, setQ] = useState('');
   const [sectorId, setSectorId] = useState('');
   const [location, setLocation] = useState('');
@@ -33,11 +74,12 @@ export function ExplorePage() {
 
   const { data: sectors } = useQuery({ queryKey: ['sectors'], queryFn: endpoints.sectors, staleTime: 600_000 });
 
-  const filters = { q, sectorId, location, minAmount, maxAmount, cooperationType, minTrustScore, sort };
+  const filters = { audience, q, sectorId, location, minAmount, maxAmount, cooperationType, minTrustScore, sort };
   const { data, isLoading, isError } = useQuery({
     queryKey: ['search', filters],
     queryFn: () =>
       endpoints.search({
+        audience,
         q: q.trim() || undefined,
         sectorId: sectorId || undefined,
         location: location.trim() || undefined,
@@ -67,16 +109,31 @@ export function ExplorePage() {
   return (
     <div className="shell">
       <div className="page-head">
-        <h1>Cari peluang</h1>
-        <p>Saring berdasarkan sektor, kebutuhan dana, lokasi, skema, dan skor kepercayaan.</p>
+        <h1>{copy.title}</h1>
+        <p>{copy.lead}</p>
+      </div>
+
+      {/* FR-05 dua arah — sisi yang dicari bisa ditukar kapan saja */}
+      <div className="chip-row" role="tablist" aria-label="Sisi yang dicari">
+        {(['peluang', 'pemodal'] as const).map((side) => (
+          <button
+            key={side}
+            type="button"
+            className="chip"
+            aria-pressed={audience === side}
+            onClick={() => setAudience(side)}
+          >
+            {side === 'peluang' ? 'Peluang usaha' : 'Pemodal'}
+          </button>
+        ))}
       </div>
 
       {/* Desktop: filter di kiri, hasil di kanan (DESIGN.md, grid 12 kolom) */}
-      <div className="two-pane">
+      <div className="two-pane" style={{ marginTop: 16 }}>
         <aside className="card card-pad stack">
           <input
             className="input"
-            placeholder="Cari nama atau deskripsi usaha"
+            placeholder={copy.keyword}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             aria-label="Kata kunci"
@@ -106,7 +163,7 @@ export function ExplorePage() {
           </div>
 
           <div className="field">
-            <label>Kebutuhan dana</label>
+            <label>{copy.amountLabel}</label>
             <div className="field-grid">
               <label className="input-money">
                 <input
@@ -199,14 +256,14 @@ export function ExplorePage() {
 
           {isLoading && <Spinner />}
           {isError && (
-            <EmptyState icon="warning" title="Gagal memuat peluang" message="Periksa koneksimu lalu coba lagi." />
+            <EmptyState icon="warning" title="Gagal memuat hasil" message="Periksa koneksimu lalu coba lagi." />
           )}
 
           {/* Pesan kosong berasal dari server (FR-05) */}
           {!isLoading && !isError && data && data.items.length === 0 && (
             <EmptyState
               icon="search"
-              title="Tidak ada yang cocok"
+              title={copy.emptyTitle}
               message={data.emptyMessage ?? 'Coba ubah kata kunci atau filter.'}
               action={
                 activeFilters > 0 ? (
@@ -220,11 +277,11 @@ export function ExplorePage() {
 
           {!isLoading && data && data.items.length > 0 && (
             <>
-              <p className="opp-meta">{data.total} peluang ditemukan</p>
+              <p className="opp-meta">{copy.found(data.total)}</p>
               <div className="grid-3">
-                {data.items.map((item) => (
-                  <OpportunityCard key={item.id} item={item} />
-                ))}
+                {data.audience === 'pemodal'
+                  ? data.items.map((item) => <InvestorCard key={item.id} item={item} />)
+                  : data.items.map((item) => <OpportunityCard key={item.id} item={item} />)}
               </div>
             </>
           )}

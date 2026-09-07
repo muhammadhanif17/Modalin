@@ -79,6 +79,56 @@ function serialize(row: ListedRequest) {
 // FR-05 — pencarian dan filter manual
 // ---------------------------------------------------------------------------
 
+/**
+ * Daftar pemodal — sisi kedua dari FR-05.
+ *
+ * Sebelumnya /search hanya pernah mengembalikan FundingRequest, jadi UMKM tidak
+ * punya cara apa pun menemukan investor: proposal menuntut pencarian dua arah,
+ * tapi separuhnya tidak ada. Yang muncul di sini hanya investor yang sudah
+ * mengisi preferensi — tanpa itu tidak ada yang bisa ditampilkan maupun
+ * dicocokkan, dan kartunya jadi kosong.
+ */
+const investorInclude = {
+  profile: {
+    select: {
+      fullName: true,
+      avatarUrl: true,
+      bio: true,
+      location: true,
+      trustScore: true,
+      verificationStatus: true,
+    },
+  },
+  investorPreference: { include: { preferredSector: true } },
+} satisfies Prisma.UserInclude;
+
+type ListedInvestor = Prisma.UserGetPayload<{ include: typeof investorInclude }>;
+
+function serializeInvestor(row: ListedInvestor) {
+  const profile = row.profile;
+  const pref = row.investorPreference;
+  return {
+    id: row.id,
+    createdAt: row.createdAt,
+    fullName: profile?.fullName ?? null,
+    avatarUrl: profile?.avatarUrl ?? null,
+    bio: profile?.bio ?? null,
+    location: profile?.location ?? null,
+    trustScore: profile?.trustScore ?? 0,
+    // Badge hanya untuk VERIFIED (FR-02).
+    isVerified: profile?.verificationStatus === VerificationStatus.VERIFIED,
+    preference: pref
+      ? {
+          minimumAmount: Number(pref.minimumAmount),
+          maximumAmount: Number(pref.maximumAmount),
+          preferredLocation: pref.preferredLocation,
+          preferredSector: pref.preferredSector,
+          cooperationTypes: parseCooperationTypes(pref.cooperationTypes),
+        }
+      : null,
+  };
+}
+
 const searchSchema = z.object({
   q: z.string().trim().max(120).optional(),
   sectorId: z.string().optional(),
@@ -89,62 +139,145 @@ const searchSchema = z.object({
   minTrustScore: z.coerce.number().min(0).max(100).optional(),
   sort: z.enum(['terbaru', 'trust', 'dana_terkecil', 'dana_terbesar']).default('terbaru'),
   limit: z.coerce.number().int().min(1).max(50).default(20),
+  /// Sisi mana yang dicari. Kalau tidak diisi, diturunkan dari peran pemanggil.
+  audience: z.enum(['peluang', 'pemodal']).optional(),
 });
+
+type SearchFilters = z.infer<typeof searchSchema>;
+
+/** Sisi UMKM: permintaan pendanaan yang sedang terbuka. */
+async function searchOpportunities(f: SearchFilters, viewerId: string | null) {
+  const where: Prisma.FundingRequestWhereInput = {
+    status: FundingStatus.ACTIVE,
+    ...(f.minAmount !== undefined ? { targetAmount: { gte: new Prisma.Decimal(f.minAmount) } } : {}),
+    ...(f.maxAmount !== undefined
+      ? { targetAmount: { ...(f.minAmount !== undefined ? { gte: new Prisma.Decimal(f.minAmount) } : {}), lte: new Prisma.Decimal(f.maxAmount) } }
+      : {}),
+    business: {
+      ...(f.sectorId ? { sectorId: f.sectorId } : {}),
+      ...(f.location ? { location: { contains: f.location } } : {}),
+      ...(f.q ? { OR: [{ name: { contains: f.q } }, { description: { contains: f.q } }] } : {}),
+      // Pengajuan sendiri tidak pernah masuk hasil. /matches sudah mengecualikan
+      // diri sendiri sejak awal; /search tidak, sehingga UMKM melihat usahanya
+      // sendiri di daftar "Cari peluang" dan terbaca seperti bug.
+      owner: {
+        ...(viewerId ? { id: { not: viewerId } } : {}),
+        ...(f.minTrustScore !== undefined ? { profile: { trustScore: { gte: f.minTrustScore } } } : {}),
+      },
+    },
+  };
+
+  const orderBy: Prisma.FundingRequestOrderByWithRelationInput =
+    f.sort === 'dana_terkecil'
+      ? { targetAmount: 'asc' }
+      : f.sort === 'dana_terbesar'
+        ? { targetAmount: 'desc' }
+        : { createdAt: 'desc' };
+
+  let rows = await prisma.fundingRequest.findMany({
+    where,
+    include: listInclude,
+    orderBy,
+    // Ambil lebih banyak dulu karena filter jenis kerja sama dan urutan trust
+    // dikerjakan di aplikasi (cooperationTypes disimpan sebagai Json).
+    take: f.cooperationType || f.sort === 'trust' ? 200 : f.limit,
+  });
+
+  if (f.cooperationType) {
+    rows = rows.filter((row) => parseCooperationTypes(row.cooperationTypes).includes(f.cooperationType!));
+  }
+  if (f.sort === 'trust') {
+    rows.sort((a, b) => (b.business.owner.profile?.trustScore ?? 0) - (a.business.owner.profile?.trustScore ?? 0));
+  }
+
+  return {
+    items: rows.slice(0, f.limit).map(serialize),
+    emptyMessage:
+      'Belum ada peluang yang cocok dengan filter ini. Coba longgarkan rentang dana atau hapus filter lokasi.',
+  };
+}
+
+/** Sisi investor: pemodal yang sudah menyatakan kriteria investasinya. */
+async function searchInvestors(f: SearchFilters, viewerId: string | null) {
+  const where: Prisma.UserWhereInput = {
+    role: Role.INVESTOR,
+    ...(viewerId ? { id: { not: viewerId } } : {}),
+    // Tanpa preferensi tidak ada yang bisa ditampilkan di kartu.
+    investorPreference: {
+      is: {
+        ...(f.sectorId ? { preferredSectorId: f.sectorId } : {}),
+        // Rentang dana investor beririsan dengan rentang yang dicari UMKM.
+        ...(f.maxAmount !== undefined ? { minimumAmount: { lte: new Prisma.Decimal(f.maxAmount) } } : {}),
+        ...(f.minAmount !== undefined ? { maximumAmount: { gte: new Prisma.Decimal(f.minAmount) } } : {}),
+      },
+    },
+    profile: {
+      is: {
+        ...(f.minTrustScore !== undefined ? { trustScore: { gte: f.minTrustScore } } : {}),
+        ...(f.q ? { OR: [{ fullName: { contains: f.q } }, { bio: { contains: f.q } }] } : {}),
+      },
+    },
+    // Lokasi boleh cocok dengan domisili investor ATAU wilayah yang diincarnya.
+    ...(f.location
+      ? {
+          OR: [
+            { profile: { is: { location: { contains: f.location } } } },
+            { investorPreference: { is: { preferredLocation: { contains: f.location } } } },
+          ],
+        }
+      : {}),
+  };
+
+  const orderBy: Prisma.UserOrderByWithRelationInput =
+    f.sort === 'dana_terkecil'
+      ? { investorPreference: { minimumAmount: 'asc' } }
+      : f.sort === 'dana_terbesar'
+        ? { investorPreference: { maximumAmount: 'desc' } }
+        : f.sort === 'trust'
+          ? { profile: { trustScore: 'desc' } }
+          : { createdAt: 'desc' };
+
+  let rows = await prisma.user.findMany({
+    where,
+    include: investorInclude,
+    orderBy,
+    take: f.cooperationType ? 200 : f.limit,
+  });
+
+  if (f.cooperationType) {
+    rows = rows.filter((row) =>
+      parseCooperationTypes(row.investorPreference?.cooperationTypes ?? []).includes(f.cooperationType!),
+    );
+  }
+
+  return {
+    items: rows.slice(0, f.limit).map(serializeInvestor),
+    emptyMessage:
+      'Belum ada pemodal yang cocok dengan filter ini. Coba longgarkan rentang dana atau hapus filter sektor.',
+  };
+}
 
 matchmakingRouter.get(
   '/search',
   optionalAuth,
-  ah(async (req, res) => {
+  ah(async (req: AuthRequest, res) => {
     const f = searchSchema.parse(req.query);
+    const viewerId = req.user?.id ?? null;
 
-    const where: Prisma.FundingRequestWhereInput = {
-      status: FundingStatus.ACTIVE,
-      ...(f.minAmount !== undefined ? { targetAmount: { gte: new Prisma.Decimal(f.minAmount) } } : {}),
-      ...(f.maxAmount !== undefined
-        ? { targetAmount: { ...(f.minAmount !== undefined ? { gte: new Prisma.Decimal(f.minAmount) } : {}), lte: new Prisma.Decimal(f.maxAmount) } }
-        : {}),
-      business: {
-        ...(f.sectorId ? { sectorId: f.sectorId } : {}),
-        ...(f.location ? { location: { contains: f.location } } : {}),
-        ...(f.q ? { OR: [{ name: { contains: f.q } }, { description: { contains: f.q } }] } : {}),
-        ...(f.minTrustScore !== undefined
-          ? { owner: { profile: { trustScore: { gte: f.minTrustScore } } } }
-          : {}),
-      },
-    };
+    // UMKM mencari pemodal, investor mencari peluang. Pengunjung yang belum
+    // masuk melihat peluang (itu yang ditampilkan landing). Parameter eksplisit
+    // tetap menang supaya kedua sisi bisa ditelusuri siapa pun dari UI.
+    const audience = f.audience ?? (req.user?.role === Role.UMKM ? 'pemodal' : 'peluang');
 
-    const orderBy: Prisma.FundingRequestOrderByWithRelationInput =
-      f.sort === 'dana_terkecil'
-        ? { targetAmount: 'asc' }
-        : f.sort === 'dana_terbesar'
-          ? { targetAmount: 'desc' }
-          : { createdAt: 'desc' };
-
-    let rows = await prisma.fundingRequest.findMany({
-      where,
-      include: listInclude,
-      orderBy,
-      // Ambil lebih banyak dulu karena filter jenis kerja sama dan urutan trust
-      // dikerjakan di aplikasi (cooperationTypes disimpan sebagai Json).
-      take: f.cooperationType || f.sort === 'trust' ? 200 : f.limit,
-    });
-
-    if (f.cooperationType) {
-      rows = rows.filter((row) => parseCooperationTypes(row.cooperationTypes).includes(f.cooperationType!));
-    }
-    if (f.sort === 'trust') {
-      rows.sort((a, b) => (b.business.owner.profile?.trustScore ?? 0) - (a.business.owner.profile?.trustScore ?? 0));
-    }
-    const items = rows.slice(0, f.limit).map(serialize);
+    const result =
+      audience === 'pemodal' ? await searchInvestors(f, viewerId) : await searchOpportunities(f, viewerId);
 
     // FR-05 mewajibkan pesan yang jelas saat kombinasi filter tidak menghasilkan apa pun.
     res.json({
-      items,
-      total: items.length,
-      emptyMessage:
-        items.length > 0
-          ? null
-          : 'Belum ada peluang yang cocok dengan filter ini. Coba longgarkan rentang dana atau hapus filter lokasi.',
+      audience,
+      items: result.items,
+      total: result.items.length,
+      emptyMessage: result.items.length > 0 ? null : result.emptyMessage,
     });
   }),
 );
