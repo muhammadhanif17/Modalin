@@ -195,7 +195,8 @@ img { max-width: 100%; display: block; }
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 .opp-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-.opp-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+/* wrap: di layar sempit badge status turun ke baris sendiri, bukan meluber */
+.opp-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .opp-card h3 { font-size: 18px; }
 /*
  * text-2, bukan text-3: sektor, lokasi, dan tanggal adalah metadata bermakna.
@@ -687,7 +688,14 @@ p, .body { line-height: 1.5; }
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.01em;
+  /*
+   * nowrap supaya label dua kata tidak patah di tengah pil — tapi harus
+   * disertai flex:none, kalau tidak badge ikut diperas oleh saudaranya di baris
+   * flex dan teksnya meluber keluar kartu di 360px ("Sedang Ditinj...").
+   * Wadahnya yang mengalah lewat flex-wrap, bukan badge-nya yang menyusut.
+   */
   white-space: nowrap;
+  flex: none;
 }
 .badge-success { background: var(--success-soft); color: var(--success-ink); }
 .badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
@@ -952,16 +960,15 @@ p, .body { line-height: 1.5; }
 /* --- Angka skor besar di beranda, seukuran token currency-display --- */
 .score-display { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
 
-/* --- Kartu sistem di ruang negosiasi --- */
+/* --- Kartu sistem di ruang negosiasi, menempel di bawah kepala percakapan --- */
 .escrow-note {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 12px 14px;
-  margin-bottom: 4px;
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  flex: none;
+  padding: 10px 14px;
+  background: var(--primary-soft);
+  border-bottom: 1px solid var(--line);
   color: var(--text-2);
 }
 .escrow-note .icon { margin-top: 1px; color: var(--accent); }

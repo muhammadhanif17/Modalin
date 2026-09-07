@@ -163,19 +163,24 @@ export function ConversationPage({ conversationId }: { conversationId: string })
           </div>
         </div>
 
-        <div className="chat-body">
-          {/* Kartu sistem dari layar ruang_negosiasi Stitch — konteks sebelum pesan pertama */}
-          <div className="escrow-note">
-            <Icon name="shield" size={18} />
-            <div>
-              <strong>Diawasi Sistem Modalin</strong>
-              <p>
-                Kedua pihak sudah menunjukkan ketertarikan. Diskusikan jenis kerja sama dan detail
-                kesepakatan di sini. Dana investasi disalurkan langsung antar kalian, di luar platform.
-              </p>
-            </div>
+        {/*
+          Kartu sistem dari layar ruang_negosiasi Stitch. Ditaruh DI LUAR
+          .chat-body: di dalamnya ia ikut tergulir dan langsung hilang, karena
+          ruang pesan otomatis menggulir ke bawah begitu dibuka — jadi konteks
+          yang seharusnya selalu terlihat justru tidak pernah terbaca.
+        */}
+        <div className="escrow-note">
+          <Icon name="shield" size={18} />
+          <div>
+            <strong>Diawasi Sistem Modalin</strong>
+            <p>
+              Kedua pihak sudah menunjukkan ketertarikan. Dana investasi disalurkan langsung antar
+              kalian, di luar platform.
+            </p>
           </div>
+        </div>
 
+        <div className="chat-body">
           {messages.length === 0 && (
             <p style={{ color: 'var(--text-3)', textAlign: 'center', margin: 'auto' }}>
               Belum ada pesan. Sapa dulu untuk memulai negosiasi.

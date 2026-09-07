@@ -113,7 +113,7 @@ function QueueRow({ row, reviewable }: { row: QueueItem; reviewable: boolean }) 
 
   return (
     <div className="card card-pad stack">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <Avatar name={row.fullName} seed={row.userId} size="md" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>{row.fullName}</strong>
