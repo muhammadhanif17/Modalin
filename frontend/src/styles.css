@@ -1,7 +1,18 @@
-/* Urutan @import sesuai cascade: tokens -> base -> components -> layout -> pages -> responsive */
+/*
+ * @import WAJIB berada di atas aturan lain — kalau @tailwind ditaruh lebih
+ * dulu, seluruh berkas di bawah ini diabaikan diam-diam dan halaman kehilangan
+ * semua gayanya tanpa satu pun pesan galat.
+ *
+ * Urutan cascade: tokens -> base -> components -> layout -> pages -> responsive
+ */
 @import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/components.css';
 @import './styles/layout.css';
 @import './styles/pages.css';
 @import './styles/responsive.css';
+
+/* Utilitas Tailwind menyusul, dipakai halaman yang sudah dipindahkan dari mockup */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

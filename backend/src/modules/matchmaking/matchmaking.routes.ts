@@ -70,6 +70,9 @@ function serialize(row: ListedRequest) {
       location: row.business.location,
       sector: row.business.sector,
       establishedYear: row.business.establishedYear,
+      // Dipakai kartu peluang ("Omzet ... /bln") — mockup b6.
+      monthlyRevenue:
+        row.business.monthlyRevenue === null ? null : Number(row.business.monthlyRevenue),
     },
     owner: {
       id: row.business.owner.id,

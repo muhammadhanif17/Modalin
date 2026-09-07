@@ -351,7 +351,7 @@ export function ExplorePage() {
           {!isLoading && data && data.items.length > 0 && (
             <>
               <p className="opp-meta">{copy.found(data.total)}</p>
-              <div className="grid-3">
+              <div className="flex flex-col gap-space-lg">
                 {data.audience === 'pemodal'
                   ? data.items.map((item) => <InvestorCard key={item.id} item={item} />)
                   : data.items.map((item) => <OpportunityCard key={item.id} item={item} />)}

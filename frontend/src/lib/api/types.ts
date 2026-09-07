@@ -63,6 +63,7 @@ export type Opportunity = {
     location: string;
     sector: Sector;
     establishedYear: number | null;
+    monthlyRevenue: number | null;
   };
   owner: OpportunityOwner;
 };
