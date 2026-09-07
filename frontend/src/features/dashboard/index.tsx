@@ -5,6 +5,7 @@ import { Spinner, Notice, EmptyState } from '../../components/ui';
 import { readSession } from '../../lib/session';
 import { DashboardHeader } from './DashboardHeader';
 import { TrustScoreCard } from './TrustScoreCard';
+import { ProfileProgress } from './ProfileProgress';
 import { TopMatches } from './TopMatches';
 import { Shortcuts } from './Shortcuts';
 import { IncomingCard } from './IncomingCard';
@@ -75,6 +76,8 @@ export function DashboardPage() {
       )}
 
       <TrustScoreCard profile={profile} breakdown={breakdown} />
+
+      <ProfileProgress breakdown={breakdown} isInvestor={isInvestor} />
 
       {matches && !matches.needsSetup && (
         <TopMatches matches={matches as MatchesResponse} />

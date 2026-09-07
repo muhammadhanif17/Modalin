@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Avatar } from '../../components/ui/Avatar';
+import { Icon } from '../../components/ui/Icon';
 import { formatRupiah } from '../../lib/format';
 import type { MatchesResponse, MatchedInvestor, MatchedOpportunity } from '../../lib/api';
 
@@ -15,7 +16,9 @@ export function TopMatches({ matches }: { matches: MatchesResponse }) {
       <>
         <div className="section-head">
           <h2>Rekomendasi pemodal</h2>
+          <span className="opp-meta">{matches.recommended.length + matches.alternatives.length} kandidat</span>
         </div>
+        <MatchNote matches={matches} />
         <div className="stack">
           {matches.recommended.map((item) => (
             <InvestorRow key={item.id} item={item} />
@@ -40,7 +43,9 @@ export function TopMatches({ matches }: { matches: MatchesResponse }) {
     <>
       <div className="section-head">
         <h2>Rekomendasi peluang</h2>
+        <span className="opp-meta">{matches.recommended.length + matches.alternatives.length} kandidat</span>
       </div>
+      <MatchNote matches={matches} />
       <div className="stack">
         {matches.recommended.map((item) => (
           <OpportunityRow key={item.id} item={item} />
@@ -59,6 +64,32 @@ export function TopMatches({ matches }: { matches: MatchesResponse }) {
         </>
       )}
     </>
+  );
+}
+
+/**
+ * Penjelas pencocokan — baris "Dicocokkan otomatis ..." di mockup a1/b1.
+ *
+ * Ini juga satu-satunya tempat FR-06 dan FR-07 terlihat oleh pengguna setelah
+ * halaman Rekomendasi terpisah ditiadakan: bobotnya disebut apa adanya, dan
+ * jumlah kandidat yang gugur di hard filter ikut dilaporkan supaya daftar yang
+ * pendek tidak terbaca seperti sistem yang tidak bekerja.
+ */
+function MatchNote({ matches }: { matches: MatchesResponse }) {
+  const dasar =
+    matches.audience === 'pemodal'
+      ? 'sektor usahamu, kebutuhan dana, lokasi, dan skor kepercayaan'
+      : 'preferensi sektor, rentang dana, lokasi, dan skor kepercayaan';
+
+  return (
+    <p className="match-note">
+      <Icon name="target" size={15} />
+      <span>
+        Dicocokkan otomatis dari {dasar} — bobot sektor 40%, dana 30%, lokasi 10%, skor 20%.
+        {matches.rejectedByHardFilter > 0 &&
+          ` ${matches.rejectedByHardFilter} kandidat disaring lebih dulu karena skema kerja samanya tidak beririsan.`}
+      </span>
+    </p>
   );
 }
 

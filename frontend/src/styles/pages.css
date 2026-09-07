@@ -903,3 +903,58 @@ a.opp-card:hover { border-color: var(--primary); text-decoration: none; }
   .night-stats b { font-size: 52px; }
 }
 
+
+/* =========================================================================
+   Blok beranda dari mockup a1/b1
+   ========================================================================= */
+
+/* --- Kelengkapan profil: "Kelengkapan Profil Usaha 75%" (a1) --- */
+.progress-card {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.progress-head { display: flex; align-items: flex-start; gap: 12px; }
+.progress-head > div { flex: 1; min-width: 0; }
+.progress-head h3 { font-size: 16px; letter-spacing: -0.01em; }
+.progress-head p { margin-top: 3px; color: var(--text-2); font-size: 12.5px; line-height: 1.45; }
+.progress-head > b {
+  flex: none;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--primary-strong);
+  font-variant-numeric: tabular-nums;
+}
+.progress-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--primary-soft);
+  color: var(--accent);
+}
+.progress-tip { color: var(--text-2); font-size: 13px; line-height: 1.5; }
+.progress-tip b { color: var(--text); }
+
+/* --- Penjelas pencocokan: "Dicocokkan otomatis ..." (a1/b1) --- */
+.match-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: -6px 0 14px;
+  padding: 11px 13px;
+  border-radius: var(--r-md);
+  background: var(--primary-soft);
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.match-note .icon { flex: none; margin-top: 1px; color: var(--accent); }
