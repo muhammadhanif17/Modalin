@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../lib/api';
+import { api, VERIFICATION_LABEL, type VerificationStatus } from '../lib/api';
 import { Avatar } from '../components/ui/Avatar';
 import { Icon } from '../components/ui/Icon';
-import { Field, Notice, Badge } from '../components/ui';
+import { Field, Notice, Badge, VERIFICATION_TONE } from '../components/ui';
 import { LogoutButton } from '../components/Layout';
 import { readSession } from '../lib/session';
 
@@ -18,7 +18,8 @@ export function ProfilePage() {
   });
   const [editing, setEditing] = useState(false);
 
-  const isVerified = profile?.isVerified;
+  const status = profile?.verificationStatus ?? 'UNVERIFIED';
+  const isVerified = status === 'VERIFIED';
 
   if (isLoading) {
     return (
@@ -44,14 +45,17 @@ export function ProfilePage() {
               {session?.role === 'INVESTOR' ? 'Investor' : 'Pemilik usaha'} · {session?.email}
             </p>
           </div>
-          {isVerified ? (
-            <Badge tone="success">
-              <Icon name="verified" size={13} />
-              Terverifikasi
-            </Badge>
-          ) : (
-            <Badge tone="warning">Belum verifikasi</Badge>
-          )}
+          {/*
+            Dibaca dari verificationStatus, bukan boolean isVerified: dengan
+            boolean, akun yang DITOLAK ikut tampil kuning "Belum verifikasi" —
+            padahal statusnya menuntut tindakan dan harus merah. Ini satu-satunya
+            tempat yang masih memakai boolean setelah Beranda/Verifikasi/Admin
+            diseragamkan.
+          */}
+          <Badge tone={VERIFICATION_TONE[status]}>
+            {status === 'VERIFIED' && <Icon name="verified" size={13} />}
+            {VERIFICATION_LABEL[status]}
+          </Badge>
         </div>
 
         {/*
@@ -196,4 +200,5 @@ type Profile = {
   location?: string | null;
   bio?: string | null;
   isVerified?: boolean;
+  verificationStatus?: VerificationStatus;
 };
