@@ -19,8 +19,14 @@
     harus melewati seluruh formulir sebelum melihat satu peluang pun.
   */
   .two-pane { display: flex; flex-direction: column; gap: 16px; }
-  .two-pane > .results-pane { order: 1; }
-  .two-pane > aside { order: 2; }
+  .two-pane > .results-pane { order: 2; }
+  /*
+   * Panel filter tampil tepat di bawah tombol yang membukanya. Sebelumnya
+   * diberi order di bawah hasil, jadi menekan "Filter" membuka panel di luar
+   * pandangan dan tampak seperti tombol yang tidak berfungsi. Saat tertutup
+   * panelnya display:none, sehingga hasil tetap yang pertama terlihat.
+   */
+  .two-pane > aside { order: 1; }
 }
 
 @media (max-width: 640px) {

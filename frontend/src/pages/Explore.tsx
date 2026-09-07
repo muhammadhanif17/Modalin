@@ -10,7 +10,9 @@ import {
 import { OpportunityCard } from '../components/OpportunityCard';
 import { InvestorCard } from '../components/InvestorCard';
 import { Spinner, EmptyState } from '../components/ui';
+import { Icon } from '../components/ui/Icon';
 import { readSession } from '../lib/session';
+import { formatRupiahSingkat } from '../lib/format';
 
 /**
  * FR-05 — pencarian dan filter manual.
@@ -71,6 +73,8 @@ export function ExplorePage() {
   const [cooperationType, setCooperationType] = useState<CooperationType | ''>('');
   const [minTrustScore, setMinTrustScore] = useState('');
   const [sort, setSort] = useState<(typeof SORTS)[number]['key']>('terbaru');
+  // Panel filter tertutup di layar sempit; di desktop CSS membukanya kembali.
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const { data: sectors } = useQuery({ queryKey: ['sectors'], queryFn: endpoints.sectors, staleTime: 600_000 });
 
@@ -106,6 +110,42 @@ export function ExplorePage() {
     setSort('terbaru');
   };
 
+  /*
+   * Filter yang sedang menyala, masing-masing bisa dilepas sendiri — pola chip
+   * berpenutup "x" di mockup a8/b6. Sebelumnya satu-satunya jalan adalah
+   * menghapus semuanya sekaligus.
+   */
+  const activeChips: { key: string; label: string; clear: () => void }[] = [];
+  if (sectorId) {
+    const nama = (sectors ?? []).find((x) => x.id === sectorId)?.name ?? 'Sektor';
+    activeChips.push({ key: 'sector', label: nama, clear: () => setSectorId('') });
+  }
+  if (cooperationType)
+    activeChips.push({
+      key: 'coop',
+      label: COOPERATION_LABEL[cooperationType],
+      clear: () => setCooperationType(''),
+    });
+  if (location) activeChips.push({ key: 'loc', label: location, clear: () => setLocation('') });
+  if (minAmount || maxAmount) {
+    const dari = minAmount ? formatRupiahSingkat(Number(minAmount)) : 'bebas';
+    const sampai = maxAmount ? formatRupiahSingkat(Number(maxAmount)) : 'bebas';
+    activeChips.push({
+      key: 'amount',
+      label: `${dari} – ${sampai}`,
+      clear: () => {
+        setMinAmount('');
+        setMaxAmount('');
+      },
+    });
+  }
+  if (minTrustScore)
+    activeChips.push({
+      key: 'trust',
+      label: `Skor ${minTrustScore}+`,
+      clear: () => setMinTrustScore(''),
+    });
+
   return (
     <div className="shell">
       <div className="page-head">
@@ -129,15 +169,48 @@ export function ExplorePage() {
       </div>
 
       {/* Desktop: filter di kiri, hasil di kanan (DESIGN.md, grid 12 kolom) */}
-      <div className="two-pane" style={{ marginTop: 16 }}>
-        <aside className="card card-pad stack">
-          <input
-            className="input"
-            placeholder={copy.keyword}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            aria-label="Kata kunci"
-          />
+      {/* Bilah cari + tombol filter berlencana, mengikuti mockup a8/b6 */}
+      <div className="explore-bar">
+        <input
+          className="input"
+          placeholder={copy.keyword}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label="Kata kunci"
+        />
+        <button
+          type="button"
+          className="btn btn-outline filter-toggle"
+          onClick={() => setFilterOpen((v) => !v)}
+          aria-expanded={filterOpen}
+          aria-controls="panel-filter"
+        >
+          <Icon name="tune" size={18} />
+          Filter
+          {activeFilters > 0 && <span className="filter-count">{activeFilters}</span>}
+        </button>
+      </div>
+
+      {activeChips.length > 0 && (
+        <ul className="chip-row active-filters" aria-label="Filter yang sedang menyala">
+          {activeChips.map((c) => (
+            <li key={c.key}>
+              <button type="button" className="chip chip-removable" onClick={c.clear}>
+                {c.label}
+                <Icon name="close" size={13} />
+              </button>
+            </li>
+          ))}
+          <li>
+            <button type="button" className="chip chip-clear" onClick={resetAll}>
+              Hapus semua
+            </button>
+          </li>
+        </ul>
+      )}
+
+      <div className="two-pane">
+        <aside id="panel-filter" className={`card card-pad stack filter-pane${filterOpen ? ' is-open' : ''}`}>
 
           <div className="field">
             <label htmlFor="f-sector">Sektor</label>

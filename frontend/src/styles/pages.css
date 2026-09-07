@@ -958,3 +958,44 @@ a.opp-card:hover { border-color: var(--primary); text-decoration: none; }
   line-height: 1.5;
 }
 .match-note .icon { flex: none; margin-top: 1px; color: var(--accent); }
+
+/* =========================================================================
+   Eksplorasi — pola filter dari mockup a8/b6
+   ========================================================================= */
+
+/* --- Bilah cari + tombol filter berlencana --- */
+.explore-bar { display: flex; gap: 10px; align-items: stretch; margin-top: 16px; }
+.explore-bar .input { flex: 1; min-width: 0; }
+.filter-toggle { flex: none; gap: 8px; white-space: nowrap; }
+.filter-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Chip filter aktif, tiap chip bisa dilepas sendiri --- */
+.active-filters { margin-top: 12px; }
+.chip-removable { gap: 7px; padding-right: 10px; background: var(--primary-soft); border-color: transparent; color: var(--accent); }
+.chip-removable:hover { background: var(--surface-3); color: var(--text); }
+.chip-removable .icon { opacity: 0.75; }
+.chip-clear { background: transparent; border-style: dashed; color: var(--text-2); }
+
+/*
+ * Panel filter tertutup di layar sempit sampai tombol Filter ditekan; di
+ * desktop dua panel selalu tampil berdampingan sehingga tombolnya tidak perlu.
+ */
+.filter-pane { display: none; margin-top: 12px; }
+.filter-pane.is-open { display: grid; }
+
+@media (min-width: 1025px) {
+  .explore-bar .filter-toggle { display: none; }
+  .filter-pane { display: grid; margin-top: 0; }
+}

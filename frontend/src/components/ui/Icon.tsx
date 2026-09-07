@@ -36,7 +36,8 @@ export type IconName =
   | 'handshake'
   | 'image'
   | 'trash'
-  | 'bell';
+  | 'bell'
+  | 'tune';
 
 /** Glyph bergaris — mewarisi tebal garis dan warna dari elemen svg. */
 const STROKE: Partial<Record<IconName, React.ReactNode>> = {
@@ -130,6 +131,14 @@ const STROKE: Partial<Record<IconName, React.ReactNode>> = {
   ),
   close: <path d="m6 6 12 12M18 6 6 18" />,
   chevron: <path d="m9.5 5 7 7-7 7" />,
+  /* Tiga penggeser — lambang filter, mengikuti glyph "tune" di mockup */
+  tune: (
+    <>
+      <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+      <circle cx="16" cy="7" r="2.2" />
+      <circle cx="10" cy="17" r="2.2" />
+    </>
+  ),
   /* Sparkline naik — lambang merek di mockup welcome screen, bukan huruf "M" */
   trend: (
     <>
