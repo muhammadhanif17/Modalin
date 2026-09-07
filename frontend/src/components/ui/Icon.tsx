@@ -33,7 +33,10 @@ export type IconName =
   | 'close'
   | 'chevron'
   | 'trend'
-  | 'handshake';
+  | 'handshake'
+  | 'image'
+  | 'trash'
+  | 'bell';
 
 /** Glyph bergaris — mewarisi tebal garis dan warna dari elemen svg. */
 const STROKE: Partial<Record<IconName, React.ReactNode>> = {
@@ -140,6 +143,27 @@ const STROKE: Partial<Record<IconName, React.ReactNode>> = {
       <path d="m13 6.5 2.2-2.2a2 2 0 0 1 2.8 0l3 3a2 2 0 0 1 0 2.8l-3.5 3.5" />
       <path d="m8.5 13.6 2.1 2.1a1.5 1.5 0 0 0 2.1 0l.4-.4" />
       <path d="m13.1 15.3 1.7 1.7a1.5 1.5 0 0 0 2.1-2.1" />
+    </>
+  ),
+  image: (
+    <>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+      <circle cx="9" cy="10" r="1.8" />
+      <path d="m5.5 18 4.5-4.5 3 3 2.5-2.5 3 3" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" />
+      <path d="M6.5 7l1 12a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-12" />
+      <path d="M10 11.5v5M14 11.5v5" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
     </>
   ),
 };

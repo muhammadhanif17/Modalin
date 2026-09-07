@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, setToken } from '../lib/api';
 import { Field, Notice } from '../components/ui';
+import { Icon } from '../components/ui/Icon';
 import { saveSession } from '../lib/session';
 
 /** Dikirim AuthGuard atau CTA landing supaya pengguna tahu kenapa diminta masuk. */
@@ -38,7 +39,7 @@ export function LoginPage() {
   return (
     <AuthShell
       title="Selamat datang kembali"
-      subtitle="Lanjutkan menemukan mitra yang tepat."
+      subtitle="Masuk untuk melanjutkan."
       footer={
         <p className="auth-switch">
           Belum punya akun? <Link to="/register">Daftar di sini</Link>
@@ -91,8 +92,8 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      title="Mulai dari satu pertemuan"
-      subtitle="Bangun profil yang membuat peluang datang lebih dekat."
+      title="Buat akun"
+      subtitle="Satu langkah menuju verifikasi."
       footer={
         <p className="auth-switch">
           Sudah punya akun? <Link to="/login">Masuk di sini</Link>
@@ -159,6 +160,10 @@ function AuthShell({
     <div className="shell">
       <section className="auth-wrap">
         <div className="auth-title">
+          {/* Tombol kembali seperti mockup login/registrasi Stitch */}
+          <button type="button" className="back-btn" onClick={() => window.history.back()} aria-label="Kembali">
+            <Icon name="chevron" size={20} className="flip-x" />
+          </button>
           <span className="eyebrow">Modalin</span>
           <h1>{title}</h1>
           <p>{subtitle}</p>

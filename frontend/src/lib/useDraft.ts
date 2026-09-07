@@ -89,8 +89,8 @@ export function useDraft<T extends Record<string, unknown>>(
     [key, totalSteps],
   );
 
-  const setValue = useCallback(<K extends keyof T>(field: K, value: T[K]) => {
-    setValues((prev) => ({ ...prev, [field]: value }));
+  const setValue = useCallback((field: string, value: unknown) => {
+    setValues((prev) => ({ ...prev, [field]: value }) as T);
   }, []);
 
   const setMany = useCallback((patch: Partial<T>) => {

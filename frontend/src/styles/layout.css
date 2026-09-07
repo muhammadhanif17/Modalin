@@ -53,3 +53,19 @@
 }
 .topnav-links a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
 .topnav-links a.active { background: var(--primary-soft); color: var(--primary-strong); }
+
+/* --- Aksi kanan topnav: lencana peran + bell + profil (cerminan prototipe index.html) --- */
+.top-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.topnav-links + .top-actions { margin-left: 0; }
+.icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+}
+.bell-dot { position: absolute; top: 5px; right: 5px; }

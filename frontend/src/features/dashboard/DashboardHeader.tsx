@@ -1,6 +1,3 @@
-import { Link } from 'react-router-dom';
-import { Avatar } from '../../components/ui/Avatar';
-import { Badge, VERIFICATION_TONE, VERIFICATION_LABEL } from '../../components/ui';
 import type { MyProfile } from '../../lib/api';
 
 function salam(): string {
@@ -11,26 +8,18 @@ function salam(): string {
   return 'Selamat malam';
 }
 
-export function DashboardHeader({ profile, isInvestor, lead }: { profile: MyProfile; isInvestor: boolean; lead: string }) {
+/**
+ * Kepala beranda ala prototipe index.html: sapaan + satu baris urgensi.
+ * Skor dan badge verifikasi TIDAK di sini — sudah ada di TrustScoreCard,
+ * menampilkannya dua kali hanya menambah kotak tanpa informasi baru.
+ */
+export function DashboardHeader({ profile, lead }: { profile: MyProfile; lead: string }) {
   return (
-    <>
-      <div className="greeting">
-        <Avatar name={profile.fullName} seed={profile.id} size="lg" />
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <h1 className="greeting-name">{profile.fullName}</h1>
-          <div className="greeting-role">{isInvestor ? 'Pemodal' : 'Pengusaha'}</div>
-          <div className="greeting-pills">
-            <span className="score">Skor {profile.trustScore}/100</span>
-            <Badge tone={VERIFICATION_TONE[profile.verificationStatus]}>
-              {VERIFICATION_LABEL[profile.verificationStatus]}
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      <p className="greeting-lead">
-        {salam()}, {profile.fullName.split(' ')[0]}. {lead}
-      </p>
-    </>
+    <div className="page-head">
+      <h1>
+        {salam()}, {profile.fullName.split(' ')[0]}
+      </h1>
+      <p>{lead}</p>
+    </div>
   );
 }

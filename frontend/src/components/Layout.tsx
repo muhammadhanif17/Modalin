@@ -56,6 +56,8 @@ function TopNav() {
   const navigate = useNavigate();
   const role = session?.role;
   const notif = useNotifications();
+  // Satu angka untuk bell: ketertarikan menunggu + pesan belum dibaca.
+  const bellCount = (notif?.pendingConnections ?? 0) + (notif?.unreadMessages ?? 0);
 
   return (
     <header className="topnav">
@@ -78,7 +80,6 @@ function TopNav() {
               {role === 'ADMIN' && <Link to="/app/admin">Admin</Link>}
               <Link to="/app/beranda">Beranda</Link>
               <Link to="/app/explore">Cari</Link>
-              {role !== 'ADMIN' && <Link to="/app/matches">Rekomendasi</Link>}
               <Link to="/app/chat">Chat</Link>
               <Link to="/app/agreements">Perjanjian</Link>
             </>
@@ -87,9 +88,20 @@ function TopNav() {
           )}
         </nav>
         {authed ? (
-          <Link className="btn btn-soft btn-sm" to="/app/profile">
-            Profil
-          </Link>
+          <div className="top-actions">
+            {role && (
+              <span className="badge badge-soft">
+                {role === 'INVESTOR' ? 'Pemodal' : role === 'ADMIN' ? 'Admin' : 'UMKM'}
+              </span>
+            )}
+            <Link className="icon-btn" to="/app/chat" aria-label="Notifikasi">
+              <Icon name="bell" size={20} />
+              {bellCount > 0 && <span className="dot bell-dot">{bellCount}</span>}
+            </Link>
+            <Link className="btn btn-soft btn-sm" to="/app/profile">
+              Profil
+            </Link>
+          </div>
         ) : (
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
             {/* Tanpa ini pengunjung di HP hanya punya "Daftar" dan tak bisa masuk. */}
@@ -102,13 +114,6 @@ function TopNav() {
           </div>
         )}
       </div>
-      {notif && notif.pendingConnections > 0 && (
-        <div className="topbar-alert">
-          <Link to="/app/chat">
-            {notif.pendingConnections} ketertarikan menunggu responsmu →
-          </Link>
-        </div>
-      )}
     </header>
   );
 }

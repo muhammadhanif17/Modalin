@@ -312,6 +312,3 @@
 .portfolio-main { flex: 1; min-width: 0; }
 .portfolio-main strong { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .portfolio-main small { font-size: 12px; color: var(--text-3); }
-
-/* ---------- Hero ---------- */
-.hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: clamp(48px, 9vh, 96px) 0; }

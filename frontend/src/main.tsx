@@ -15,7 +15,6 @@ const RegisterPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m
 const DashboardPage = lazy(() => import('./features/dashboard').then((m) => ({ default: m.DashboardPage })));
 const VerificationPage = lazy(() => import('./pages/Verification').then((m) => ({ default: m.VerificationPage })));
 const ExplorePage = lazy(() => import('./pages/Explore').then((m) => ({ default: m.ExplorePage })));
-const MatchesPage = lazy(() => import('./pages/Matches').then((m) => ({ default: m.MatchesPage })));
 const PartnerPage = lazy(() => import('./pages/Partner').then((m) => ({ default: m.PartnerPage })));
 const ProfilePage = lazy(() => import('./pages/Profile').then((m) => ({ default: m.ProfilePage })));
 const ProfileEditUmkmPage = lazy(() =>
@@ -137,7 +136,8 @@ function AppRoutes() {
           <Route path="rating/:agreementId" element={lazyRoute(RatingPage)} />
           <Route path="pembayaran" element={lazyRoute(CheckoutPage)} />
 
-          <Route path="matches" element={lazyRoute(MatchesPage)} />
+          {/* Rekomendasi tinggal di beranda — rute lama diteruskan ke sana */}
+          <Route path="matches" element={<Navigate to="/app/beranda" replace />} />
 
           {/* Preferensi tetap khusus investor: UMKM tidak punya data ini */}
           <Route element={<RoleGuard roles={['INVESTOR']} />}>

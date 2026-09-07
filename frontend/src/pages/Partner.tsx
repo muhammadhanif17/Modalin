@@ -100,8 +100,8 @@ export function PartnerPage() {
     <div className="shell page-bottom">
       <div style={{ padding: '14px 0' }}>
         {/* Kembali ke halaman asal — dari Rekomendasi/Beranda dulu selalu terlempar ke Cari */}
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => navigate(-1)}>
-          ← Kembali
+        <button type="button" className="back-btn" onClick={() => navigate(-1)} aria-label="Kembali">
+          <Icon name="chevron" size={20} className="flip-x" />
         </button>
       </div>
 

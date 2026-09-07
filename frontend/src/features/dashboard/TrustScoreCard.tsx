@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Badge, VERIFICATION_TONE, VERIFICATION_LABEL } from '../../components/ui';
+import { Badge, VERIFICATION_TONE } from '../../components/ui';
+import { VERIFICATION_LABEL } from '../../lib/api';
 import type { MyProfile, TrustBreakdown } from '../../lib/api';
 
 export function TrustScoreCard({

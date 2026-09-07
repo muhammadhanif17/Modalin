@@ -31,8 +31,7 @@ export function ChatListPage() {
   return (
     <div className="shell page-bottom">
       <div className="page-head">
-        <h1>Percakapan</h1>
-        <p>Ruang negosiasi terbuka setelah ketertarikan diterima.</p>
+        <h1>Chat</h1>
       </div>
 
       {isLoading && <Spinner />}
@@ -43,7 +42,7 @@ export function ChatListPage() {
           title="Belum ada percakapan"
           message="Kirim ketertarikan ke calon mitra dulu. Ruang chat terbuka begitu mereka menerima."
           action={
-            <Link className="btn btn-primary" to="/app/matches">
+            <Link className="btn btn-primary" to="/app/beranda">
               {isInvestor ? 'Lihat rekomendasi peluang' : 'Lihat rekomendasi pemodal'}
             </Link>
           }
@@ -56,8 +55,8 @@ export function ChatListPage() {
             <Avatar name={row.partner.fullName ?? 'Mitra'} seed={row.partner.id} size="md" />
             <div className="row-main">
               <div className="row-title">{row.partner.fullName ?? 'Mitra'}</div>
-              <div className="row-sub">
-                {row.lastMessage ? row.lastMessage.body.slice(0, 60) : row.fundingRequest?.title ?? 'Kemitraan'}
+              <div className="row-sub chat-snippet">
+                {row.lastMessage ? row.lastMessage.body : row.fundingRequest?.title ?? 'Kemitraan'}
               </div>
             </div>
             <div style={{ textAlign: 'right', flex: 'none' }}>
@@ -139,9 +138,9 @@ export function ConversationPage({ conversationId }: { conversationId: string })
   return (
     <div className="shell" style={{ paddingBottom: 0 }}>
       <div style={{ padding: '14px 0' }}>
-        <Link className="btn btn-ghost btn-sm" to="/app/chat">
-          ← Kembali
-        </Link>
+        <button type="button" className="back-btn" onClick={() => navigate('/app/chat')} aria-label="Kembali ke daftar chat">
+          <Icon name="chevron" size={20} className="flip-x" />
+        </button>
       </div>
 
       <div className="chat-shell">

@@ -4,6 +4,18 @@ export function formatRupiah(value: number | string | undefined | null): string 
   return 'Rp ' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(num);
 }
 
+/** Versi ringkas untuk angka raksasa ("Rp 1,2 M", "Rp 80 jt"). */
+export function formatRupiahSingkat(value: number | string | undefined | null): string {
+  const num = Number(value ?? 0);
+  if (Number.isNaN(num)) return 'Rp 0';
+  const pendek = (n: number) =>
+    parseFloat(n.toFixed(1)).toString().replace('.', ',');
+  if (num >= 1_000_000_000) return `Rp ${pendek(num / 1_000_000_000)} M`;
+  if (num >= 1_000_000) return `Rp ${pendek(num / 1_000_000)} jt`;
+  if (num >= 1_000) return `Rp ${pendek(num / 1_000)} rb`;
+  return `Rp ${num}`;
+}
+
 export function formatTanggal(value: string | Date | undefined | null): string {
   if (!value) return '-';
   const date = new Date(value);

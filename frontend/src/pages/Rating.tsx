@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { COOPERATION_LABEL, endpoints } from '../lib/api';
 import { Avatar } from '../components/ui/Avatar';
+import { Icon } from '../components/ui/Icon';
 import { Notice, EmptyState, Spinner, Stars, Field } from '../components/ui';
 import { formatRupiah } from '../lib/format';
 
@@ -113,8 +114,8 @@ export function RatingPage() {
   return (
     <div className="shell page-bottom">
       <div style={{ padding: '14px 0' }}>
-        <Link className="btn btn-ghost btn-sm" to="/app/agreements">
-          ← Kembali
+        <Link className="back-btn" to="/app/agreements" aria-label="Kembali ke perjanjian">
+          <Icon name="chevron" size={20} className="flip-x" />
         </Link>
       </div>
 
