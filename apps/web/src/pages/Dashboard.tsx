@@ -25,10 +25,11 @@ export function DashboardPage() {
 
   const { data: profile, isLoading } = useQuery({ queryKey: ['profile'], queryFn: endpoints.me });
   const { data: connections } = useQuery({ queryKey: ['connections'], queryFn: endpoints.connections });
+  // Rekomendasi kini dua arah — UMKM melihat pemodal, investor melihat peluang.
   const { data: matches } = useQuery({
     queryKey: ['matches'],
     queryFn: endpoints.matches,
-    enabled: isInvestor,
+    enabled: session?.role !== 'ADMIN',
   });
 
   if (isLoading) return <Spinner />;
@@ -120,8 +121,8 @@ export function DashboardPage() {
         )}
       </div>
 
-      {/* Rekomendasi teratas untuk investor */}
-      {isInvestor && matches && !matches.needsPreference && matches.recommended.length > 0 && (
+      {/* Tiga teratas dari pencocokan otomatis, sisi mana pun */}
+      {matches && !matches.needsSetup && matches.recommended.length > 0 && (
         <>
           <div className="section-head">
             <h2>Paling cocok untukmu</h2>
@@ -130,31 +131,48 @@ export function DashboardPage() {
             </Link>
           </div>
           <div className="stack">
-            {matches.recommended.slice(0, 3).map((item) => (
-              <Link className="row-link" to={`/app/mitra/${item.owner.id}`} key={item.id}>
-                <Avatar name={item.business.name} seed={item.owner.id} size="md" />
-                <div className="row-main">
-                  <div className="row-title">{item.business.name}</div>
-                  <div className="row-sub">
-                    {item.business.sector.name} · <span data-money>{formatRupiah(item.targetAmount)}</span>
-                  </div>
-                </div>
-                {/* Skor kecocokan pakai warna brand, bukan hijau status verifikasi */}
-                <span className="badge badge-primary">Match {item.match.score}%</span>
-              </Link>
-            ))}
+            {matches.audience === 'pemodal'
+              ? matches.recommended.slice(0, 3).map((item) => (
+                  <Link className="row-link" to={`/app/mitra/${item.id}`} key={item.id}>
+                    <Avatar name={item.fullName ?? 'Pemodal'} seed={item.id} size="md" />
+                    <div className="row-main">
+                      <div className="row-title">{item.fullName ?? 'Pemodal'}</div>
+                      <div className="row-sub">
+                        {item.preference?.preferredSector?.name ?? 'Semua sektor'} ·{' '}
+                        <span data-money>
+                          {item.preference ? formatRupiah(item.preference.maximumAmount) : '—'}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="badge badge-primary">Match {item.match.score}%</span>
+                  </Link>
+                ))
+              : matches.recommended.slice(0, 3).map((item) => (
+                  <Link className="row-link" to={`/app/mitra/${item.owner.id}`} key={item.id}>
+                    <Avatar name={item.business.name} seed={item.owner.id} size="md" />
+                    <div className="row-main">
+                      <div className="row-title">{item.business.name}</div>
+                      <div className="row-sub">
+                        {item.business.sector.name} ·{' '}
+                        <span data-money>{formatRupiah(item.targetAmount)}</span>
+                      </div>
+                    </div>
+                    {/* Skor kecocokan pakai warna brand, bukan hijau status verifikasi */}
+                    <span className="badge badge-primary">Match {item.match.score}%</span>
+                  </Link>
+                ))}
           </div>
         </>
       )}
 
-      {isInvestor && matches?.needsPreference && (
+      {matches?.needsSetup && (
         <EmptyState
           icon="target"
-          title="Atur preferensi dulu"
-          message="Kami butuh kriteria investasimu untuk mencarikan mitra yang cocok."
+          title={isInvestor ? 'Atur preferensi dulu' : 'Buat permintaan pendanaan dulu'}
+          message={matches.emptyMessage ?? undefined}
           action={
-            <Link className="btn btn-primary" to="/app/preferensi">
-              Atur sekarang
+            <Link className="btn btn-primary" to={isInvestor ? '/app/preferensi' : '/app/profile'}>
+              {isInvestor ? 'Atur sekarang' : 'Lengkapi profil usaha'}
             </Link>
           }
         />

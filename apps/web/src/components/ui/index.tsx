@@ -122,7 +122,8 @@ export function Stars({
           aria-label={`${n} bintang`}
           onClick={onChange ? () => onChange(n) : undefined}
         >
-          ★
+          {/* Glyph teks terakhir di aplikasi; disamakan dengan ikon lain */}
+          <Icon name="star" size={28} />
         </button>
       ))}
     </div>

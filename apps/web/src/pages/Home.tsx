@@ -59,9 +59,7 @@ export function HomePage() {
             <span style={{ marginLeft: 'auto' }}>terbaru</span>
           </div>
           {featured.length === 0 && (
-            <p style={{ padding: 18, color: 'var(--text-3)', fontSize: 14 }}>
-              Belum ada peluang. Coba lagi sebentar lagi.
-            </p>
+            <p className="hero-panel-empty">Belum ada peluang. Coba lagi sebentar lagi.</p>
           )}
           {featured.map((item) => (
             <div className="opp-row" key={item.id}>
@@ -111,9 +109,7 @@ export function HomePage() {
                 {i + 1}
               </span>
               <h3 style={{ marginTop: 14 }}>{step.title}</h3>
-              <p style={{ color: 'var(--text-2)', marginTop: 8, fontSize: 14, lineHeight: 1.6 }}>
-                {step.desc}
-              </p>
+              <p className="step-desc">{step.desc}</p>
             </div>
           ))}
         </div>

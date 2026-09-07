@@ -43,9 +43,8 @@ export function ChatListPage() {
           title="Belum ada percakapan"
           message="Kirim ketertarikan ke calon mitra dulu. Ruang chat terbuka begitu mereka menerima."
           action={
-            /* /app/matches dijaga RoleGuard INVESTOR — UMKM yang klik dulu dipantulkan diam-diam */
-            <Link className="btn btn-primary" to={isInvestor ? '/app/matches' : '/app/explore'}>
-              {isInvestor ? 'Lihat rekomendasi' : 'Cari peluang'}
+            <Link className="btn btn-primary" to="/app/matches">
+              {isInvestor ? 'Lihat rekomendasi peluang' : 'Lihat rekomendasi pemodal'}
             </Link>
           }
         />

@@ -72,7 +72,7 @@ function TopNav() {
               {role === 'ADMIN' && <Link to="/app/admin">Admin</Link>}
               <Link to="/app/beranda">Beranda</Link>
               <Link to="/app/explore">Cari</Link>
-              {role === 'INVESTOR' && <Link to="/app/matches">Rekomendasi</Link>}
+              {role !== 'ADMIN' && <Link to="/app/matches">Rekomendasi</Link>}
               <Link to="/app/chat">Chat</Link>
               <Link to="/app/agreements">Perjanjian</Link>
             </>

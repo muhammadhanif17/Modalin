@@ -110,7 +110,7 @@ export function PartnerPage() {
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <Avatar name={data.profile.fullName} seed={data.id} size="lg" />
           <div style={{ minWidth: 0, flex: 1 }}>
-            <h1 style={{ fontSize: 22 }}>{data.profile.fullName}</h1>
+            <h1 className="partner-name">{data.profile.fullName}</h1>
             <div className="opp-meta">
               <span className="badge badge-primary">
                 {data.role === 'UMKM' ? 'Pengusaha' : 'Pemodal'}

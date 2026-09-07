@@ -169,7 +169,7 @@ export function CheckoutPage() {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flex: 'none' }}>
-                  <div className="opp-amount" data-money style={{ fontSize: 15 }}>
+                  <div className="opp-amount opp-amount-sm" data-money>
                     {formatRupiah(trx.amount)}
                   </div>
                   <Badge tone={STATUS[trx.status].tone}>{STATUS[trx.status].text}</Badge>

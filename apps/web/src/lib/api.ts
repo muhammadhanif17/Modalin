@@ -213,14 +213,28 @@ export type SearchResponse =
   | { audience: 'peluang'; items: Opportunity[]; total: number; emptyMessage: string | null }
   | { audience: 'pemodal'; items: InvestorListing[]; total: number; emptyMessage: string | null };
 
-export type MatchesResponse = {
-  needsPreference: boolean;
+export type MatchedInvestor = InvestorListing & { match: MatchResult };
+
+type MatchesBase = {
+  /** Preferensi (investor) atau permintaan pendanaan (UMKM) belum ada. */
+  needsSetup: boolean;
   minScore?: number;
-  recommended: MatchedOpportunity[];
-  alternatives: MatchedOpportunity[];
   rejectedByHardFilter: number;
   emptyMessage: string | null;
 };
+
+/** Pencocokan dua arah: investor menerima peluang, UMKM menerima pemodal. */
+export type MatchesResponse =
+  | (MatchesBase & {
+      audience: 'peluang';
+      recommended: MatchedOpportunity[];
+      alternatives: MatchedOpportunity[];
+    })
+  | (MatchesBase & {
+      audience: 'pemodal';
+      recommended: MatchedInvestor[];
+      alternatives: MatchedInvestor[];
+    });
 
 export type TrustBreakdown = {
   total: number;

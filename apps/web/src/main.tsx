@@ -111,8 +111,11 @@ function AppRoutes() {
           <Route path="rating/:agreementId" element={<RatingPage />} />
           <Route path="pembayaran" element={<CheckoutPage />} />
 
+          {/* Pencocokan dua arah — terbuka untuk kedua peran, isinya menyesuaikan */}
+          <Route path="matches" element={<MatchesPage />} />
+
+          {/* Preferensi tetap khusus investor: UMKM tidak punya data ini */}
           <Route element={<RoleGuard roles={['INVESTOR']} />}>
-            <Route path="matches" element={<MatchesPage />} />
             <Route path="preferensi" element={<InvestorPage />} />
           </Route>
 

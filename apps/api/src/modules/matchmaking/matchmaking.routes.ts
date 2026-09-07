@@ -4,8 +4,15 @@ import { z } from 'zod';
 import { prisma } from '../../lib/prisma.js';
 import { ah, badRequest, conflict, forbidden, notFound } from '../../lib/http.js';
 import { currentUser, optionalAuth, requireAuth, type AuthRequest } from '../../middleware/auth.js';
-import { parseCooperationTypes } from '../../lib/cooperation.js';
-import { MATCH_MIN_SCORE, rankMatches, type InvestorSide, type UmkmSide } from './matchmaking.calc.js';
+import { COOPERATION_LABEL, parseCooperationTypes } from '../../lib/cooperation.js';
+import {
+  MATCH_MIN_SCORE,
+  rankMatches,
+  scoreMatch,
+  type InvestorSide,
+  type MatchResult,
+  type UmkmSide,
+} from './matchmaking.calc.js';
 import { notifyConnectionUpdate } from '../chat/chat.gateway.js';
 
 /**
@@ -286,19 +293,147 @@ matchmakingRouter.get(
 // FR-06 + FR-07 — pencocokan otomatis
 // ---------------------------------------------------------------------------
 
+/**
+ * Kalimat alasan dari sudut pandang UMKM.
+ *
+ * scoreMatch menghasilkan alasan dari sudut pandang investor ("sesuai fokus
+ * investasimu", "masuk rentang anggaranmu"). Dibaca UMKM, kata "-mu" itu
+ * menunjuk orang yang salah, jadi kalimatnya disusun ulang di sini dari
+ * komponen skor yang sama. Fungsi murninya sengaja tidak disentuh supaya 19
+ * unit test yang mengunci bobot tetap berlaku apa adanya.
+ */
+function reasonsForUmkm(
+  match: { components: MatchResult['components']; matchedCooperationTypes: CooperationType[] },
+  investor: { preferredLocation: string | null; trustScore: number },
+  targetAmount: number,
+): string[] {
+  const reasons = [
+    `Menerima skema ${match.matchedCooperationTypes.map((t) => COOPERATION_LABEL[t]).join(' / ')}`,
+  ];
+  if (match.components.sector.ratio === 1) reasons.push('Fokus investasinya sesuai sektor usahamu');
+  const amount = match.components.amount.ratio;
+  const nominal = `Rp${Math.round(targetAmount).toLocaleString('id-ID')}`;
+  if (amount === 1) reasons.push(`Kebutuhanmu ${nominal} masuk rentang anggarannya`);
+  else if (amount >= 0.7) reasons.push(`Kebutuhanmu ${nominal} mendekati rentang anggarannya`);
+  if (match.components.location.ratio === 1 && investor.preferredLocation) {
+    reasons.push(`Sedang mengincar wilayah ${investor.preferredLocation}`);
+  }
+  if (investor.trustScore >= 70) reasons.push(`Skor kepercayaan pemodal tinggi (${investor.trustScore}/100)`);
+  return reasons;
+}
+
+/**
+ * FR-06/FR-07 dari sisi UMKM: peringkat pemodal untuk satu permintaan pendanaan.
+ *
+ * Mesin skornya sama persis — hard filter irisan skema lalu bobot 40/30/10/20.
+ * Yang ditukar hanya arah bacanya: komponen trust menilai LAWAN bicara, jadi
+ * dari sisi investor yang dinilai UMKM, dan dari sisi UMKM yang dinilai pemodal.
+ */
+async function matchesForUmkm(userId: string) {
+  const business = await prisma.business.findUnique({
+    where: { ownerId: userId },
+    include: { fundingRequests: { where: { status: FundingStatus.ACTIVE }, orderBy: { createdAt: 'desc' }, take: 1 } },
+  });
+  const request = business?.fundingRequests[0];
+
+  if (!business || !request) {
+    return {
+      audience: 'pemodal' as const,
+      needsSetup: true,
+      recommended: [],
+      alternatives: [],
+      rejectedByHardFilter: 0,
+      emptyMessage:
+        'Buat permintaan pendanaan dulu supaya kami bisa mencarikan pemodal yang cocok dengan kebutuhanmu.',
+    };
+  }
+
+  const investors = await prisma.user.findMany({
+    where: { role: Role.INVESTOR, id: { not: userId }, investorPreference: { isNot: null } },
+    include: investorInclude,
+    take: 200,
+  });
+
+  const targetAmount = Number(request.targetAmount);
+  const myTypes = parseCooperationTypes(request.cooperationTypes);
+
+  let rejectedByHardFilter = 0;
+  const scored: { row: (typeof investors)[number]; match: MatchResult }[] = [];
+
+  for (const row of investors) {
+    const pref = row.investorPreference!;
+    const investorSide: InvestorSide = {
+      minimumAmount: Number(pref.minimumAmount),
+      maximumAmount: Number(pref.maximumAmount),
+      preferredLocation: pref.preferredLocation,
+      preferredSectorId: pref.preferredSectorId,
+      cooperationTypes: parseCooperationTypes(pref.cooperationTypes),
+    };
+    const trustScore = row.profile?.trustScore ?? 0;
+    const match = scoreMatch(investorSide, {
+      fundingRequestId: request.id,
+      sectorId: business.sectorId,
+      location: business.location,
+      targetAmount,
+      cooperationTypes: myTypes,
+      // Yang dinilai komponen trust adalah calon mitra — di sini pemodalnya.
+      trustScore,
+    });
+    if (!match) {
+      rejectedByHardFilter += 1;
+      continue;
+    }
+    scored.push({
+      row,
+      match: { ...match, reasons: reasonsForUmkm(match, { preferredLocation: pref.preferredLocation, trustScore }, targetAmount) },
+    });
+  }
+
+  scored.sort((a, b) => b.match.score - a.match.score || a.row.id.localeCompare(b.row.id));
+  const attach = (e: (typeof scored)[number]) => ({ ...serializeInvestor(e.row), match: e.match });
+  const recommended = scored.filter((e) => e.match.isRecommended);
+  const alternatives = scored.filter((e) => !e.match.isRecommended);
+
+  return {
+    audience: 'pemodal' as const,
+    needsSetup: false,
+    minScore: MATCH_MIN_SCORE,
+    recommended: recommended.map(attach),
+    // FR-07: alternatif informatif, bukan layar kosong.
+    alternatives: alternatives.slice(0, 10).map(attach),
+    rejectedByHardFilter,
+    emptyMessage:
+      recommended.length > 0
+        ? null
+        : alternatives.length > 0
+          ? `Belum ada yang mencapai skor ${MATCH_MIN_SCORE}. Ini beberapa pemodal yang paling mendekati kebutuhanmu.`
+          : 'Belum ada pemodal dengan skema kerja sama yang beririsan dengan pengajuanmu. Coba tambahkan skema lain di permintaan pendanaanmu.',
+  };
+}
+
 matchmakingRouter.get(
   '/matches',
   requireAuth,
   ah(async (req: AuthRequest, res) => {
     const me = currentUser(req);
+
+    // Pencocokan dua arah. Sebelumnya rute ini menolak semua yang bukan
+    // INVESTOR, sehingga UMKM yang membukanya dilempar balik tanpa penjelasan —
+    // padahal proposal menuntut matchmaking dua arah, dan pencarian manual
+    // sudah lebih dulu dibuat dua arah.
+    if (me.role === Role.UMKM) {
+      res.json(await matchesForUmkm(me.id));
+      return;
+    }
     if (me.role !== Role.INVESTOR) {
-      throw forbidden('Rekomendasi otomatis tersedia untuk akun Pemodal.');
+      throw forbidden('Rekomendasi otomatis tersedia untuk akun Pengusaha dan Pemodal.');
     }
 
     const pref = await prisma.investorPreference.findUnique({ where: { userId: me.id } });
     if (!pref) {
       res.json({
-        needsPreference: true,
+        audience: 'peluang',
+        needsSetup: true,
         recommended: [],
         alternatives: [],
         rejectedByHardFilter: 0,
@@ -338,7 +473,8 @@ matchmakingRouter.get(
     };
 
     res.json({
-      needsPreference: false,
+      audience: 'peluang',
+      needsSetup: false,
       minScore: MATCH_MIN_SCORE,
       recommended: recommended.map(attach),
       // FR-07: alternatif informatif, bukan layar kosong.

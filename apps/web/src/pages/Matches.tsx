@@ -1,17 +1,68 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { endpoints } from '../lib/api';
+import { endpoints, type MatchesResponse } from '../lib/api';
 import { OpportunityCard } from '../components/OpportunityCard';
+import { InvestorCard } from '../components/InvestorCard';
 import { Spinner, EmptyState } from '../components/ui';
 
 /**
- * FR-06 + FR-07 — hasil pencocokan otomatis.
+ * FR-06 + FR-07 — hasil pencocokan otomatis, dua arah.
  *
- * Skor dan urutannya datang apa adanya dari server; halaman ini tidak
- * mengurutkan ulang atau mengarang angka. Kandidat di bawah ambang tetap
- * ditampilkan sebagai alternatif informatif, bukan disembunyikan jadi layar
- * kosong.
+ * Investor menerima peluang usaha, UMKM menerima pemodal; mesin skornya sama
+ * (hard filter irisan skema lalu bobot 40/30/10/20), yang berbeda hanya sisi
+ * mana yang diperingkat. Skor dan urutannya datang apa adanya dari server —
+ * halaman ini tidak mengurutkan ulang atau mengarang angka. Kandidat di bawah
+ * ambang tetap ditampilkan sebagai alternatif informatif, bukan disembunyikan
+ * jadi layar kosong.
  */
+
+const COPY = {
+  peluang: {
+    title: 'Rekomendasi untukmu',
+    lead: 'Peluang usaha dicocokkan dari sektor (40%), kebutuhan dana (30%), lokasi (10%), dan skor kepercayaan (20%).',
+    setupTitle: 'Atur preferensi investasimu dulu',
+    setupCta: 'Atur preferensi',
+    setupTo: '/app/preferensi',
+    filtered: (n: number) =>
+      `${n} peluang disaring lebih dulu karena skema kerja samanya tidak beririsan dengan preferensimu.`,
+    emptyTitle: 'Belum ada peluang yang cocok',
+    loosenCta: 'Longgarkan preferensi',
+    loosenTo: '/app/preferensi',
+  },
+  pemodal: {
+    title: 'Pemodal yang cocok untukmu',
+    lead: 'Pemodal dicocokkan dari sektor (40%), kebutuhan dana (30%), lokasi (10%), dan skor kepercayaan (20%).',
+    setupTitle: 'Buat permintaan pendanaan dulu',
+    setupCta: 'Lengkapi profil usaha',
+    setupTo: '/app/profile',
+    filtered: (n: number) =>
+      `${n} pemodal disaring lebih dulu karena skema kerja samanya tidak beririsan dengan pengajuanmu.`,
+    emptyTitle: 'Belum ada pemodal yang cocok',
+    loosenCta: 'Ubah permintaan pendanaan',
+    loosenTo: '/app/profile',
+  },
+} as const;
+
+/** Kartu mengikuti sisi yang diperingkat. */
+function Results({ data, kind }: { data: MatchesResponse; kind: 'recommended' | 'alternatives' }) {
+  if (data.audience === 'pemodal') {
+    return (
+      <div className="grid-3">
+        {data[kind].map((item) => (
+          <InvestorCard key={item.id} item={item} match={item.match} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="grid-3">
+      {data[kind].map((item) => (
+        <OpportunityCard key={item.id} item={item} match={item.match} />
+      ))}
+    </div>
+  );
+}
+
 export function MatchesPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['matches'],
@@ -19,39 +70,36 @@ export function MatchesPage() {
     staleTime: 15_000,
   });
 
+  const copy = COPY[data?.audience ?? 'peluang'];
+
   return (
-    <div className="shell">
+    <div className="shell page-bottom">
       <div className="page-head">
-        <h1>Rekomendasi untukmu</h1>
-        <p>
-          Dicocokkan dari sektor (40%), kebutuhan dana (30%), lokasi (10%), dan skor kepercayaan (20%).
-        </p>
+        <h1>{copy.title}</h1>
+        <p>{copy.lead}</p>
       </div>
 
       {isLoading && <Spinner />}
       {isError && <EmptyState icon="warning" title="Gagal memuat rekomendasi" message="Coba lagi sebentar lagi." />}
 
-      {/* Investor belum mengatur preferensi: tidak ada yang bisa dicocokkan */}
-      {data?.needsPreference && (
+      {/* Belum ada bahan untuk dicocokkan dari sisi pengguna sendiri */}
+      {data?.needsSetup && (
         <EmptyState
           icon="target"
-          title="Atur preferensi investasimu dulu"
+          title={copy.setupTitle}
           message={data.emptyMessage ?? undefined}
           action={
-            <Link className="btn btn-primary" to="/app/preferensi">
-              Atur preferensi
+            <Link className="btn btn-primary" to={copy.setupTo}>
+              {copy.setupCta}
             </Link>
           }
         />
       )}
 
-      {data && !data.needsPreference && (
+      {data && !data.needsSetup && (
         <div className="stack">
           {data.rejectedByHardFilter > 0 && (
-            <p className="opp-meta">
-              {data.rejectedByHardFilter} peluang disaring lebih dulu karena skema kerja samanya tidak
-              beririsan dengan preferensimu.
-            </p>
+            <p className="opp-meta">{copy.filtered(data.rejectedByHardFilter)}</p>
           )}
 
           {data.recommended.length > 0 && (
@@ -60,11 +108,7 @@ export function MatchesPage() {
                 <h2>Paling cocok</h2>
                 <span className="opp-meta">skor {data.minScore ?? 50} ke atas</span>
               </div>
-              <div className="grid-3">
-                {data.recommended.map((item) => (
-                  <OpportunityCard key={item.id} item={item} match={item.match} />
-                ))}
-              </div>
+              <Results data={data} kind="recommended" />
             </>
           )}
 
@@ -83,22 +127,18 @@ export function MatchesPage() {
                 <h2>Alternatif terdekat</h2>
                 <span className="opp-meta">di bawah ambang, tapi masih relevan</span>
               </div>
-              <div className="grid-3">
-                {data.alternatives.map((item) => (
-                  <OpportunityCard key={item.id} item={item} match={item.match} />
-                ))}
-              </div>
+              <Results data={data} kind="alternatives" />
             </>
           )}
 
           {data.recommended.length === 0 && data.alternatives.length === 0 && (
             <EmptyState
               icon="users"
-              title="Belum ada mitra yang cocok"
+              title={copy.emptyTitle}
               message={data.emptyMessage ?? undefined}
               action={
-                <Link className="btn btn-outline" to="/app/preferensi">
-                  Longgarkan preferensi
+                <Link className="btn btn-outline" to={copy.loosenTo}>
+                  {copy.loosenCta}
                 </Link>
               }
             />

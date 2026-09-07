@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { COOPERATION_LABEL, type InvestorListing } from '../lib/api';
+import { COOPERATION_LABEL, type InvestorListing, type MatchResult } from '../lib/api';
 import { formatRupiah } from '../lib/format';
 import { Avatar } from './ui/Avatar';
 import { Icon } from './ui/Icon';
@@ -11,7 +11,7 @@ import { Icon } from './ui/Icon';
  * grid angka tabular, lalu satu CTA) supaya kedua arah pencarian terasa seperti
  * satu produk, bukan dua halaman berbeda yang kebetulan berdampingan.
  */
-export function InvestorCard({ item }: { item: InvestorListing }) {
+export function InvestorCard({ item, match }: { item: InvestorListing; match?: MatchResult }) {
   const pref = item.preference;
   const name = item.fullName ?? 'Pemodal';
 
@@ -42,6 +42,11 @@ export function InvestorCard({ item }: { item: InvestorListing }) {
             )}
           </div>
         </div>
+        {match && (
+          <span className="badge badge-primary" title={match.reasons.join(' · ')} style={{ flex: 'none' }}>
+            Match {match.score}%
+          </span>
+        )}
       </div>
 
       <div>
@@ -79,6 +84,14 @@ export function InvestorCard({ item }: { item: InvestorListing }) {
           <b data-money>{item.trustScore}/100</b>
         </div>
       </div>
+
+      {match && match.reasons.length > 0 && (
+        <ul className="reasons">
+          {match.reasons.slice(0, 3).map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+      )}
 
       <div className="opp-foot">
         <span className="opp-meta">
