@@ -1,201 +1,206 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import { Spinner, EmptyState, Notice, Badge } from '../components/ui';
-import { formatRupiah, formatTanggal } from '../lib/format';
+import { endpoints, VERIFICATION_LABEL, type VerificationStatus } from '../lib/api';
+import { Avatar } from '../components/ui/Avatar';
+import { Spinner, EmptyState, Notice, Badge, VERIFICATION_TONE } from '../components/ui';
+import { formatTanggal } from '../lib/format';
+
+/**
+ * Panel admin — FR-02.
+ *
+ * Antrean diurutkan server berdasarkan waktu unggah, jadi yang paling lama
+ * menunggu selalu tampil lebih dulu (ARCHITECTURE.md §2.3). Approve cukup satu
+ * klik; reject wajib menyertakan alasan singkat supaya pengguna tahu apa yang
+ * harus diperbaiki.
+ */
+
+const TABS: { key: VerificationStatus; label: string }[] = [
+  { key: 'PENDING', label: 'Menunggu tinjauan' },
+  { key: 'VERIFIED', label: 'Disetujui' },
+  { key: 'REJECTED', label: 'Ditolak' },
+];
 
 export function AdminPage() {
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['admin-stats'],
-    queryFn: () => api<Stats>('/api/admin/stats'),
-    staleTime: 30_000,
+  const [tab, setTab] = useState<VerificationStatus>('PENDING');
+
+  const { data: stats } = useQuery({ queryKey: ['admin-stats'], queryFn: endpoints.adminStats, staleTime: 30_000 });
+  const { data: queue, isLoading, isError } = useQuery({
+    queryKey: ['verifications', tab],
+    queryFn: () => endpoints.verificationQueue(tab),
+    staleTime: 10_000,
   });
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
-        <h1>Dashboard Admin</h1>
-        <p>Pantau aktivitas dan moderasi platform Modalin.</p>
+        <h1>Panel admin</h1>
+        <p>Tinjau dokumen KYC dan pantau aktivitas platform.</p>
       </div>
-      <section className="stack">
-        {statsLoading ? (
-          <Spinner />
-        ) : (
-          <div className="stat-grid">
-            <Stat label="Total pengguna" value={String(stats?.totalUsers ?? 0)} />
-            <Stat label="UMKM" value={String(stats?.umkmCount ?? 0)} />
-            <Stat label="Investor" value={String(stats?.investorCount ?? 0)} />
-            <Stat label="Admin" value={String(stats?.adminCount ?? 0)} />
-            <Stat label="Permohonan aktif" value={String(stats?.activeRequests ?? 0)} />
-            <Stat label="Terkumpul" value={String(stats?.fundedRequests ?? 0)} />
-            <Stat label="Koneksi" value={String(stats?.totalConnections ?? 0)} />
-            <Stat label="Perjanjian" value={String(stats?.totalAgreements ?? 0)} />
-          </div>
-        )}
-      </section>
-      <div className="stack" style={{ marginTop: 24 }}>
-        <ModerateRequests />
-        <ManageUsers />
+
+      {stats && (
+        <div className="stat-grid">
+          <Stat label="Pengguna" value={stats.totalUsers} />
+          <Stat label="Menunggu tinjauan" value={stats.pendingVerification} />
+          <Stat label="Terverifikasi" value={stats.verified} />
+          <Stat label="Peluang aktif" value={stats.activeRequests} />
+          <Stat label="Koneksi diterima" value={stats.acceptedConnections} />
+          <Stat label="Kesepakatan" value={stats.signedAgreements} />
+        </div>
+      )}
+
+      <div className="chip-row" style={{ margin: '20px 0 12px' }} role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            className="chip"
+            aria-pressed={tab === t.key}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {isLoading && <Spinner />}
+      {isError && <EmptyState icon="warning" title="Gagal memuat antrean" message="Coba lagi sebentar lagi." />}
+      {!isLoading && !isError && (queue ?? []).length === 0 && (
+        <EmptyState
+          icon="check"
+          title={tab === 'PENDING' ? 'Antrean kosong' : 'Belum ada data'}
+          message={tab === 'PENDING' ? 'Semua dokumen sudah ditinjau.' : undefined}
+        />
+      )}
+
+      <div className="stack">
+        {(queue ?? []).map((row) => (
+          <QueueRow key={row.userId} row={row} reviewable={tab === 'PENDING'} />
+        ))}
       </div>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="card card-pad stat-box">
+    <div className="stat-box">
+      <b data-money>{value}</b>
       <small>{label}</small>
-      <strong>{value}</strong>
     </div>
   );
 }
 
-function ModerateRequests() {
-  const qc = useQueryClient();
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin-funding'],
-    queryFn: () => api<FRow[]>('/api/admin/funding-requests'),
-    staleTime: 30_000,
-  });
-  const mutation = useMutation({
-    mutationFn: (payload: { id: string; status: string }) =>
-      api(`/api/admin/funding-requests/${payload.id}/status`, { method: 'PATCH', json: { status: payload.status } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-funding'] }),
-  });
+type QueueItem = Awaited<ReturnType<typeof endpoints.verificationQueue>>[number];
 
-  const rows = data ?? [];
+function QueueRow({ row, reviewable }: { row: QueueItem; reviewable: boolean }) {
+  const qc = useQueryClient();
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+
+  const decide = useMutation({
+    mutationFn: (body: { decision: 'APPROVE' } | { decision: 'REJECT'; reason: string }) =>
+      endpoints.decideVerification(row.userId, body),
+    onSuccess: () => {
+      setRejecting(false);
+      setReason('');
+      setError('');
+      qc.invalidateQueries({ queryKey: ['verifications'] });
+      qc.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+    onError: (err) => setError(err instanceof Error ? err.message : 'Gagal menyimpan keputusan.'),
+  });
 
   return (
-    <div className="card card-pad">
-      <h3>Moderasi permohonan</h3>
-      {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat" message="Coba lagi." />}
-      {!isLoading && !isError && rows.length === 0 && (
-        <EmptyState icon="📭" title="Tidak ada permohonan" message="Belum ada funding request." />
-      )}
-      {!isLoading && rows.length > 0 && (
-        <div className="list">
-          {rows.map((r) => (
-            <div className="list-row" key={r.id}>
-              <div style={{ flex: 1 }}>
-                <strong>{r.business?.name ?? '-'}</strong>
-                <div className="opp-meta">
-                  {formatRupiah(r.targetAmount)} · {r.status}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {r.status !== 'ACTIVE' && (
-                  <button className="btn btn-soft btn-sm" onClick={() => mutation.mutate({ id: r.id, status: 'ACTIVE' })}>
-                    Aktifkan
-                  </button>
-                )}
-                {r.status !== 'FUNDED' && (
-                  <button className="btn btn-soft btn-sm" onClick={() => mutation.mutate({ id: r.id, status: 'FUNDED' })}>
-                    Tandai terkumpul
-                  </button>
-                )}
-                {r.status !== 'CANCELLED' && (
-                  <button className="btn btn-outline btn-sm" onClick={() => mutation.mutate({ id: r.id, status: 'CANCELLED' })}>
-                    Batalkan
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+    <div className="card card-pad stack">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <Avatar name={row.fullName} seed={row.userId} size="md" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <strong>{row.fullName}</strong>
+          <div className="opp-meta">
+            {row.user.email} · {row.user.role === 'UMKM' ? 'Pengusaha' : 'Pemodal'}
+            {row.location ? ` · ${row.location}` : ''}
+          </div>
+          {row.kycSubmittedAt && (
+            <div className="opp-meta">Diajukan {formatTanggal(row.kycSubmittedAt)}</div>
+          )}
         </div>
-      )}
-    </div>
-  );
-}
-
-function ManageUsers() {
-  const [filter, setFilter] = useState('');
-  const qc = useQueryClient();
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin-users', filter],
-    queryFn: () => api<URow[]>(`/api/admin/users${filter ? `?role=${filter}` : ''}`),
-    staleTime: 30_000,
-  });
-  const mutation = useMutation({
-    mutationFn: (payload: { id: string; isVerified: boolean }) =>
-      api(`/api/admin/users/${payload.id}/verify`, { method: 'PATCH', json: { isVerified: payload.isVerified } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }),
-  });
-  const [notice, setNotice] = useState('');
-
-  const rows = data ?? [];
-
-  return (
-    <div className="card card-pad">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <h3>Manajemen pengguna</h3>
-        <select className="select" value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filter peran">
-          <option value="">Semua peran</option>
-          <option value="UMKM">UMKM</option>
-          <option value="INVESTOR">Investor</option>
-          <option value="ADMIN">Admin</option>
-        </select>
+        <Badge tone={VERIFICATION_TONE[row.verificationStatus]}>
+          {VERIFICATION_LABEL[row.verificationStatus]}
+        </Badge>
       </div>
-      {notice && <Notice tone="success" onClose={() => setNotice('')}>{notice}</Notice>}
-      {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat" message="Coba lagi." />}
-      {!isLoading && rows.length === 0 && <EmptyState icon="👥" title="Tidak ada pengguna" />}
-      {!isLoading && rows.length > 0 && (
-        <div className="list">
-          {rows.map((u) => (
-            <div className="list-row" key={u.id}>
-              <div style={{ flex: 1 }}>
-                <strong>{u.profile?.fullName ?? u.email}</strong>
-                <div className="opp-meta">
-                  {u.email} · {u.role}
-                </div>
-              </div>
-              <Badge tone={u.profile?.isVerified ? 'success' : 'warning'}>
-                {u.profile?.isVerified ? 'Terverifikasi' : 'Belum verifikasi'}
-              </Badge>
-              <button
-                className="btn btn-soft btn-sm"
-                onClick={() =>
-                  mutation.mutate(
-                    { id: u.id, isVerified: !u.profile?.isVerified },
-                    {
-                      onSuccess: () =>
-                        setNotice(u.profile?.isVerified ? 'Verifikasi dibatalkan.' : 'Pengguna diverifikasi.'),
-                    }
-                  )
-                }
-              >
-                {u.profile?.isVerified ? 'Tarik verifikasi' : 'Verifikasi'}
-              </button>
-            </div>
+
+      <div className="chip-row">
+        {row.ktpUrl ? (
+          <a className="chip" href={row.ktpUrl} target="_blank" rel="noopener noreferrer">
+            Lihat KTP
+          </a>
+        ) : (
+          <span className="chip">KTP belum ada</span>
+        )}
+        {row.user.role === 'UMKM' &&
+          (row.nibUrl ? (
+            <a className="chip" href={row.nibUrl} target="_blank" rel="noopener noreferrer">
+              Lihat NIB
+            </a>
+          ) : (
+            <span className="chip">NIB belum ada</span>
           ))}
+        <span className="chip">Skor {row.trustScore}</span>
+      </div>
+
+      {row.rejectReason && <Notice tone="error">Alasan penolakan: {row.rejectReason}</Notice>}
+      {error && <Notice tone="error" onClose={() => setError('')}>{error}</Notice>}
+
+      {reviewable && !rejecting && (
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            type="button"
+            className="btn btn-soft"
+            style={{ flex: 1 }}
+            disabled={decide.isPending}
+            onClick={() => setRejecting(true)}
+          >
+            Tolak
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ flex: 1 }}
+            disabled={decide.isPending}
+            onClick={() => decide.mutate({ decision: 'APPROVE' })}
+          >
+            {decide.isPending ? 'Menyimpan…' : 'Setujui'}
+          </button>
+        </div>
+      )}
+
+      {reviewable && rejecting && (
+        <div className="stack">
+          <textarea
+            className="textarea"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Alasan penolakan, mis. foto NIB buram dan nomornya tidak terbaca."
+            maxLength={500}
+          />
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button type="button" className="btn btn-soft" style={{ flex: 1 }} onClick={() => setRejecting(false)}>
+              Batal
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ flex: 1 }}
+              disabled={reason.trim().length < 5 || decide.isPending}
+              onClick={() => decide.mutate({ decision: 'REJECT', reason: reason.trim() })}
+            >
+              Kirim penolakan
+            </button>
+          </div>
+          {reason.trim().length < 5 && <p className="field-hint">Alasan minimal 5 karakter.</p>}
         </div>
       )}
     </div>
   );
 }
-
-type Stats = {
-  totalUsers: number;
-  umkmCount: number;
-  investorCount: number;
-  adminCount: number;
-  activeRequests: number;
-  fundedRequests: number;
-  totalConnections: number;
-  totalAgreements: number;
-};
-
-type FRow = {
-  id: string;
-  targetAmount: number;
-  status: string;
-  business?: { name?: string } | null;
-};
-
-type URow = {
-  id: string;
-  email: string;
-  role: string;
-  profile?: { fullName?: string; isVerified?: boolean } | null;
-};

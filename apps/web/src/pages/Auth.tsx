@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api, setToken } from '../lib/api';
 import { Field, Notice } from '../components/ui';
 import { saveSession } from '../lib/session';
 
+/** Dikirim AuthGuard atau CTA landing supaya pengguna tahu kenapa diminta masuk. */
+type LoginState = { from?: string; notice?: string };
+
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { from, notice } = (location.state ?? {}) as LoginState;
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -21,7 +26,8 @@ export function LoginPage() {
       );
       setToken(result.accessToken);
       saveSession(result.user);
-      navigate('/app/explore', { replace: true });
+      // Kembali ke halaman yang tadi diminta, kalau ada.
+      navigate(from ?? '/app/beranda', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Tidak dapat masuk.');
     } finally {
@@ -32,7 +38,7 @@ export function LoginPage() {
   return (
     <AuthShell
       title="Selamat datang kembali"
-      subtitle="Lanjutkan menemukan mitra yang tepat untuk usahamu."
+      subtitle="Lanjutkan menemukan mitra yang tepat."
       footer={
         <p className="auth-switch">
           Belum punya akun? <Link to="/register">Daftar di sini</Link>
@@ -40,6 +46,7 @@ export function LoginPage() {
       }
     >
       <form className="auth-form card" onSubmit={onSubmit}>
+        {notice && !error && <Notice tone="info">{notice}</Notice>}
         {error && <Notice tone="error">{error}</Notice>}
         <Field label="Email">
           <input className="input" name="email" type="email" placeholder="nama@email.com" required autoComplete="email" />
@@ -73,7 +80,8 @@ export function RegisterPage() {
       );
       setToken(result.accessToken);
       saveSession(result.user);
-      navigate('/app/explore', { replace: true });
+      // Langkah 2 dari onboarding: langsung ke verifikasi, bukan ke pencarian.
+      navigate('/app/verifikasi', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Tidak dapat membuat akun.');
     } finally {
@@ -92,6 +100,12 @@ export function RegisterPage() {
       }
     >
       <form className="auth-form card" onSubmit={onSubmit}>
+        {/* Onboarding tiga langkah: Profil → Verifikasi → Selesai (NFR Usability) */}
+        <div className="steps" aria-label="Langkah 1 dari 3: buat profil">
+          <span className="now" />
+          <span />
+          <span />
+        </div>
         {error && <Notice tone="error">{error}</Notice>}
         <Field label="Saya adalah">
           <div className="role-grid">
@@ -145,7 +159,7 @@ function AuthShell({
     <div className="shell">
       <section className="auth-wrap">
         <div className="auth-title">
-          <span className="eyebrow">🪴 Modalin</span>
+          <span className="eyebrow">Modalin</span>
           <h1>{title}</h1>
           <p>{subtitle}</p>
         </div>
