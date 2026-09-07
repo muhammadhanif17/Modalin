@@ -1,0 +1,317 @@
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--r-pill);
+  padding: 12px 22px;
+  font-weight: 700;
+  font-size: 15px;
+  min-height: 44px;
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-strong); }
+.btn-ghost { background: transparent; color: var(--primary-strong); }
+.btn-ghost:hover { background: var(--primary-soft); }
+.btn-soft { background: var(--surface-2); color: var(--text); }
+.btn-soft:hover { background: var(--surface-3); }
+.btn-outline { background: #fff; border: 1.5px solid var(--line); color: var(--text); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary-strong); }
+.btn-block { width: 100%; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-pad { padding: 20px; }
+
+/* ---------- Opportunity cards ---------- */
+.opp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.opp-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+/* wrap: di layar sempit badge status turun ke baris sendiri, bukan meluber */
+.opp-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.opp-card h3 { font-size: 18px; }
+/*
+ * text-2, bukan text-3: sektor, lokasi, dan tanggal adalah metadata bermakna.
+ * text-3 disisakan untuk placeholder dan hint saja.
+ */
+.opp-meta { color: var(--text-2); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.meta-item { display: inline-flex; align-items: center; gap: 4px; }
+.opp-desc { color: var(--text-2); font-size: 14px; line-height: 1.55; }
+.opp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 12px; flex-wrap: wrap; }
+.opp-amount { font-weight: 800; font-size: 17px; }
+.opp-amount small { display: block; color: var(--text-3); font-weight: 600; font-size: 11px; }
+
+/* ---------- Avatar ---------- */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0;
+}
+.avatar-sm { width: 36px; height: 36px; font-size: 13px; }
+.avatar-md { width: 46px; height: 46px; font-size: 16px; }
+.avatar-lg { width: 72px; height: 72px; font-size: 24px; }
+/*
+ * Enam nada dari satu keluarga hutan, bukan enam warna acak. Versi sebelumnya
+ * memakai teal/oranye/biru/pink yang tidak ada di palet brand maupun status —
+ * berdampingan, avatar terlihat seperti design system kedua.
+ */
+.avatar-t1 { background: #0f2419; }
+.avatar-t2 { background: #2d6a4f; }
+.avatar-t3 { background: #40806a; }
+.avatar-t4 { background: #4a5b52; }
+.avatar-t5 { background: #1e4634; }
+.avatar-t6 { background: #6b8f7c; }
+
+/* ---------- Score badge ---------- */
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--primary-strong);
+  background: var(--primary-soft);
+  padding: 4px 11px;
+  border-radius: var(--r-pill);
+}
+
+/* ---------- Forms ---------- */
+.field { display: grid; gap: 7px; }
+.field label { font-size: 13px; font-weight: 700; color: var(--text-2); }
+.field small.hint { color: var(--text-3); font-size: 12px; }
+.input, .select, .textarea {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  min-height: 46px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.textarea { resize: vertical; min-height: 100px; }
+.error-text { color: var(--danger); font-size: 13px; }
+
+/* ---------- Role picker ---------- */
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.role-opt {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.role-opt strong { font-size: 15px; }
+.role-opt small { color: var(--text-2); font-size: 12px; line-height: 1.4; }
+.role-opt.selected { border-color: var(--primary); background: var(--primary-soft); }
+.role-opt.selected strong { color: var(--primary-strong); }
+
+/* ---------- Notice / toast ---------- */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 16px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+/*
+ * Teks memakai varian -ink, bukan warna dasarnya: #10B981 / #EF4444 di atas
+ * latar 12%-nya sendiri hanya mencapai rasio ~2:1 dan gagal WCAG AA.
+ */
+.notice-success { background: var(--success-soft); color: var(--success-ink); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
+.notice-error { background: var(--danger-soft); color: var(--danger-ink); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+.notice-info { background: var(--primary-soft); color: var(--primary-strong); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.notice button {
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: inherit;
+}
+.notice button:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-soft { background: var(--surface-2); color: var(--text-2); }
+.badge-primary { background: var(--primary-soft); color: var(--primary-strong); }
+.badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
+.badge-success { background: var(--success-soft); color: var(--success-ink); }
+.badge-danger { background: var(--danger-soft); color: var(--danger-ink); }
+
+/* ---------- Wizard / multi-step form ---------- */
+.wizard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+.wizard-head h1 { font-size: 20px; font-weight: 700; }
+.wizard-body { display: flex; flex-direction: column; gap: 20px; margin-top: 24px; }
+.wizard-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.wizard-actions .btn { flex: 1; }
+
+/* ---------- Stepper ---------- */
+.stepper {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+.stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+.stepper-marker {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.stepper-done .stepper-marker { background: var(--primary); color: #fff; }
+.stepper-active .stepper-marker { background: var(--primary); color: #fff; }
+.stepper-upcoming .stepper-marker { background: var(--surface-2); color: var(--text-3); border: 2px solid var(--line); }
+.stepper-text { text-align: center; margin-top: 6px; }
+.stepper-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.stepper-active .stepper-label, .stepper-done .stepper-label { color: var(--primary-strong); }
+.stepper-desc { display: none; }
+.stepper-line {
+  position: absolute;
+  top: 18px;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 2px;
+  background: var(--line);
+}
+.stepper-done .stepper-line { background: var(--primary); }
+
+/* ---------- Auto-save indicator ---------- */
+.autosave {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.autosave-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  flex-shrink: 0;
+}
+.autosave-dot-pending { background: var(--warning); }
+
+/* ---------- Form helpers ---------- */
+.step-intro { color: var(--text-2); font-size: 14px; line-height: 1.6; }
+.coop-options { display: flex; flex-direction: column; gap: 12px; }
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+}
+.check-row input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; }
+.check-label { display: block; line-height: 1.4; }
+.check-label small { display: block; font-size: 13px; color: var(--text-2); margin-top: 2px; }
+
+/* ---------- Radio group ---------- */
+.radio-group { border: 0; padding: 0; margin: 0; }
+.radio-group legend { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.radio-options { display: flex; flex-direction: column; gap: 8px; }
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+}
+.radio-option input[type="radio"] { flex-shrink: 0; }
+.radio-option.selected { border-color: var(--primary); background: var(--primary-soft); }
+
+/* ---------- Portfolio list ---------- */
+.portfolio-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.portfolio-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.portfolio-main { flex: 1; min-width: 0; }
+.portfolio-main strong { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.portfolio-main small { font-size: 12px; color: var(--text-3); }
+
+/* ---------- Hero ---------- */
+.hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: clamp(48px, 9vh, 96px) 0; }

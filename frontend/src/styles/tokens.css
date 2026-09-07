@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/*
+ * Token diambil dari stitch_modalin_onboarding_flow_pwa/modalin_design_system/DESIGN.md.
+ * Menggantikan palet biru di ARCHITECTURE.md §9.1 — perubahan itu dicatat di
+ * README dan di §9.1 sendiri, jangan diubah diam-diam.
+ *
+ * Arah rasa: "editorial fintech" — kanvas kertas tulang, kartu putih bersih,
+ * hijau hutan dalam untuk aksi utama. Warna status sengaja dijaga terpisah dari
+ * warna brand supaya status akun tidak pernah ambigu dengan tema.
+ */
+:root {
+  /* Warna — botanical / bone */
+  --bg: #f3eee3;          /* Bone White, kanvas aplikasi */
+  --surface: #ffffff;     /* kartu dan sheet */
+  --surface-2: #ede8dd;
+  --surface-3: #e7e2d7;
+  --text: #16241d;        /* Deep Charcoal Green */
+  --text-2: #4a5b52;      /* Olive Charcoal */
+  --text-3: #8b9890;
+  --line: #e2ddd2;        /* hairline hangat */
+  --primary: #0f2419;     /* Deep Forest Green */
+  --primary-strong: #2d6a4f; /* dipakai sebagai hover primary */
+  --primary-soft: rgba(45, 106, 79, 0.08);
+  --accent: #2d6a4f;      /* Rich Pine, state aktif */
+  --accent-soft: rgba(45, 106, 79, 0.12);
+  --tint: #8fbfa0;        /* Soft Mint */
+  --success: #10b981;
+  --success-ink: #0d7a55;
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --warning: #f59e0b;
+  --warning-ink: #9a6304;
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --danger: #ef4444;
+  --danger-ink: #b91c1c;
+  --danger-soft: rgba(239, 68, 68, 0.12);
+  --on-primary: #ffffff;
+  --input-line: #d8d2c5;
+
+  /* Radius — kartu 16, tombol/input 12, chip penuh */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-pill: 9999px;
+
+  /* Bayangan hangat, bukan abu-abu steril */
+  --shadow-sm: 0 2px 8px -2px rgba(15, 36, 25, 0.05), 0 8px 16px -4px rgba(15, 36, 25, 0.03);
+  --shadow-md: 0 4px 12px -2px rgba(15, 36, 25, 0.08), 0 16px 28px -6px rgba(15, 36, 25, 0.06);
+  --shadow-lg: 0 12px 32px -4px rgba(15, 36, 25, 0.16), 0 24px 48px -8px rgba(15, 36, 25, 0.12);
+
+  /* Spacing & grid */
+  --gutter: clamp(16px, 5vw, 24px);
+  --shell-w: 1200px;      /* desktop 12 kolom, maks 75rem */
+  --tap: 48px;            /* touch target minimum */
+  --control-h: 52px;      /* tombol & input di mobile */
+  --shelf-h: 4.5rem;      /* sticky bottom action shelf */
+
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+@media (min-width: 1025px) {
+  :root { --control-h: 48px; }
+}

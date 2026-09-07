@@ -1,0 +1,30 @@
+/* --- Fokus keyboard terlihat di seluruh kontrol --- */
+:where(a, button, .chip, .row-link, .choice):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Hormati preferensi gerak minimal --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  /*
+    Di HP sidebar filter yang panjang mendorong hasil jauh ke bawah — pengguna
+    harus melewati seluruh formulir sebelum melihat satu peluang pun.
+  */
+  .two-pane { display: flex; flex-direction: column; gap: 16px; }
+  .two-pane > .results-pane { order: 1; }
+  .two-pane > aside { order: 2; }
+}
+
+@media (max-width: 640px) {
+  /* Shelf aksi harus duduk di atas bottom nav, bukan tertimpa olehnya */
+  .chat-shell { max-height: none; height: calc(100dvh - 260px); min-height: 340px; }
+  .action-shelf { bottom: calc(60px + env(safe-area-inset-bottom)); border-radius: var(--r-md); }
+}

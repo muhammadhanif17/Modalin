@@ -279,7 +279,7 @@ Jadwal harian spesifik untuk deadline Babak Penyisihan (7 September 2026, 23:59 
 Belum final, putuskan pas atau sebelum bangun modul terkait:
 
 - ~~Field spesifik per jenis kerja sama di form dokumen perjanjian.~~ **DITUTUP.** `Agreement` kini punya kolom skema-spesifik nullable: `profitSharingRatio` (Bagi Hasil), `equityPercentage` (Penyertaan Modal), `interestRate` (Pinjaman). Hanya kolom yang relevan dengan `cooperationType` yang diisi dan dirender ke template PDF.
-- ~~Baseline Trust Score untuk akun baru/cold-start.~~ **DITUTUP dengan asumsi tercatat.** Akun baru mulai dari 0 tanpa perlakuan khusus, dan belum adanya rating dihitung 0 (bukan nilai netral 3/5) supaya akun baru tidak tampak lebih kredibel daripada yang sudah terbukti. Bobot 40 kelengkapan profil / 30 verifikasi / 30 rating ada di satu berkas, `apps/api/src/config/scoring.ts`, dan divalidasi berjumlah 100 saat boot.
+- ~~Baseline Trust Score untuk akun baru/cold-start.~~ **DITUTUP dengan asumsi tercatat.** Akun baru mulai dari 0 tanpa perlakuan khusus, dan belum adanya rating dihitung 0 (bukan nilai netral 3/5) supaya akun baru tidak tampak lebih kredibel daripada yang sudah terbukti. Bobot 40 kelengkapan profil / 30 verifikasi / 30 rating ada di satu berkas, `backend/src/config/scoring.ts`, dan divalidasi berjumlah 100 saat boot.
 - Disclaimer verifikasi dana investor, dan peran Modalin saat terjadi sengketa antara UMKM dan investor (masih terbuka, belum ada rumah eksplisit di proposal).
 - Fitur moderasi/report konten: rekomendasikan satu kalimat hedge di bagian fitur terkait untuk babak ini, bukan dibangun sekarang.
 

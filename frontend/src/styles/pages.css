@@ -1,0 +1,883 @@
+/*
+ * Skala tipografi DESIGN.md, bukan angka karangan.
+ * display-lg-mobile 32/40 -> display-lg 40/48, tracking -0.02em, bobot 800.
+ * Sebelumnya memuncak di 64px — 60% lebih besar dari yang pernah dirancang,
+ * dan itu satu-satunya alasan terbesar layar ini tidak terlihat seperti mockup.
+ */
+.hero h1 {
+  font-size: clamp(32px, 5.4vw, 40px);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 18px 0 20px;
+}
+.hero-sub { color: var(--text-2); font-size: 18px; line-height: 1.6; max-width: 480px; }
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 13px;
+  border-radius: var(--r-pill);
+}
+.hero-actions { display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap; }
+
+.hero-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.hero-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+}
+.live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); display: inline-block; }
+.hero-panel .opp-row { padding: 16px 18px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 13px; }
+.hero-panel .opp-row:first-of-type { border-top: 0; }
+.hero-panel .opp-row .opp-name { font-weight: 700; font-size: 15px; }
+.hero-panel .opp-row .opp-spec { color: var(--text-3); font-size: 12px; }
+.hero-panel .opp-row .score { margin-left: auto; }
+
+/* ---------- Section titles ---------- */
+.section-pad { padding: clamp(40px, 7vh, 72px) 0; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+/* headline-md 22/28 -> headline-lg 28/36 */
+.section-head h2 { font-size: clamp(20px, 3.2vw, 28px); line-height: 1.28; letter-spacing: -0.015em; }
+.section-head p { color: var(--text-2); max-width: 460px; margin-top: 8px; }
+
+/* ---------- Stats ---------- */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+.stat { padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+.stat strong { display: block; font-size: 30px; letter-spacing: -0.03em; color: var(--primary-strong); }
+.stat span { color: var(--text-2); font-size: 14px; }
+
+/* ---------- Grids ---------- */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+/* ---------- Filters ---------- */
+.filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
+.filter-bar .input { flex: 1 1 200px; }
+
+/* ---------- Empty state ---------- */
+.empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text-2);
+}
+.empty .empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--accent);
+}
+.empty h3 { color: var(--text); margin-bottom: 6px; }
+.empty p { max-width: 42ch; margin: 0 auto; }
+
+/* ---------- Page headings ---------- */
+.page-head { padding: clamp(28px, 5vh, 48px) 0 22px; }
+/* headline-md 22/28 -> headline-lg 28/36 */
+.page-head h1 { font-size: clamp(22px, 4vw, 28px); line-height: 1.28; letter-spacing: -0.015em; }
+.page-head p { color: var(--text-2); margin-top: 8px; }
+
+/* ---------- Auth ---------- */
+.auth-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; padding: clamp(28px, 6vh, 64px) 0; max-width: 940px; margin: 0 auto; }
+.auth-form { display: grid; gap: 16px; padding: 26px; }
+.auth-title h1 { font-size: clamp(24px, 3.4vw, 28px); line-height: 1.28; letter-spacing: -0.015em; }
+.auth-title p { color: var(--text-2); margin-top: 10px; line-height: 1.6; }
+.auth-switch { text-align: center; color: var(--text-2); font-size: 14px; margin-top: 4px; }
+
+/* ---------- Bottom navigation (mobile) ---------- */
+.bottomnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: none;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottomnav-inner { display: flex; max-width: 560px; margin: 0 auto; }
+.bottomnav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0 8px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 700;
+}
+.bottomnav a.active { color: var(--primary-strong); }
+.bottomnav a svg { width: 22px; height: 22px; }
+
+.page-with-nav { padding-bottom: 76px; }
+
+/* ---------- Chat ---------- */
+.chat-shell { display: flex; flex-direction: column; height: calc(100vh - 72px); max-height: 640px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
+.chat-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line); font-weight: 700; }
+.chat-body { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); }
+.msg { max-width: 78%; padding: 10px 14px; border-radius: var(--r-md); font-size: 14px; line-height: 1.45; }
+.msg.mine { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+.msg.theirs { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+/* 11px — 10px sudah di bawah ambang baca, dan ini satu-satunya titik segitu */
+.msg time { display: block; font-size: 11px; opacity: 0.75; margin-top: 4px; }
+.chat-input { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); }
+.chat-input .input { flex: 1; }
+
+/* ---------- List rows ---------- */
+.row-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.12s, border-color 0.12s;
+}
+.row-link:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); text-decoration: none; }
+.row-link .row-main { flex: 1; min-width: 0; }
+.row-link .row-title { font-weight: 700; }
+.row-link .row-sub { color: var(--text-2); font-size: 13px; }
+.row-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--primary-soft);
+  color: var(--accent);
+}
+.row-chevron { flex: none; color: var(--text-3); }
+.stack { display: grid; gap: 12px; }
+
+/* ---------- Admin / lists ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-box { text-align: center; }
+.stat-box small { display: block; color: var(--text-3); font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.stat-box strong { font-size: 26px; }
+.list { display: grid; gap: 10px; }
+.list-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md); }
+.btn-sm { padding: 6px 10px; font-size: 13px; }
+
+/* ---------- Onboarding for new users ---------- */
+.note { display: block; font-size: 13px; color: var(--text-3); }
+.note b { color: var(--text-2); }
+.field-grid { display: grid; gap: 12px; }
+
+@media (max-width: 700px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- Loading ---------- */
+.spinner {
+  width: 22px; height: 22px; margin: 0 auto;
+  border: 3px solid var(--surface-3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.center-wrap { padding: 70px 20px; display: grid; place-items: center; }
+
+/* ---------- Skeleton ---------- */
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.skeleton { background: var(--surface-3); border-radius: var(--r-sm); animation: pulse 1.4s ease infinite; }
+
+/* ---------- Two column app layout ---------- */
+.app-grid { display: grid; grid-template-columns: 240px 1fr; gap: 28px; padding: 28px 0; }
+.side-nav { display: grid; gap: 4px; align-self: start; position: sticky; top: 84px; }
+.side-nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: var(--r-md);
+  color: var(--text-2); font-weight: 700; font-size: 14px;
+}
+.side-nav a:hover { background: var(--surface-2); text-decoration: none; }
+.side-nav a.active { background: var(--primary-soft); color: var(--primary-strong); }
+.side-nav a svg { width: 19px; height: 19px; }
+
+/* ---------- Detail grid ---------- */
+.detail-list { display: grid; gap: 16px; }
+.detail-item small { display: block; color: var(--text-3); font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.detail-item strong { font-size: 15px; }
+
+/* ---------- Divider ---------- */
+.divider { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* ---------- Rating stars ---------- */
+.stars { display: inline-flex; gap: 3px; }
+.stars button { background: none; border: 0; padding: 0; color: var(--surface-3); }
+.stars button.filled { color: var(--accent); }
+
+/* ---------- Footer ---------- */
+.footer { border-top: 1px solid var(--line); padding: 28px 0; color: var(--text-3); font-size: 14px; text-align: center; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 32px; }
+  .auth-wrap { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .topnav-links .hide-sm { display: none; }
+  .app-grid { grid-template-columns: 1fr; }
+  .side-nav { display: none; }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 15px; }
+  .topnav-links { display: none; }
+  .bottomnav { display: block; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr; }
+  .page-with-nav { padding-bottom: 84px; }
+}
+
+/* =========================================================================
+   Lapisan Stitch
+   Menimpa metrik komponen agar persis mengikuti
+   stitch_modalin_onboarding_flow_pwa/modalin_design_system/DESIGN.md.
+   Ditaruh paling bawah supaya menang tanpa harus mengubah markup yang ada.
+   ========================================================================= */
+
+/* --- Tipografi: nominal Rupiah wajib tabular supaya kolom angka lurus --- */
+.opp-amount,
+.stat b,
+.stat-box b,
+.score,
+.money,
+[data-money] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+h1, h2 { letter-spacing: -0.02em; font-weight: 800; }
+h3, h4 { letter-spacing: -0.01em; font-weight: 700; }
+p, .body { line-height: 1.5; }
+
+/* --- Tombol: radius 12px, tinggi 52 mobile / 48 desktop, bukan pill --- */
+.btn {
+  border-radius: var(--r-md);
+  min-height: var(--control-h);
+  padding: 0 20px;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:hover:not(:disabled) { background: var(--primary-strong); }
+.btn-outline {
+  background: var(--surface);
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-soft, .btn-ghost { background: var(--primary-soft); color: var(--accent); border: 0; }
+.btn:disabled {
+  background: var(--line);
+  color: var(--text-3);
+  cursor: not-allowed;
+  transform: none;
+}
+/* 44px adalah lantai target sentuh di NFR — tombol kecil pun tidak boleh di bawahnya */
+.btn-sm { min-height: 44px; padding: 0 14px; font-size: 14px; }
+
+/* --- Kartu: radius 16, padding 20, hairline + bayangan hangat --- */
+.card, .opp-card, .hero-panel, .stat-box {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(22, 36, 29, 0.06);
+  box-shadow: var(--shadow-sm);
+}
+.card-pad, .opp-card { padding: 20px; }
+
+/* --- Chip / filter pill: penuh, terpilih = latar hutan --- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip[aria-pressed='true'], .chip.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+/*
+ * Chip dibungkus, tidak digulir.
+ *
+ * Versi sebelumnya `overflow-x: auto` dengan scrollbar disembunyikan, jadi di
+ * 360px empat chip meluap ke kanan tanpa scrollbar, fade, maupun tombol geser —
+ * tidak ada satu pun isyarat bahwa ada opsi tersembunyi. Menambahkan isyarat
+ * gulir memang mungkin, tapi membungkus lebih baik: tidak ada yang tersembunyi
+ * sejak awal, jadi tidak butuh isyarat sama sekali.
+ */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Badge status: pil rapat. Sentence case seperti mockup — `text-transform:
+ * uppercase` memaksa "TERVERIFIKASI / SEDANG DITINJAU", padahal labelnya di
+ * VERIFICATION_LABEL sudah ditulis rapi dan huruf besar semua lebih sulit
+ * dibaca sekilas pada ukuran 11px.
+ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  /* Persis token label-sm DESIGN.md: 11px / 700 / 0.04em. Yang salah di versi
+     lama cuma text-transform-nya; ukuran dan tracking-nya sudah benar. */
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  /*
+   * nowrap supaya label dua kata tidak patah di tengah pil — tapi harus
+   * disertai flex:none, kalau tidak badge ikut diperas oleh saudaranya di baris
+   * flex dan teksnya meluber keluar kartu di 360px ("Sedang Ditinj...").
+   * Wadahnya yang mengalah lewat flex-wrap, bukan badge-nya yang menyusut.
+   */
+  white-space: nowrap;
+  flex: none;
+}
+.badge-success { background: var(--success-soft); color: var(--success-ink); }
+.badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
+.badge-danger  { background: var(--danger-soft);  color: var(--danger-ink); }
+.badge-primary { background: var(--primary-soft); color: var(--accent); }
+.badge .icon { flex: none; }
+
+/* --- Input: tinggi 52, border 1.5, fokus pine + halo --- */
+.input, .textarea, select.input {
+  min-height: var(--control-h);
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--input-line);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+}
+.textarea { min-height: 120px; }
+.input:focus, .textarea:focus, select.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+}
+/* Prefix "Rp" yang menempel permanen di input nominal */
+.input-money { position: relative; display: block; }
+.input-money > .input { padding-left: 44px; font-variant-numeric: tabular-nums; }
+.input-money::before {
+  content: 'Rp';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  color: var(--text-2);
+  pointer-events: none;
+}
+/* Microcopy menenangkan di bawah input */
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* --- Checkbox & radio: 22px di dalam area sentuh 48px --- */
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+}
+.choice:has(input:checked) { border-color: var(--accent); background: var(--primary-soft); }
+.choice input { width: 22px; height: 22px; accent-color: var(--primary); flex: none; margin-top: 2px; }
+
+/* --- Semua kontrol interaktif hormati target sentuh minimum --- */
+.bottomnav a, .chip, .row-link, .list-row { min-height: var(--tap); }
+
+/* --- Bottom nav: Beranda / Cari / Chat / Profil --- */
+.bottomnav {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottomnav a { color: var(--text-2); }
+.bottomnav a.active { color: var(--primary); }
+
+/* --- Sticky action shelf: CTA utama di zona jempol --- */
+.action-shelf {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  min-height: var(--shelf-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+.action-shelf .btn { flex: 1; }
+
+/* --- Modal: backdrop hutan pekat + blur --- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: end center;
+  background: rgba(15, 36, 25, 0.45);
+  backdrop-filter: blur(4px);
+}
+.sheet {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: 24px var(--gutter) calc(24px + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-lg);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+@media (min-width: 768px) {
+  .backdrop { place-items: center; }
+  .sheet { border-radius: var(--r-xl); }
+}
+
+/* --- Meter pendanaan: track hairline, isi pine --- */
+.meter { height: 8px; border-radius: var(--r-pill); background: var(--line); overflow: hidden; }
+.meter > span { display: block; height: 100%; border-radius: var(--r-pill); background: var(--accent); }
+
+/* --- Indikator progres form bertahap --- */
+.steps { display: flex; gap: 8px; margin-bottom: 20px; }
+.steps > span { flex: 1; height: 4px; border-radius: var(--r-pill); background: var(--line); }
+.steps > span.done { background: var(--accent); }
+.steps > span.now { background: var(--primary); }
+
+/* --- Ikon info untuk istilah keuangan (NFR Usability) --- */
+.info-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+}
+
+/* --- Desktop: dua panel, filter kiri, peluang kanan --- */
+@media (min-width: 1025px) {
+  .two-pane {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .two-pane > aside { position: sticky; top: 84px; }
+}
+
+/* --- Titik notifikasi untuk pesan/koneksi baru (FR-09) --- */
+.dot {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* --- Grid angka di kartu peluang (Target Modal / Tenor / ROI) --- */
+.num-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+/*
+ * Di 360px "Rp 500.000.000" tidak muat di sepertiga lebar dan mendorong dua
+ * kolom lain. Nilai pertama (selalu yang terpanjang) diberi baris sendiri.
+ */
+@media (max-width: 380px) {
+  .num-grid { grid-template-columns: 1fr 1fr; }
+  .num-grid > div:first-child { grid-column: 1 / -1; }
+}
+.num-grid small {
+  display: block;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.num-grid b { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* --- Alasan kecocokan di kartu rekomendasi --- */
+.reasons { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.reasons li { color: var(--text-2); font-size: 13px; line-height: 1.45; }
+
+/* --- Baris peluang ringkas di landing --- */
+.opp-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.opp-row:last-child { border-bottom: 0; }
+.opp-name { font-weight: 700; }
+.opp-spec { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* --- Papan tanda tangan (FR-10, sentuh langsung tanpa aplikasi tambahan) --- */
+.sign-pad {
+  width: 100%;
+  display: block;
+  background: var(--surface);
+  border: 1.5px dashed var(--input-line);
+  border-radius: var(--r-md);
+  touch-action: none; /* cegah halaman ikut menggulir saat menggambar */
+  cursor: crosshair;
+}
+
+/* --- Titik notifikasi menempel di sudut ikon nav --- */
+.dot-corner { position: absolute; top: -6px; right: -10px; }
+
+/* --- Bilah peringatan di bawah topnav --- */
+.topbar-alert {
+  background: var(--warning-soft);
+  border-top: 1px solid var(--line);
+  padding: 8px var(--gutter);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.topbar-alert a { color: var(--warning-ink); }
+
+/* =========================================================================
+   Ikon, dan komponen yang lahir dari audit UI 7 September
+   ========================================================================= */
+
+/* --- Ikon garis: sejajar teks, tidak pernah ikut mengecil --- */
+.icon { flex: none; display: block; }
+
+/* Ikon di bottom nav butuh posisi relatif untuk titik notifikasi di sudutnya */
+.bottomnav-icon { position: relative; display: grid; place-items: center; }
+
+/* --- Nomor langkah di landing: penanda urutan, bukan pil metrik --- */
+.step-number {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 800;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Baris kepercayaan di hero: batas platform, dinyatakan di layar pertama --- */
+.trust-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 18px;
+  max-width: 480px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.trust-line .icon { margin-top: 1px; color: var(--accent); }
+
+/* --- Angka skor besar di beranda, seukuran token currency-display --- */
+.score-display { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+
+/* --- Kartu sistem di ruang negosiasi, menempel di bawah kepala percakapan --- */
+.escrow-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: none;
+  padding: 10px 14px;
+  background: var(--primary-soft);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+}
+.escrow-note .icon { margin-top: 1px; color: var(--accent); }
+.escrow-note strong { display: block; color: var(--text); font-size: 13px; }
+.escrow-note p { font-size: 12.5px; line-height: 1.45; margin-top: 2px; }
+
+/* --- Status kanal di kepala chat --- */
+.chat-presence {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+.presence-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+/* --- Pemisah tanggal: pil netral sentence-case, bukan badge brand --- */
+.chat-day { text-align: center; margin: 12px 0; }
+.chat-day span {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* --- Label di bawah indikator progres kesepakatan --- */
+.steps-legend {
+  display: flex;
+  gap: 8px;
+  margin: -12px 0 4px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+}
+.steps-legend > span { flex: 1; }
+.steps-legend > span:nth-child(2) { text-align: center; }
+.steps-legend > span:last-child { text-align: right; }
+
+/* --- Pilihan tunggal bertingkat, menggantikan chip-row untuk skema kerja sama --- */
+/* Opsi ditaruh di wadah sendiri: <legend> tidak jadi grid item di dalam fieldset */
+.choice-set { border: 0; padding: 0; margin: 0; min-width: 0; }
+.choice-set legend { font-size: 13px; font-weight: 700; color: var(--text-2); padding: 0; }
+.choice-list { display: grid; gap: 10px; margin-top: 8px; }
+.choice-set .choice input { accent-color: var(--accent); }
+.choice-set .choice strong { display: block; font-size: 14px; }
+.choice-set .choice small { display: block; color: var(--text-2); font-size: 12px; line-height: 1.45; margin-top: 2px; }
+
+/* --- Nama usaha panjang dipotong dua baris, bukan mendorong kartu melar --- */
+.opp-name,
+.opp-card h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+}
+/* Baris ringkas di landing tetap satu baris */
+.hero-panel .opp-row .opp-name { -webkit-line-clamp: 1; line-clamp: 1; }
+
+/* --- Bintang rating: tanpa padding target sentuhnya di bawah minimum --- */
+.stars button {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 8px;
+  line-height: 1;
+}
+.stars button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
+
+/* --- Rentang angka berdampingan mulai dari lebar yang memuatnya --- */
+@media (min-width: 640px) {
+  .field-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* --- Jarak bawah halaman, menggantikan style inline yang tersebar --- */
+.page-bottom { padding-bottom: 30px; }
+
+/*
+ * Ukuran huruf yang sebelumnya ditulis inline. Dipindah ke sini supaya skala
+ * tipografi terkumpul di satu tempat — inline style sempat menyebar jadi
+ * kebiasaan dan membuat hierarki font sulit ditelusuri.
+ */
+/* --- Kartu identitas pembuka beranda, mengikuti mockup dashboard --- */
+.greeting {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.greeting-name { font-size: 20px; font-weight: 800; letter-spacing: -0.015em; }
+.greeting-role { color: var(--text-2); font-size: 13px; font-weight: 600; margin-top: 1px; }
+.greeting-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.greeting-lead {
+  margin: 14px 2px 16px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/*
+ * Kartu "Perhatian Utama Hari Ini" — satu-satunya permukaan gelap di aplikasi.
+ * Kegelapannya yang membuat kartu ini menang tanpa perlu warna status, jadi
+ * merah/kuning tetap murni berarti status verifikasi.
+ */
+.attention {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  margin-bottom: 22px;
+  border-radius: var(--r-lg);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+.attention-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--tint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.attention-tag {
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.attention-title { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.3; }
+.attention-sub { color: rgba(255, 255, 255, 0.78); font-size: 13px; line-height: 1.5; }
+.btn-attention { background: #fff; color: var(--primary); margin-top: 2px; }
+.btn-attention:hover:not(:disabled) { background: var(--tint); color: var(--primary); }
+
+/* --- Kartu hero landing, mengikuti welcome_screen_modalin_mobile --- */
+.hero-pills {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px 0;
+}
+.pill-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  background: var(--success-soft);
+  border: 1px solid color-mix(in srgb, var(--success) 24%, transparent);
+  color: var(--success-ink);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.pill-note { color: var(--text-2); font-size: 11.5px; font-weight: 600; }
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--line);
+}
+.hero-metric {
+  padding: 10px 8px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.hero-metric small {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.hero-metric b { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+
+/* Eyebrow bergaris tepi, versi berikon */
+.eyebrow-icon { background: transparent; padding: 0; text-transform: none; letter-spacing: 0; font-size: 12.5px; }
+
+/* --- Strip kepercayaan penutup landing --- */
+.trust-strip {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px 16px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+.trust-strip .icon { flex: none; margin-top: 1px; color: var(--primary); }
+
+.partner-name { font-size: 22px; }
+.opp-amount-sm { font-size: 15px; }
+.hero-panel-empty { padding: 18px; color: var(--text-3); font-size: 14px; }
+.step-desc { color: var(--text-2); margin-top: 8px; font-size: 14px; line-height: 1.6; }
+

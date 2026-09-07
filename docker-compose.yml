@@ -17,7 +17,7 @@ services:
       retries: 20
   api:
     build:
-      context: ./apps/api
+      context: ./backend
     environment:
       DATABASE_URL: mysql://modalin:modalin@db:3306/modalin
       JWT_SECRET: replace-with-a-long-random-secret

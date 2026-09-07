@@ -21,23 +21,25 @@ React + TypeScript (SPA/PWA) · Node.js + Express (Modular Monolith, 8 modul dom
 
 ## Menjalankan secara lokal
 
+Lihat `RUN.md` untuk setup end-to-end (backend, frontend, database, seed, demo accounts).
+
 ```bash
 # 1. Siapkan environment
-cp .env.example apps/api/.env          # isi DATABASE_URL dan JWT_SECRET (minimal 32 karakter)
-echo "VITE_API_URL=http://localhost:4000" > apps/web/.env
+cp .env.example backend/.env          # isi DATABASE_URL dan JWT_SECRET (minimal 32 karakter)
+echo "VITE_API_URL=http://localhost:4000" > frontend/.env
 
 # 2. Siapkan MySQL — pakai Docker, atau arahkan DATABASE_URL ke MySQL terkelola
 docker compose up -d db
 
 # 3. Pasang dependensi dan siapkan basis data
 npm install
-npm --workspace apps/api run db:generate
-npm --workspace apps/api exec prisma migrate deploy
-npm --workspace apps/api run db:seed
+npm --workspace backend run db:generate
+npm --workspace backend exec prisma migrate deploy
+npm --workspace backend run db:seed
 
 # 4. Jalankan
-npm run dev:api      # http://localhost:4000
-npm run dev:web      # http://localhost:5173
+npm run dev:backend    # http://localhost:4000
+npm run dev:frontend   # http://localhost:5173
 ```
 
 ### Akun demo
@@ -58,7 +60,7 @@ Seeder membuat 8 UMKM, 5 investor, dan koneksi di **semua** status FR-14 (menung
 
 ```bash
 npm run typecheck                    # kedua workspace
-npm --workspace apps/api run test    # 39 unit test
+npm --workspace backend run test    # 39 unit test
 npm run build                        # kedua workspace
 ```
 
@@ -98,7 +100,7 @@ Perubahan berikut menyimpang dari dokumen acuan dan dicatat di sini serta di dok
 
 7. **Keputusan Terbuka ARCHITECTURE.md §12 poin 1 ditutup:** `Agreement` kini punya kolom skema-spesifik (`profitSharingRatio`, `equityPercentage`, `interestRate`), menggantikan field generik untuk ketiga jenis kerja sama.
 
-8. **Asumsi cold-start Trust Score (§12 poin 2):** akun baru mulai dari 0 tanpa perlakuan khusus, dan belum adanya rating dihitung 0 — bukan nilai netral 3/5 — supaya akun baru tidak tampak lebih kredibel daripada yang sudah terbukti. Bobot 40/30/30 ada di satu berkas, `apps/api/src/config/scoring.ts`.
+8. **Asumsi cold-start Trust Score (§12 poin 2):** akun baru mulai dari 0 tanpa perlakuan khusus, dan belum adanya rating dihitung 0 — bukan nilai netral 3/5 — supaya akun baru tidak tampak lebih kredibel daripada yang sudah terbukti. Bobot 40/30/30 ada di satu berkas, `backend/src/config/scoring.ts`.
 
 9. **FR-10/FR-11 dan FR-12 dibangun sekarang**, meski proposal §4.1 menempatkannya pasca-penyisihan. Membangun lebih dari yang dijanjikan tidak melanggar proposal.
 
@@ -111,7 +113,7 @@ Perubahan berikut menyimpang dari dokumen acuan dan dicatat di sini serta di dok
 
 ## Deployment
 
-Frontend ke Vercel dengan root repositori sebagai project root; set `VITE_API_URL` ke URL API publik. API ke host yang mendukung Docker (Render, Railway, Fly.io, Cloud Run, atau VPS) memakai `apps/api/Dockerfile`; `render.yaml` tersedia sebagai titik awal.
+Frontend ke Vercel dengan root repositori sebagai project root; set `VITE_API_URL` ke URL API publik. API ke host yang mendukung Docker (Render, Railway, Fly.io, Cloud Run, atau VPS) memakai `backend/Dockerfile`; `render.yaml` tersedia sebagai titik awal.
 
 1. Siapkan MySQL terkelola, salin connection string ke `DATABASE_URL`.
 2. Set `JWT_SECRET`, `JWT_REFRESH_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`, `WEB_ORIGIN`, `PUBLIC_BASE_URL`, dan `API_PORT=4000`.
