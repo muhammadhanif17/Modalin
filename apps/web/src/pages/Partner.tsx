@@ -10,7 +10,8 @@ import {
   type VerificationStatus,
 } from '../lib/api';
 import { Avatar } from '../components/ui/Avatar';
-import { Spinner, EmptyState, Notice, Stars } from '../components/ui';
+import { Icon } from '../components/ui/Icon';
+import { Spinner, EmptyState, Notice, Stars, Badge, VERIFICATION_TONE } from '../components/ui';
 import { formatRupiah, formatTanggal } from '../lib/format';
 import { readSession } from '../lib/session';
 
@@ -72,6 +73,7 @@ type PublicProfile = {
 export function PartnerPage() {
   const { id = '' } = useParams();
   const session = readSession();
+  const navigate = useNavigate();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['partner', id],
@@ -85,7 +87,7 @@ export function PartnerPage() {
   if (isError || !data) {
     return (
       <div className="shell">
-        <EmptyState icon="🔍" title="Mitra tidak ditemukan" message="Profil ini mungkin sudah tidak tersedia." />
+        <EmptyState icon="search" title="Mitra tidak ditemukan" message="Profil ini mungkin sudah tidak tersedia." />
       </div>
     );
   }
@@ -95,11 +97,12 @@ export function PartnerPage() {
   const funding = data.business?.fundingRequests ?? [];
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div style={{ padding: '14px 0' }}>
-        <Link className="btn btn-ghost btn-sm" to="/app/explore">
+        {/* Kembali ke halaman asal — dari Rekomendasi/Beranda dulu selalu terlempar ke Cari */}
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => navigate(-1)}>
           ← Kembali
-        </Link>
+        </button>
       </div>
 
       {/* Panel kepercayaan di atas kartu, sesuai Trust Banner di DESIGN.md */}
@@ -112,18 +115,15 @@ export function PartnerPage() {
               <span className="badge badge-primary">
                 {data.role === 'UMKM' ? 'Pengusaha' : 'Pemodal'}
               </span>
-              <span
-                className={`badge ${
-                  data.isVerified
-                    ? 'badge-success'
-                    : data.profile.verificationStatus === 'PENDING'
-                      ? 'badge-warning'
-                      : 'badge-danger'
-                }`}
-              >
+              <Badge tone={VERIFICATION_TONE[data.profile.verificationStatus]}>
                 {VERIFICATION_LABEL[data.profile.verificationStatus]}
-              </span>
-              {data.profile.location && <span>📍 {data.profile.location}</span>}
+              </Badge>
+              {data.profile.location && (
+                <span className="meta-item">
+                  <Icon name="location" size={14} />
+                  {data.profile.location}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -157,7 +157,10 @@ export function PartnerPage() {
               <h3>{data.business.name}</h3>
               <div className="opp-meta">
                 <span className="badge badge-primary">{data.business.sector.name}</span>
-                <span>📍 {data.business.location}</span>
+                <span className="meta-item">
+                  <Icon name="location" size={14} />
+                  {data.business.location}
+                </span>
                 {data.business.establishedYear && <span>· berdiri {data.business.establishedYear}</span>}
                 {data.business.employeeCount && <span>· {data.business.employeeCount} pekerja</span>}
               </div>
@@ -320,7 +323,15 @@ function InterestButton({
     onSuccess: () => {
       setOpen(false);
       qc.invalidateQueries({ queryKey: ['connections'] });
-      navigate('/app/chat');
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      /*
+        Dulu mendarat di /app/chat, padahal ruang chat baru ada setelah mitra
+        menerima — jadi pengguna selalu melihat "Belum ada percakapan" dan
+        mengira pengirimannya gagal. Beranda punya konteks untuk menjelaskannya.
+      */
+      navigate('/app/beranda', {
+        state: { notice: 'Ketertarikan terkirim. Kamu diberi tahu begitu mitra merespons.' },
+      });
     },
     onError: (err) => setError(err instanceof Error ? err.message : 'Gagal mengirim ketertarikan.'),
   });

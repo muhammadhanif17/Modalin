@@ -29,12 +29,12 @@ export function MatchesPage() {
       </div>
 
       {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat rekomendasi" message="Coba lagi sebentar lagi." />}
+      {isError && <EmptyState icon="warning" title="Gagal memuat rekomendasi" message="Coba lagi sebentar lagi." />}
 
       {/* Investor belum mengatur preferensi: tidak ada yang bisa dicocokkan */}
       {data?.needsPreference && (
         <EmptyState
-          icon="🎯"
+          icon="target"
           title="Atur preferensi investasimu dulu"
           message={data.emptyMessage ?? undefined}
           action={
@@ -71,7 +71,7 @@ export function MatchesPage() {
           {/* FR-07: alternatif informatif ketika tidak ada yang lolos ambang */}
           {data.recommended.length === 0 && data.alternatives.length > 0 && (
             <EmptyState
-              icon="🌱"
+              icon="sprout"
               title="Belum ada yang mencapai skor minimum"
               message={data.emptyMessage ?? undefined}
             />
@@ -93,7 +93,7 @@ export function MatchesPage() {
 
           {data.recommended.length === 0 && data.alternatives.length === 0 && (
             <EmptyState
-              icon="🤝"
+              icon="users"
               title="Belum ada mitra yang cocok"
               message={data.emptyMessage ?? undefined}
               action={

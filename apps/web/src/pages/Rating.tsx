@@ -47,7 +47,7 @@ export function RatingPage() {
   if (isError) {
     return (
       <div className="shell">
-        <EmptyState icon="⚠️" title="Gagal memuat" message="Coba lagi sebentar lagi." />
+        <EmptyState icon="warning" title="Gagal memuat" message="Coba lagi sebentar lagi." />
       </div>
     );
   }
@@ -56,14 +56,14 @@ export function RatingPage() {
   if (!agreementId) {
     const rows = data ?? [];
     return (
-      <div className="shell" style={{ paddingBottom: 30 }}>
+      <div className="shell page-bottom">
         <div className="page-head">
           <h1>Beri ulasan</h1>
           <p>Ulasanmu memperbarui skor kepercayaan mitra.</p>
         </div>
         {rows.length === 0 ? (
           <EmptyState
-            icon="⭐"
+            icon="star"
             title="Belum ada yang perlu diulas"
             message="Ulasan bisa diberikan setelah kerja sama ditandai selesai."
             action={
@@ -97,7 +97,7 @@ export function RatingPage() {
     return (
       <div className="shell">
         <EmptyState
-          icon="✅"
+          icon="check"
           title="Kerja sama ini tidak bisa diulas"
           message="Mungkin belum selesai, atau kamu sudah pernah memberi ulasan untuknya."
           action={
@@ -111,7 +111,7 @@ export function RatingPage() {
   }
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div style={{ padding: '14px 0' }}>
         <Link className="btn btn-ghost btn-sm" to="/app/agreements">
           ← Kembali

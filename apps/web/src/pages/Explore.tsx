@@ -112,7 +112,7 @@ export function ExplorePage() {
                 <input
                   className="input"
                   inputMode="numeric"
-                  placeholder="Minimum"
+                  placeholder="10.000.000"
                   value={minAmount}
                   onChange={(e) => setMinAmount(e.target.value.replace(/\D/g, ''))}
                   aria-label="Dana minimum"
@@ -122,7 +122,7 @@ export function ExplorePage() {
                 <input
                   className="input"
                   inputMode="numeric"
-                  placeholder="Maksimum"
+                  placeholder="500.000.000"
                   value={maxAmount}
                   onChange={(e) => setMaxAmount(e.target.value.replace(/\D/g, ''))}
                   aria-label="Dana maksimum"
@@ -182,7 +182,7 @@ export function ExplorePage() {
           )}
         </aside>
 
-        <section className="stack">
+        <section className="stack results-pane">
           <div className="chip-row" role="tablist" aria-label="Urutkan">
             {SORTS.map((s) => (
               <button
@@ -199,13 +199,13 @@ export function ExplorePage() {
 
           {isLoading && <Spinner />}
           {isError && (
-            <EmptyState icon="⚠️" title="Gagal memuat peluang" message="Periksa koneksimu lalu coba lagi." />
+            <EmptyState icon="warning" title="Gagal memuat peluang" message="Periksa koneksimu lalu coba lagi." />
           )}
 
           {/* Pesan kosong berasal dari server (FR-05) */}
           {!isLoading && !isError && data && data.items.length === 0 && (
             <EmptyState
-              icon="🔍"
+              icon="search"
               title="Tidak ada yang cocok"
               message={data.emptyMessage ?? 'Coba ubah kata kunci atau filter.'}
               action={

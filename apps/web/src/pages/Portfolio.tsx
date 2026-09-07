@@ -43,7 +43,7 @@ export function PortfolioPage() {
   const rows = data ?? [];
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>{isInvestor ? 'Rekam jejak pendanaan' : 'Berkas pendukung usaha'}</h1>
         <p>
@@ -57,10 +57,10 @@ export function PortfolioPage() {
         <UploadForm />
 
         {isLoading && <Spinner />}
-        {isError && <EmptyState icon="⚠️" title="Gagal memuat berkas" message="Coba lagi sebentar lagi." />}
+        {isError && <EmptyState icon="warning" title="Gagal memuat berkas" message="Coba lagi sebentar lagi." />}
         {!isLoading && !isError && rows.length === 0 && (
           <EmptyState
-            icon="📄"
+            icon="folder"
             title="Belum ada berkas"
             message="Unggah berkas pertamamu, ini menaikkan skor kepercayaanmu."
           />

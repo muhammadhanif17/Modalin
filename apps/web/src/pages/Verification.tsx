@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { endpoints, VERIFICATION_LABEL } from '../lib/api';
-import { Notice, Spinner, Badge, Field } from '../components/ui';
+import { Notice, Spinner, Badge, Field, VERIFICATION_TONE } from '../components/ui';
 import { formatTanggal } from '../lib/format';
 
 /**
@@ -57,20 +57,11 @@ export function VerificationPage() {
   if (isLoading) return <Spinner />;
   if (!data) return null;
 
-  const tone =
-    data.verificationStatus === 'VERIFIED'
-      ? 'success'
-      : data.verificationStatus === 'PENDING'
-        ? 'warning'
-        : data.verificationStatus === 'REJECTED'
-          ? 'soft'
-          : 'soft';
-
   const steps = [Boolean(data.ktpUrl), data.requiresNib ? Boolean(data.nibUrl) : true, data.isVerified];
   const doneCount = steps.filter(Boolean).length;
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>Verifikasi identitas</h1>
         <p>Akun terverifikasi lebih dipercaya mitra dan naik skor kepercayaannya.</p>
@@ -91,7 +82,7 @@ export function VerificationPage() {
               <div className="opp-meta">Diajukan {formatTanggal(data.kycSubmittedAt)}</div>
             )}
           </div>
-          <Badge tone={tone as 'success' | 'warning' | 'soft'}>
+          <Badge tone={VERIFICATION_TONE[data.verificationStatus]}>
             {VERIFICATION_LABEL[data.verificationStatus]}
           </Badge>
         </div>
@@ -167,7 +158,15 @@ function DocCard({
         {uploaded && <Badge tone="success">Terunggah</Badge>}
       </div>
       <Field label={uploaded ? 'Ganti berkas' : 'Pilih berkas'} hint={hint}>
-        <input className="input" type="file" accept={ACCEPT} onChange={onPick} disabled={disabled} />
+        {/* capture: di HP langsung buka kamera belakang, bukan pemilih berkas */}
+        <input
+          className="input"
+          type="file"
+          accept={ACCEPT}
+          capture="environment"
+          onChange={onPick}
+          disabled={disabled}
+        />
       </Field>
     </div>
   );

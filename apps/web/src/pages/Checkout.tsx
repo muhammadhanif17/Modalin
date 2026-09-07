@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { endpoints, type Product, type Transaction } from '../lib/api';
-import { Notice, EmptyState, Spinner, Badge } from '../components/ui';
+import { Notice, EmptyState, Spinner, Badge, type BadgeTone } from '../components/ui';
 import { formatRupiah, formatTanggal } from '../lib/format';
 
 /**
@@ -15,10 +15,11 @@ import { formatRupiah, formatTanggal } from '../lib/format';
  * hanya untuk biaya layanan platform dan langganan Modalin Pro.
  */
 
-const STATUS: Record<Transaction['status'], { text: string; tone: 'warning' | 'success' | 'soft' }> = {
+const STATUS: Record<Transaction['status'], { text: string; tone: BadgeTone }> = {
   PENDING: { text: 'Menunggu', tone: 'warning' },
   SUCCESS: { text: 'Berhasil', tone: 'success' },
-  FAILED: { text: 'Gagal', tone: 'soft' },
+  // Pembayaran gagal butuh warna alert, bukan abu-abu netral.
+  FAILED: { text: 'Gagal', tone: 'danger' },
 };
 
 export function CheckoutPage() {
@@ -58,7 +59,7 @@ export function CheckoutPage() {
   });
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>Pembayaran</h1>
         <p>Biaya layanan platform dan langganan Modalin Pro.</p>
@@ -85,7 +86,8 @@ export function CheckoutPage() {
             <div className="opp-foot">
               <div className="opp-amount" data-money>
                 {formatRupiah(product.amount)}
-                <small>sekali bayar</small>
+                {/* Langganan ditagih berulang — jangan pukul rata "sekali bayar" */}
+                <small>{product.key === 'SUBSCRIPTION_PRO' ? 'per bulan' : 'sekali bayar'}</small>
               </div>
               <button
                 type="button"
@@ -154,7 +156,7 @@ export function CheckoutPage() {
         <h2>Riwayat transaksi</h2>
       </div>
       {(transactions ?? []).length === 0 ? (
-        <EmptyState icon="🧾" title="Belum ada transaksi" message="Riwayat pembayaranmu akan muncul di sini." />
+        <EmptyState icon="receipt" title="Belum ada transaksi" message="Riwayat pembayaranmu akan muncul di sini." />
       ) : (
         <div className="stack">
           {(transactions ?? []).map((trx) => (

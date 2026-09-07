@@ -44,7 +44,7 @@ export function AgreementsPage() {
   });
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>Dokumen kesepakatan</h1>
         <p>Susun, tandatangani, dan terbitkan surat perjanjian kerja sama.</p>
@@ -59,10 +59,10 @@ export function AgreementsPage() {
       )}
 
       {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat dokumen" message="Coba lagi sebentar lagi." />}
+      {isError && <EmptyState icon="warning" title="Gagal memuat dokumen" message="Coba lagi sebentar lagi." />}
       {!isLoading && !isError && (data ?? []).length === 0 && !creating && (
         <EmptyState
-          icon="📝"
+          icon="document"
           title="Belum ada dokumen"
           message="Kesepakatan disusun setelah negosiasi di ruang chat menemui titik temu."
           action={
@@ -94,6 +94,10 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
   const mySignature = agreement.signatures.find((s) => s.userId === session?.id);
   const signatureCount = agreement.signatures.length;
   const status = STATUS_LABEL[agreement.status];
+  const canPublish = signatureCount >= 2;
+
+  // Susun → Tanda tangan → Terbit, dibaca dari status yang ada, bukan state baru.
+  const step = agreement.documentUrl ? 3 : signatureCount > 0 ? 2 : 1;
 
   const sign = useMutation({
     mutationFn: () => endpoints.sign(agreement.id, new File([blob!], 'ttd.png', { type: 'image/png' })),
@@ -135,6 +139,17 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
           </div>
         </div>
         <Badge tone={status.tone}>{status.text}</Badge>
+      </div>
+
+      <div className="steps" aria-label={`Progres kesepakatan: langkah ${step} dari 3`}>
+        <span className={step > 1 ? 'done' : 'now'} />
+        <span className={step > 2 ? 'done' : step === 2 ? 'now' : ''} />
+        <span className={step === 3 ? 'done' : ''} />
+      </div>
+      <div className="steps-legend" aria-hidden="true">
+        <span>Susun</span>
+        <span>Tanda tangan</span>
+        <span>Terbit</span>
       </div>
 
       <div className="num-grid">
@@ -208,17 +223,29 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
         </p>
       )}
 
-      {/* FR-10/FR-11 — terbitkan PDF, hanya kalau dua tanda tangan lengkap */}
+      {/*
+        FR-10/FR-11 — terbitkan PDF, hanya kalau dua tanda tangan lengkap.
+        Gerbangnya ditegakkan server, tapi tombolnya ikut dinonaktifkan: dulu
+        tetap bisa diklik dan baru gagal di server, dan `title` tidak terbaca
+        sama sekali di layar sentuh. Alasannya ditulis di bawah tombol.
+      */}
       {!agreement.documentUrl && agreement.status !== 'CANCELLED' && (
-        <button
-          type="button"
-          className="btn btn-outline btn-block"
-          disabled={generate.isPending}
-          onClick={() => generate.mutate()}
-          title={signatureCount < 2 ? 'Dokumen baru bisa terbit setelah kedua pihak menandatangani' : undefined}
-        >
-          {generate.isPending ? 'Menerbitkan…' : 'Terbitkan PDF final'}
-        </button>
+        <>
+          <button
+            type="button"
+            className="btn btn-outline btn-block"
+            disabled={generate.isPending || !canPublish}
+            onClick={() => generate.mutate()}
+          >
+            {generate.isPending ? 'Menerbitkan…' : 'Terbitkan PDF final'}
+          </button>
+          {!canPublish && (
+            <p className="field-hint">
+              Menunggu tanda tangan mitra ({signatureCount}/2). Dokumen terbit setelah kedua pihak
+              menandatangani.
+            </p>
+          )}
+        </>
       )}
 
       {agreement.documentUrl && (
@@ -319,24 +346,31 @@ function CreateForm({ conversationId, onDone }: { conversationId: string | null;
         </select>
       </Field>
 
-      <div className="field">
-        <label>Skema kerja sama</label>
-        <div className="chip-row" style={{ marginTop: 8 }}>
+      {/*
+        Bukan chip-row: skema menentukan isi dokumen dan sifatnya pilihan tunggal
+        yang penting, bukan filter cepat. Deretan horizontal juga meluap keluar
+        layar di 360px tanpa isyarat apa pun bahwa ada opsi tersembunyi.
+      */}
+      <fieldset className="choice-set">
+        <legend>Skema kerja sama</legend>
+        <div className="choice-list">
           {TYPES.map((t) => (
-            <button
-              key={t}
-              type="button"
-              className="chip"
-              aria-pressed={type === t}
-              onClick={() => setType(t)}
-              title={COOPERATION_HELP[t]}
-            >
-              {COOPERATION_LABEL[t]}
-            </button>
+            <label className="choice" key={t}>
+              <input
+                type="radio"
+                name="cooperationType"
+                value={t}
+                checked={type === t}
+                onChange={() => setType(t)}
+              />
+              <span>
+                <strong>{COOPERATION_LABEL[t]}</strong>
+                <small>{COOPERATION_HELP[t]}</small>
+              </span>
+            </label>
           ))}
         </div>
-        <span className="field-hint">{COOPERATION_HELP[type]}</span>
-      </div>
+      </fieldset>
 
       <Field label="Nilai kerja sama">
         <label className="input-money">

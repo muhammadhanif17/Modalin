@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { endpoints, VERIFICATION_LABEL, type VerificationStatus } from '../lib/api';
 import { Avatar } from '../components/ui/Avatar';
-import { Spinner, EmptyState, Notice, Badge } from '../components/ui';
+import { Spinner, EmptyState, Notice, Badge, VERIFICATION_TONE } from '../components/ui';
 import { formatTanggal } from '../lib/format';
 
 /**
@@ -31,7 +31,7 @@ export function AdminPage() {
   });
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>Panel admin</h1>
         <p>Tinjau dokumen KYC dan pantau aktivitas platform.</p>
@@ -63,10 +63,10 @@ export function AdminPage() {
       </div>
 
       {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat antrean" message="Coba lagi sebentar lagi." />}
+      {isError && <EmptyState icon="warning" title="Gagal memuat antrean" message="Coba lagi sebentar lagi." />}
       {!isLoading && !isError && (queue ?? []).length === 0 && (
         <EmptyState
-          icon="✅"
+          icon="check"
           title={tab === 'PENDING' ? 'Antrean kosong' : 'Belum ada data'}
           message={tab === 'PENDING' ? 'Semua dokumen sudah ditinjau.' : undefined}
         />
@@ -111,9 +111,6 @@ function QueueRow({ row, reviewable }: { row: QueueItem; reviewable: boolean }) 
     onError: (err) => setError(err instanceof Error ? err.message : 'Gagal menyimpan keputusan.'),
   });
 
-  const tone =
-    row.verificationStatus === 'VERIFIED' ? 'success' : row.verificationStatus === 'PENDING' ? 'warning' : 'soft';
-
   return (
     <div className="card card-pad stack">
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -128,7 +125,7 @@ function QueueRow({ row, reviewable }: { row: QueueItem; reviewable: boolean }) 
             <div className="opp-meta">Diajukan {formatTanggal(row.kycSubmittedAt)}</div>
           )}
         </div>
-        <Badge tone={tone as 'success' | 'warning' | 'soft'}>
+        <Badge tone={VERIFICATION_TONE[row.verificationStatus]}>
           {VERIFICATION_LABEL[row.verificationStatus]}
         </Badge>
       </div>

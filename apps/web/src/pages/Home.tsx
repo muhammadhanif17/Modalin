@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { Avatar } from '../components/ui/Avatar';
-import { Score } from '../components/ui';
+import { Icon } from '../components/ui/Icon';
 import { formatRupiah } from '../lib/format';
 
 export function HomePage() {
@@ -20,20 +20,34 @@ export function HomePage() {
   const featured = (data ?? []).slice(0, 3);
 
   return (
-    <div className="shell" style={{ paddingBottom: 40 }}>
+    <div className="shell page-bottom">
       <section className="hero">
         <div>
-          <span className="eyebrow">🪴 Platform kolaborasi pendanaan</span>
+          <span className="eyebrow">Platform kolaborasi pendanaan</span>
           <h1>Modal tumbuh ketika orang yang tepat bertemu.</h1>
           <p className="hero-sub">
             Modalin mempertemukan UMKM dengan investor yang relevan — lewat profil yang
             jujur, kecocokan yang terukur, dan percakapan yang transparan.
           </p>
+          <p className="trust-line">
+            <Icon name="lock" size={16} />
+            Dana investasi disalurkan langsung antara kedua pihak, di luar platform. Pembayaran
+            di sini hanya untuk biaya layanan.
+          </p>
           <div className="hero-actions">
             <Link className="btn btn-primary btn-block" to="/register">
               Mulai sekarang
             </Link>
-            <Link className="btn btn-soft btn-block" to="/app/explore">
+            {/*
+              Dulu menuju /app/explore yang dijaga AuthGuard, jadi pengunjung publik
+              langsung dibanting ke /login tanpa penjelasan. Sekarang jujur soal
+              tujuannya dan tetap mendarat di Cari peluang setelah masuk.
+            */}
+            <Link
+              className="btn btn-soft btn-block"
+              to="/login"
+              state={{ from: '/app/explore', notice: 'Masuk dulu untuk menjelajahi peluang.' }}
+            >
               Jelajahi peluang
             </Link>
           </div>
@@ -92,7 +106,10 @@ export function HomePage() {
         <div className="grid-3">
           {steps.map((step, i) => (
             <div className="card card-pad" key={step.title}>
-              <Score value={i + 1} suffix="" />
+              {/* Penanda urutan, bukan metrik — pil skor hijau dipakai untuk angka nyata saja */}
+              <span className="step-number" aria-hidden="true">
+                {i + 1}
+              </span>
               <h3 style={{ marginTop: 14 }}>{step.title}</h3>
               <p style={{ color: 'var(--text-2)', marginTop: 8, fontSize: 14, lineHeight: 1.6 }}>
                 {step.desc}

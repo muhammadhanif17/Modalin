@@ -8,7 +8,7 @@ async function make({ size, corner, maskable }) {
   // Rounded-rect background
   const bg = Buffer.from(
     `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-      <rect x="${pad}" y="${pad}" width="${inner}" height="${inner}" rx="${r}" fill="#0e8a6d"/>
+      <rect x="${pad}" y="${pad}" width="${inner}" height="${inner}" rx="${r}" fill="#0f2419"/>
     </svg>`
   );
 

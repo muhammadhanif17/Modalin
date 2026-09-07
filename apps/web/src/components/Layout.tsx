@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { setToken, isAuthed, endpoints } from '../lib/api';
 import { subscribeToNotifications, disconnectSocket } from '../lib/socket';
 import { readSession, saveSession } from '../lib/session';
+import { Icon, type IconName } from './ui/Icon';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -85,7 +86,8 @@ function TopNav() {
           </Link>
         ) : (
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-            <Link className="btn btn-ghost btn-sm hide-sm" to="/login">
+            {/* Tanpa ini pengunjung di HP hanya punya "Daftar" dan tak bisa masuk. */}
+            <Link className="btn btn-ghost btn-sm" to="/login">
               Masuk
             </Link>
             <Link className="btn btn-primary btn-sm" to="/register">
@@ -128,24 +130,37 @@ export function LogoutButton() {
 }
 
 /** Empat tab persis seperti bottom nav di Stitch: Beranda, Cari, Chat, Profil. */
-const APP_LINKS = [
-  { to: '/app/beranda', label: 'Beranda', icon: '🏠' },
-  { to: '/app/explore', label: 'Cari', icon: '🔍' },
-  { to: '/app/chat', label: 'Chat', icon: '💬' },
-  { to: '/app/profile', label: 'Profil', icon: '👤' },
-] as const;
+const APP_LINKS: { to: string; label: string; icon: IconName }[] = [
+  { to: '/app/beranda', label: 'Beranda', icon: 'home' },
+  { to: '/app/explore', label: 'Cari', icon: 'search' },
+  { to: '/app/chat', label: 'Chat', icon: 'chat' },
+  { to: '/app/profile', label: 'Profil', icon: 'person' },
+];
+
+/**
+ * Tab admin hanya ada di topnav desktop, padahal topnav disembunyikan di ≤640px.
+ * Tanpa slot di bawah, admin yang meninjau KYC dari HP terkunci dari panelnya.
+ */
+const ADMIN_LINK: { to: string; label: string; icon: IconName } = {
+  to: '/app/admin',
+  label: 'Admin',
+  icon: 'shield',
+};
 
 function BottomNav() {
   const notif = useNotifications();
+  const session = readSession();
   if (!isAuthed()) return null;
+
+  const links = session?.role === 'ADMIN' ? [...APP_LINKS, ADMIN_LINK] : APP_LINKS;
 
   return (
     <nav className="bottomnav" aria-label="Navigasi bawah">
       <div className="bottomnav-inner">
-        {APP_LINKS.map((link) => (
+        {links.map((link) => (
           <NavLink key={link.to} to={link.to} className={({ isActive }) => (isActive ? 'active' : '')}>
-            <span aria-hidden="true" style={{ position: 'relative' }}>
-              {link.icon}
+            <span className="bottomnav-icon">
+              <Icon name={link.icon} size={22} />
               {link.to === '/app/chat' && notif && notif.unreadMessages > 0 && (
                 <span className="dot dot-corner">{notif.unreadMessages}</span>
               )}

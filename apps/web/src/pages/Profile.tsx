@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { Avatar } from '../components/ui/Avatar';
+import { Icon } from '../components/ui/Icon';
 import { Field, Notice, Badge } from '../components/ui';
 import { LogoutButton } from '../components/Layout';
 import { readSession } from '../lib/session';
@@ -27,7 +29,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>Profil kamu</h1>
         <p>Data ini membantu mitra memahami siapa kamu.</p>
@@ -43,11 +45,59 @@ export function ProfilePage() {
             </p>
           </div>
           {isVerified ? (
-            <Badge tone="success">✓ Terverifikasi</Badge>
+            <Badge tone="success">
+              <Icon name="verified" size={13} />
+              Terverifikasi
+            </Badge>
           ) : (
             <Badge tone="warning">Belum verifikasi</Badge>
           )}
         </div>
+
+        {/*
+          Sebelumnya jalan ke Verifikasi dan Berkas hanya ada lewat pintasan di
+          Beranda, jadi pengguna yang membuka tab Profil dari bottom nav tidak
+          menemukan jalannya sama sekali.
+        */}
+        <nav className="stack" aria-label="Pengaturan akun">
+          <Link className="row-link" to="/app/verifikasi">
+            <span className="row-icon">
+              <Icon name="shield" />
+            </span>
+            <div className="row-main">
+              <div className="row-title">Verifikasi identitas</div>
+              <div className="row-sub">
+                KTP{session?.role === 'UMKM' ? ' dan NIB' : ''} ·{' '}
+                {isVerified ? 'sudah terverifikasi' : 'belum terverifikasi'}
+              </div>
+            </div>
+            <Icon name="chevron" size={18} className="row-chevron" />
+          </Link>
+          <Link className="row-link" to="/app/rekam-jejak">
+            <span className="row-icon">
+              <Icon name="folder" />
+            </span>
+            <div className="row-main">
+              <div className="row-title">
+                {session?.role === 'INVESTOR' ? 'Rekam jejak pendanaan' : 'Berkas pendukung'}
+              </div>
+              <div className="row-sub">Unggah dokumen agar mitra lebih yakin</div>
+            </div>
+            <Icon name="chevron" size={18} className="row-chevron" />
+          </Link>
+          {session?.role === 'INVESTOR' && (
+            <Link className="row-link" to="/app/preferensi">
+              <span className="row-icon">
+                <Icon name="target" />
+              </span>
+              <div className="row-main">
+                <div className="row-title">Preferensi investasi</div>
+                <div className="row-sub">Kriteria yang dipakai untuk mencarikan kecocokan</div>
+              </div>
+              <Icon name="chevron" size={18} className="row-chevron" />
+            </Link>
+          )}
+        </nav>
 
         {!editing ? (
           <div className="card card-pad">

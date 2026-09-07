@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { endpoints, type ChatMessage } from '../lib/api';
 import { subscribeToConversation, sendViaSocket } from '../lib/socket';
 import { Avatar } from '../components/ui/Avatar';
+import { Icon } from '../components/ui/Icon';
 import { Spinner, EmptyState, Notice } from '../components/ui';
 import { formatWaktu, formatTanggal } from '../lib/format';
 import { readSession } from '../lib/session';
@@ -16,6 +17,9 @@ import { readSession } from '../lib/session';
  */
 
 export function ChatListPage() {
+  const session = readSession();
+  const isInvestor = session?.role === 'INVESTOR';
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['conversations'],
     queryFn: endpoints.conversations,
@@ -25,22 +29,23 @@ export function ChatListPage() {
   const rows = data ?? [];
 
   return (
-    <div className="shell" style={{ paddingBottom: 30 }}>
+    <div className="shell page-bottom">
       <div className="page-head">
         <h1>Percakapan</h1>
         <p>Ruang negosiasi terbuka setelah ketertarikan diterima.</p>
       </div>
 
       {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat percakapan" message="Coba lagi sebentar lagi." />}
+      {isError && <EmptyState icon="warning" title="Gagal memuat percakapan" message="Coba lagi sebentar lagi." />}
       {!isLoading && !isError && rows.length === 0 && (
         <EmptyState
-          icon="💬"
+          icon="chat"
           title="Belum ada percakapan"
           message="Kirim ketertarikan ke calon mitra dulu. Ruang chat terbuka begitu mereka menerima."
           action={
-            <Link className="btn btn-primary" to="/app/matches">
-              Lihat rekomendasi
+            /* /app/matches dijaga RoleGuard INVESTOR — UMKM yang klik dulu dipantulkan diam-diam */
+            <Link className="btn btn-primary" to={isInvestor ? '/app/matches' : '/app/explore'}>
+              {isInvestor ? 'Lihat rekomendasi' : 'Cari peluang'}
             </Link>
           }
         />
@@ -117,7 +122,7 @@ export function ConversationPage({ conversationId }: { conversationId: string })
     return (
       <div className="shell">
         <EmptyState
-          icon="🔒"
+          icon="lock"
           title="Percakapan tidak tersedia"
           message="Ruang chat hanya terbuka untuk koneksi yang sudah diterima."
           action={
@@ -145,11 +150,32 @@ export function ConversationPage({ conversationId }: { conversationId: string })
           <Avatar name={partnerName} seed={meta?.partner.id} size="sm" />
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 700 }}>{partnerName}</div>
-            {meta?.fundingRequest && <div className="opp-meta">{meta.fundingRequest.title}</div>}
+            {/*
+              Sengaja TIDAK menulis "Aktif sekarang": presence belum dilacak, dan
+              mengarang status online membuat pengguna menunggu balasan yang tak
+              akan datang. Yang ditegaskan adalah hal yang memang benar.
+            */}
+            <div className="chat-presence">
+              <span className="presence-dot" aria-hidden="true" />
+              Terhubung via Modalin
+              {meta?.fundingRequest ? ` · ${meta.fundingRequest.title}` : ''}
+            </div>
           </div>
         </div>
 
         <div className="chat-body">
+          {/* Kartu sistem dari layar ruang_negosiasi Stitch — konteks sebelum pesan pertama */}
+          <div className="escrow-note">
+            <Icon name="shield" size={18} />
+            <div>
+              <strong>Diawasi Sistem Modalin</strong>
+              <p>
+                Kedua pihak sudah menunjukkan ketertarikan. Diskusikan jenis kerja sama dan detail
+                kesepakatan di sini. Dana investasi disalurkan langsung antar kalian, di luar platform.
+              </p>
+            </div>
+          </div>
+
           {messages.length === 0 && (
             <p style={{ color: 'var(--text-3)', textAlign: 'center', margin: 'auto' }}>
               Belum ada pesan. Sapa dulu untuk memulai negosiasi.
@@ -163,8 +189,8 @@ export function ConversationPage({ conversationId }: { conversationId: string })
             return (
               <div key={m.id}>
                 {newDay && (
-                  <div style={{ textAlign: 'center', margin: '12px 0' }}>
-                    <span className="badge badge-primary">{formatTanggal(m.createdAt)}</span>
+                  <div className="chat-day">
+                    <span>{formatTanggal(m.createdAt)}</span>
                   </div>
                 )}
                 <div className={`msg ${mine ? 'mine' : 'theirs'}`}>

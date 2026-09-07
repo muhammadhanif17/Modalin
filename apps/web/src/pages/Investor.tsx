@@ -46,7 +46,7 @@ export function InvestorPage() {
       </div>
 
       {isLoading && <Spinner />}
-      {isError && <EmptyState icon="⚠️" title="Gagal memuat preferensi" message="Coba lagi sebentar lagi." />}
+      {isError && <EmptyState icon="warning" title="Gagal memuat preferensi" message="Coba lagi sebentar lagi." />}
       {!isLoading && !isError && <PreferenceForm initial={data ?? null} sectors={sectors ?? []} />}
     </div>
   );

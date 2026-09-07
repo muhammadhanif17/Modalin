@@ -163,8 +163,6 @@ img { max-width: 100%; display: block; }
 .btn:active { transform: translateY(1px); }
 .btn-primary { background: var(--primary); color: #fff; }
 .btn-primary:hover { background: var(--primary-strong); }
-.btn-accent { background: var(--accent); color: #fff; }
-.btn-accent:hover { background: #c9762e; }
 .btn-ghost { background: transparent; color: var(--primary-strong); }
 .btn-ghost:hover { background: var(--primary-soft); }
 .btn-soft { background: var(--surface-2); color: var(--text); }
@@ -199,9 +197,14 @@ img { max-width: 100%; display: block; }
 .opp-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .opp-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .opp-card h3 { font-size: 18px; }
-.opp-meta { color: var(--text-3); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/*
+ * text-2, bukan text-3: sektor, lokasi, dan tanggal adalah metadata bermakna.
+ * text-3 disisakan untuk placeholder dan hint saja.
+ */
+.opp-meta { color: var(--text-2); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.meta-item { display: inline-flex; align-items: center; gap: 4px; }
 .opp-desc { color: var(--text-2); font-size: 14px; line-height: 1.55; }
-.opp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 12px; }
+.opp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 12px; flex-wrap: wrap; }
 .opp-amount { font-weight: 800; font-size: 17px; }
 .opp-amount small { display: block; color: var(--text-3); font-weight: 600; font-size: 11px; }
 
@@ -218,12 +221,17 @@ img { max-width: 100%; display: block; }
 .avatar-sm { width: 36px; height: 36px; font-size: 13px; }
 .avatar-md { width: 46px; height: 46px; font-size: 16px; }
 .avatar-lg { width: 72px; height: 72px; font-size: 24px; }
-.avatar-t1 { background: #0e8a6d; }
-.avatar-t2 { background: #e0873b; }
-.avatar-t3 { background: #5b7fb9; }
-.avatar-t4 { background: #b4638e; }
-.avatar-t5 { background: #7a8b3f; }
-.avatar-t6 { background: #4a8da6; }
+/*
+ * Enam nada dari satu keluarga hutan, bukan enam warna acak. Versi sebelumnya
+ * memakai teal/oranye/biru/pink yang tidak ada di palet brand maupun status —
+ * berdampingan, avatar terlihat seperti design system kedua.
+ */
+.avatar-t1 { background: #0f2419; }
+.avatar-t2 { background: #2d6a4f; }
+.avatar-t3 { background: #40806a; }
+.avatar-t4 { background: #4a5b52; }
+.avatar-t5 { background: #1e4634; }
+.avatar-t6 { background: #6b8f7c; }
 
 /* ---------- Score badge ---------- */
 .score {
@@ -288,10 +296,26 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
   border: 1px solid transparent;
 }
-.notice-success { background: var(--success-soft); color: var(--success); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
-.notice-error { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+/*
+ * Teks memakai varian -ink, bukan warna dasarnya: #10B981 / #EF4444 di atas
+ * latar 12%-nya sendiri hanya mencapai rasio ~2:1 dan gagal WCAG AA.
+ */
+.notice-success { background: var(--success-soft); color: var(--success-ink); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
+.notice-error { background: var(--danger-soft); color: var(--danger-ink); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
 .notice-info { background: var(--primary-soft); color: var(--primary-strong); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
-.notice button { margin-left: auto; background: none; border: 0; color: inherit; font-weight: 700; }
+.notice button {
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: inherit;
+}
+.notice button:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
 
 /* ---------- Badges ---------- */
 .badge {
@@ -305,9 +329,9 @@ img { max-width: 100%; display: block; }
 }
 .badge-soft { background: var(--surface-2); color: var(--text-2); }
 .badge-primary { background: var(--primary-soft); color: var(--primary-strong); }
-.badge-accent { background: var(--accent-soft); color: #b96a27; }
-.badge-warning { background: var(--warning-soft); color: #a66f14; }
-.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
+.badge-success { background: var(--success-soft); color: var(--success-ink); }
+.badge-danger { background: var(--danger-soft); color: var(--danger-ink); }
 
 /* ---------- Hero ---------- */
 .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: clamp(48px, 9vh, 96px) 0; }
@@ -377,8 +401,18 @@ img { max-width: 100%; display: block; }
   padding: 60px 24px;
   color: var(--text-2);
 }
-.empty .empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty .empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--accent);
+}
 .empty h3 { color: var(--text); margin-bottom: 6px; }
+.empty p { max-width: 42ch; margin: 0 auto; }
 
 /* ---------- Page headings ---------- */
 .page-head { padding: clamp(28px, 5vh, 48px) 0 22px; }
@@ -449,7 +483,18 @@ img { max-width: 100%; display: block; }
 .row-link:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); text-decoration: none; }
 .row-link .row-main { flex: 1; min-width: 0; }
 .row-link .row-title { font-weight: 700; }
-.row-link .row-sub { color: var(--text-3); font-size: 13px; }
+.row-link .row-sub { color: var(--text-2); font-size: 13px; }
+.row-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--primary-soft);
+  color: var(--accent);
+}
+.row-chevron { flex: none; color: var(--text-3); }
 .stack { display: grid; gap: 12px; }
 
 /* ---------- Admin / lists ---------- */
@@ -576,7 +621,8 @@ p, .body { line-height: 1.5; }
   cursor: not-allowed;
   transform: none;
 }
-.btn-sm { min-height: 40px; padding: 0 14px; font-size: 14px; }
+/* 44px adalah lantai target sentuh di NFR — tombol kecil pun tidak boleh di bawahnya */
+.btn-sm { min-height: 44px; padding: 0 14px; font-size: 14px; }
 
 /* --- Kartu: radius 16, padding 20, hairline + bayangan hangat --- */
 .card, .opp-card, .hero-panel, .stat-box {
@@ -608,31 +654,46 @@ p, .body { line-height: 1.5; }
   border-color: var(--primary);
   color: var(--on-primary);
 }
+/*
+ * Chip dibungkus, tidak digulir.
+ *
+ * Versi sebelumnya `overflow-x: auto` dengan scrollbar disembunyikan, jadi di
+ * 360px empat chip meluap ke kanan tanpa scrollbar, fade, maupun tombol geser —
+ * tidak ada satu pun isyarat bahwa ada opsi tersembunyi. Menambahkan isyarat
+ * gulir memang mungkin, tapi membungkus lebih baik: tidak ada yang tersembunyi
+ * sejak awal, jadi tidak butuh isyarat sama sekali.
+ */
 .chip-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.chip-row::-webkit-scrollbar { display: none; }
 
-/* --- Badge status: pil rapat, 11px, tracking lebar --- */
+/*
+ * Badge status: pil rapat. Sentence case seperti mockup — `text-transform:
+ * uppercase` memaksa "TERVERIFIKASI / SEDANG DITINJAU", padahal labelnya di
+ * VERIFICATION_LABEL sudah ditulis rapi dan huruf besar semua lebih sulit
+ * dibaca sekilas pada ukuran 11px.
+ */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
   border-radius: var(--r-pill);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 .badge-success { background: var(--success-soft); color: var(--success-ink); }
 .badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
 .badge-danger  { background: var(--danger-soft);  color: var(--danger-ink); }
 .badge-primary { background: var(--primary-soft); color: var(--accent); }
+.badge .icon { flex: none; }
 
 /* --- Input: tinggi 52, border 1.5, fokus pine + halo --- */
 .input, .textarea, select.input {
@@ -793,10 +854,18 @@ p, .body { line-height: 1.5; }
 .num-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 8px 12px;
   padding: 12px 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
+}
+/*
+ * Di 360px "Rp 500.000.000" tidak muat di sepertiga lebar dan mendorong dua
+ * kolom lain. Nilai pertama (selalu yang terpanjang) diberi baris sendiri.
+ */
+@media (max-width: 380px) {
+  .num-grid { grid-template-columns: 1fr 1fr; }
+  .num-grid > div:first-child { grid-column: 1 / -1; }
 }
 .num-grid small {
   display: block;
@@ -842,3 +911,174 @@ p, .body { line-height: 1.5; }
   text-align: center;
 }
 .topbar-alert a { color: var(--warning-ink); }
+
+/* =========================================================================
+   Ikon, dan komponen yang lahir dari audit UI 7 September
+   ========================================================================= */
+
+/* --- Ikon garis: sejajar teks, tidak pernah ikut mengecil --- */
+.icon { flex: none; display: block; }
+
+/* Ikon di bottom nav butuh posisi relatif untuk titik notifikasi di sudutnya */
+.bottomnav-icon { position: relative; display: grid; place-items: center; }
+
+/* --- Nomor langkah di landing: penanda urutan, bukan pil metrik --- */
+.step-number {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 800;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Baris kepercayaan di hero: batas platform, dinyatakan di layar pertama --- */
+.trust-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 18px;
+  max-width: 480px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.trust-line .icon { margin-top: 1px; color: var(--accent); }
+
+/* --- Angka skor besar di beranda, seukuran token currency-display --- */
+.score-display { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+
+/* --- Kartu sistem di ruang negosiasi --- */
+.escrow-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 4px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+}
+.escrow-note .icon { margin-top: 1px; color: var(--accent); }
+.escrow-note strong { display: block; color: var(--text); font-size: 13px; }
+.escrow-note p { font-size: 12.5px; line-height: 1.45; margin-top: 2px; }
+
+/* --- Status kanal di kepala chat --- */
+.chat-presence {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+.presence-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+/* --- Pemisah tanggal: pil netral sentence-case, bukan badge brand --- */
+.chat-day { text-align: center; margin: 12px 0; }
+.chat-day span {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* --- Label di bawah indikator progres kesepakatan --- */
+.steps-legend {
+  display: flex;
+  gap: 8px;
+  margin: -12px 0 4px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+}
+.steps-legend > span { flex: 1; }
+.steps-legend > span:nth-child(2) { text-align: center; }
+.steps-legend > span:last-child { text-align: right; }
+
+/* --- Pilihan tunggal bertingkat, menggantikan chip-row untuk skema kerja sama --- */
+/* Opsi ditaruh di wadah sendiri: <legend> tidak jadi grid item di dalam fieldset */
+.choice-set { border: 0; padding: 0; margin: 0; min-width: 0; }
+.choice-set legend { font-size: 13px; font-weight: 700; color: var(--text-2); padding: 0; }
+.choice-list { display: grid; gap: 10px; margin-top: 8px; }
+.choice-set .choice input { accent-color: var(--accent); }
+.choice-set .choice strong { display: block; font-size: 14px; }
+.choice-set .choice small { display: block; color: var(--text-2); font-size: 12px; line-height: 1.45; margin-top: 2px; }
+
+/* --- Nama usaha panjang dipotong dua baris, bukan mendorong kartu melar --- */
+.opp-name,
+.opp-card h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+}
+/* Baris ringkas di landing tetap satu baris */
+.hero-panel .opp-row .opp-name { -webkit-line-clamp: 1; line-clamp: 1; }
+
+/* --- Bintang rating: 26px tanpa padding = target sentuh di bawah minimum --- */
+.stars button {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 8px;
+  font-size: 30px;
+  line-height: 1;
+}
+.stars button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
+
+/* --- Rentang angka berdampingan mulai dari lebar yang memuatnya --- */
+@media (min-width: 640px) {
+  .field-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* --- Jarak bawah halaman, menggantikan style inline yang tersebar --- */
+.page-bottom { padding-bottom: 30px; }
+
+/* --- Fokus keyboard terlihat di seluruh kontrol --- */
+:where(a, button, .chip, .row-link, .choice):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Hormati preferensi gerak minimal --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  /*
+    Di HP sidebar filter yang panjang mendorong hasil jauh ke bawah — pengguna
+    harus melewati seluruh formulir sebelum melihat satu peluang pun.
+  */
+  .two-pane { display: flex; flex-direction: column; gap: 16px; }
+  .two-pane > .results-pane { order: 1; }
+  .two-pane > aside { order: 2; }
+}
+
+@media (max-width: 640px) {
+  /* Shelf aksi harus duduk di atas bottom nav, bukan tertimpa olehnya */
+  .chat-shell { max-height: none; height: calc(100dvh - 260px); min-height: 340px; }
+  .action-shelf { bottom: calc(60px + env(safe-area-inset-bottom)); border-radius: var(--r-md); }
+}

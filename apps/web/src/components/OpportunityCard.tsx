@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { COOPERATION_LABEL, type MatchResult, type Opportunity } from '../lib/api';
 import { formatRupiah } from '../lib/format';
 import { Avatar } from './ui/Avatar';
+import { Icon } from './ui/Icon';
 
 /**
  * Kartu peluang, mengikuti spesifikasi kartu di DESIGN.md:
@@ -28,42 +29,49 @@ export function OpportunityCard({
               {/* Badge Terverifikasi hanya muncul kalau admin sudah menyetujui (FR-02) */}
               {owner.isVerified && (
                 <span className="badge badge-success" title="Dokumen KYC sudah diverifikasi admin">
-                  ✓ Terverifikasi
+                  <Icon name="verified" size={13} />
+                  Terverifikasi
                 </span>
               )}
             </div>
-            <div className="opp-meta">📍 {business.location}</div>
+            <div className="opp-meta">
+              <span className="meta-item">
+                <Icon name="location" size={14} />
+                {business.location}
+              </span>
+            </div>
           </div>
         </div>
         {match && (
-          <span
-            className="badge badge-success"
-            title={match.reasons.join(' · ')}
-            style={{ flex: 'none' }}
-          >
+          /* Skor kecocokan bukan status verifikasi — pakai warna brand, bukan hijau status */
+          <span className="badge badge-primary" title={match.reasons.join(' · ')} style={{ flex: 'none' }}>
             Match {match.score}%
           </span>
         )}
       </div>
 
       <div>
-        <h3>{business.name}</h3>
+        <h3 className="opp-name">{business.name}</h3>
         <div className="opp-meta">{item.title}</div>
       </div>
 
       <p className="opp-desc">{business.description}</p>
 
-      <div className="chip-row" aria-label="Skema kerja sama yang dibuka">
+      {/*
+        Chip di sini informatif, bukan tombol — `aria-pressed` pada <span> tidak
+        valid dan diabaikan pembaca layar. Skema yang beririsan ditandai lewat
+        kelas visual, dan daftarnya dibungkus <ul> supaya terbaca sebagai daftar.
+      */}
+      <ul className="chip-row" aria-label="Skema kerja sama yang dibuka">
         {item.cooperationTypes.map((type) => (
-          <span
+          <li
             key={type}
-            className="chip"
-            aria-pressed={match?.matchedCooperationTypes.includes(type) ? 'true' : 'false'}
+            className={`chip ${match?.matchedCooperationTypes.includes(type) ? 'is-selected' : ''}`}
           >
             {COOPERATION_LABEL[type]}
-          </span>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* Grid angka: semua nominal tabular supaya kolomnya lurus antar kartu */}
       <div className="num-grid">

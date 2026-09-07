@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter, Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './styles.css';
 import { Layout } from './components/Layout';
@@ -32,13 +32,40 @@ const queryClient = new QueryClient({
 });
 
 function AuthGuard() {
-  if (!isAuthed()) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  // Bawa tujuan aslinya supaya setelah masuk pengguna mendarat di halaman yang
+  // tadi diklik, bukan dilempar ke beranda tanpa penjelasan.
+  if (!isAuthed())
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname, notice: 'Masuk dulu untuk membuka halaman itu.' }}
+      />
+    );
   return <Outlet />;
 }
 
 function RoleGuard({ roles }: { roles: Role[] }) {
   const session = readSession();
-  if (!session || !roles.includes(session.role)) return <Navigate to="/app/beranda" replace />;
+  if (!session || !roles.includes(session.role))
+    return (
+      <Navigate
+        to="/app/beranda"
+        replace
+        state={{ notice: 'Halaman itu khusus investor.', noticeTone: 'info' }}
+      />
+    );
+  return <Outlet />;
+}
+
+/**
+ * Kebalikan AuthGuard. Tanpa ini, pengguna yang sudah masuk lalu membuka `/`
+ * melihat hero publik dengan nav aplikasi menempel di atas dan di bawahnya —
+ * terbaca seperti halaman bocor, padahal cuma tidak ada penjaga arah sebaliknya.
+ */
+function PublicOnly() {
+  if (isAuthed()) return <Navigate to="/app/beranda" replace />;
   return <Outlet />;
 }
 
@@ -49,10 +76,12 @@ function RoleGuard({ roles }: { roles: Role[] }) {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Publik */}
-      <Route path="/" element={<Layout><HomePage /></Layout>} />
-      <Route path="/login" element={<Layout><LoginPage /></Layout>} />
-      <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+      {/* Publik — tertutup untuk yang sudah masuk */}
+      <Route element={<PublicOnly />}>
+        <Route path="/" element={<Layout><HomePage /></Layout>} />
+        <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+        <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+      </Route>
 
       <Route element={<AuthGuard />}>
         <Route path="/app" element={<Layout><Outlet /></Layout>}>
