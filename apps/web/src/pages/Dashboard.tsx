@@ -42,12 +42,48 @@ export function DashboardPage() {
   // Sapaan menyebut satu hal paling mendesak, bukan basa-basi generik.
   const lead =
     incoming.length > 0
-      ? `Ada ${incoming.length} ketertarikan menunggu responsmu.`
+      ? `Ada ${incoming.length} aksi penting yang menunggu responsmu hari ini.`
       : needsVerification
         ? 'Verifikasi identitasmu untuk menaikkan skor kepercayaan.'
         : isInvestor
           ? 'Peluang yang cocok denganmu hari ini.'
           : 'Semua beres. Lengkapi berkas untuk menarik lebih banyak pemodal.';
+
+  /*
+   * Satu hal paling mendesak untuk kartu "Perhatian Utama Hari Ini".
+   * Urutannya: menahan orang lain > menahan diri sendiri > tidak ada.
+   */
+  const attention = (() => {
+    if (incoming.length > 0) {
+      const name = incoming[0].sender.profile?.fullName ?? 'Calon mitra';
+      return {
+        tag: 'Menunggu responsmu',
+        title: incoming.length === 1 ? `${name} menunggu jawabanmu` : `${incoming.length} ketertarikan belum dijawab`,
+        sub: 'Ruang negosiasi baru terbuka setelah kamu menerima. Selama belum dijawab, mereka tidak bisa menghubungimu.',
+        cta: 'Tinjau ketertarikan',
+        to: '/app/beranda',
+      };
+    }
+    if (profile.verificationStatus === 'REJECTED') {
+      return {
+        tag: 'Perlu diperbaiki',
+        title: 'Dokumen identitasmu ditolak',
+        sub: 'Perbaiki sesuai catatan admin lalu unggah ulang. Tanpa verifikasi, badge Terverifikasi tidak muncul di kartumu.',
+        cta: 'Perbaiki dokumen',
+        to: '/app/verifikasi',
+      };
+    }
+    if (needsVerification) {
+      return {
+        tag: null,
+        title: 'Verifikasi identitas belum selesai',
+        sub: 'Akun terverifikasi lebih dipercaya mitra dan naik skor kepercayaannya.',
+        cta: 'Verifikasi sekarang',
+        to: '/app/verifikasi',
+      };
+    }
+    return null;
+  })();
 
   return (
     <div className="shell page-bottom">
@@ -57,16 +93,46 @@ export function DashboardPage() {
         </div>
       )}
 
-      <div className="page-head">
-        <h1>Halo, {profile.fullName.split(' ')[0]}</h1>
-        <p>{lead}</p>
+      {/* Kartu identitas pembuka, mengikuti greeting card mockup beranda */}
+      <div className="greeting">
+        <Avatar name={profile.fullName} seed={session?.id} size="lg" />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h1 className="greeting-name">{profile.fullName}</h1>
+          <div className="greeting-role">{isInvestor ? 'Pemodal' : 'Pengusaha'}</div>
+          <div className="greeting-pills">
+            <span className="score">
+              Skor {profile.trustScore}/100
+            </span>
+            <Badge tone={VERIFICATION_TONE[profile.verificationStatus]}>
+              {VERIFICATION_LABEL[profile.verificationStatus]}
+            </Badge>
+          </div>
+        </div>
       </div>
 
+      <p className="greeting-lead">
+        {salam()}, {profile.fullName.split(' ')[0]}. {lead}
+      </p>
+
       {/*
-        Aksi lebih dulu, skor menyusul. Mockup dashboard_pengusaha_umkm_beranda
-        menaruh "Perhatian Utama Hari Ini" di atas kartu skor — yang menunggu
-        respons adalah satu-satunya hal di layar ini yang menahan orang lain.
+        Kartu gelap "Perhatian Utama Hari Ini" dari mockup beranda — satu hal
+        paling mendesak, ditonjolkan sebelum apa pun yang lain. Aksi lebih dulu,
+        skor menyusul.
       */}
+      {attention && (
+        <div className="attention">
+          <div className="attention-head">
+            <span>Perhatian Utama Hari Ini</span>
+            {attention.tag && <span className="attention-tag">{attention.tag}</span>}
+          </div>
+          <strong className="attention-title">{attention.title}</strong>
+          <p className="attention-sub">{attention.sub}</p>
+          <Link className="btn btn-attention btn-block" to={attention.to}>
+            {attention.cta}
+          </Link>
+        </div>
+      )}
+
       {incoming.length > 0 && (
         <>
           <div className="section-head">
@@ -222,6 +288,15 @@ const shortcuts = (
     sub: 'Biaya layanan dan langganan Modalin Pro',
   },
 ];
+
+/** Sapaan mengikuti waktu perangkat, seperti "Selamat pagi" di mockup. */
+function salam(): string {
+  const h = new Date().getHours();
+  if (h < 11) return 'Selamat pagi';
+  if (h < 15) return 'Selamat siang';
+  if (h < 19) return 'Selamat sore';
+  return 'Selamat malam';
+}
 
 /** FR-14 — hanya penerima yang boleh menerima atau menolak. */
 function IncomingCard({ connection }: { connection: Connection }) {

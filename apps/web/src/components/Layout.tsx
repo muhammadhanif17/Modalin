@@ -60,10 +60,16 @@ function TopNav() {
   return (
     <header className="topnav">
       <div className="topnav-inner">
-        <button className="brand" onClick={() => navigate('/')}>
-          <span className="brand-mark">M</span>
-          <span>
-            modalin<span className="spark">.</span>
+        {/* Lambang merek mengikuti welcome screen Stitch: sparkline naik, bukan huruf M */}
+        <button className="brand" onClick={() => navigate('/')} aria-label="Ke beranda Modalin">
+          <span className="brand-mark">
+            <Icon name="trend" size={20} />
+          </span>
+          <span className="brand-text">
+            <span className="brand-name">
+              modalin<span className="spark">.id</span>
+            </span>
+            <span className="brand-tagline">Mitra Modal Nusantara</span>
           </span>
         </button>
         <nav className="topnav-links" aria-label="Navigasi utama">

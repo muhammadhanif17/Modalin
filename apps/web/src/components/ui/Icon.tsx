@@ -30,7 +30,9 @@ export type IconName =
   | 'lock'
   | 'verified'
   | 'close'
-  | 'chevron';
+  | 'chevron'
+  | 'trend'
+  | 'handshake';
 
 /** Glyph bergaris — mewarisi tebal garis dan warna dari elemen svg. */
 const STROKE: Partial<Record<IconName, React.ReactNode>> = {
@@ -118,6 +120,21 @@ const STROKE: Partial<Record<IconName, React.ReactNode>> = {
   ),
   close: <path d="m6 6 12 12M18 6 6 18" />,
   chevron: <path d="m9.5 5 7 7-7 7" />,
+  /* Sparkline naik — lambang merek di mockup welcome screen, bukan huruf "M" */
+  trend: (
+    <>
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+      <polyline points="16 7 22 7 22 13" />
+    </>
+  ),
+  handshake: (
+    <>
+      <path d="M11 6.5 8.8 4.3a2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 0 2.8l3.5 3.5" />
+      <path d="m13 6.5 2.2-2.2a2 2 0 0 1 2.8 0l3 3a2 2 0 0 1 0 2.8l-3.5 3.5" />
+      <path d="m8.5 13.6 2.1 2.1a1.5 1.5 0 0 0 2.1 0l.4-.4" />
+      <path d="m13.1 15.3 1.7 1.7a1.5 1.5 0 0 0 2.1-2.1" />
+    </>
+  ),
 };
 
 /** Glyph padat — dipakai saat ikon berfungsi sebagai lencana, bukan simbol. */
