@@ -50,7 +50,16 @@ const listInclude = {
 type ListedRequest = Prisma.FundingRequestGetPayload<{ include: typeof listInclude }>;
 
 /** Bentuk yang dikirim ke frontend — Decimal dinormalkan jadi number. */
-function serialize(row: ListedRequest) {
+/**
+ * `withRevenue` hanya boleh true untuk pemanggil yang sudah masuk.
+ *
+ * Omzet bulanan adalah data komersial sensitif milik UMKM. /search memakai
+ * optionalAuth dan dipanggil landing tanpa token, jadi menyertakannya tanpa
+ * syarat berarti omzet setiap UMKM terbuka untuk siapa pun di internet.
+ * Mockup menampilkannya pada kartu due diligence investor yang sudah masuk,
+ * bukan di halaman publik.
+ */
+function serialize(row: ListedRequest, withRevenue = false) {
   const profile = row.business.owner.profile;
   return {
     id: row.id,
@@ -70,9 +79,12 @@ function serialize(row: ListedRequest) {
       location: row.business.location,
       sector: row.business.sector,
       establishedYear: row.business.establishedYear,
-      // Dipakai kartu peluang ("Omzet ... /bln") — mockup b6.
+      // Dipakai kartu peluang ("Omzet ... /bln") — mockup b6. Lihat catatan di
+      // atas: hanya untuk pemanggil yang sudah masuk.
       monthlyRevenue:
-        row.business.monthlyRevenue === null ? null : Number(row.business.monthlyRevenue),
+        withRevenue && row.business.monthlyRevenue !== null
+          ? Number(row.business.monthlyRevenue)
+          : null,
     },
     owner: {
       id: row.business.owner.id,
@@ -201,7 +213,7 @@ async function searchOpportunities(f: SearchFilters, viewerId: string | null) {
   }
 
   return {
-    items: rows.slice(0, f.limit).map(serialize),
+    items: rows.slice(0, f.limit).map((row) => serialize(row, Boolean(viewerId))),
     emptyMessage:
       'Belum ada peluang yang cocok dengan filter ini. Coba longgarkan rentang dana atau hapus filter lokasi.',
   };
@@ -472,7 +484,7 @@ matchmakingRouter.get(
     const { recommended, alternatives, rejectedByHardFilter } = rankMatches(investor, candidates);
     const attach = (m: (typeof recommended)[number]) => {
       const row = byId.get(m.fundingRequestId)!;
-      return { ...serialize(row), match: m };
+      return { ...serialize(row, true), match: m };
     };
 
     res.json({
