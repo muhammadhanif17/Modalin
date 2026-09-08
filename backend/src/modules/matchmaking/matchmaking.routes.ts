@@ -51,13 +51,15 @@ type ListedRequest = Prisma.FundingRequestGetPayload<{ include: typeof listInclu
 
 /** Bentuk yang dikirim ke frontend — Decimal dinormalkan jadi number. */
 /**
- * `withRevenue` hanya boleh true untuk pemanggil yang sudah masuk.
+ * `withRevenue` hanya boleh true untuk PEMODAL (dan admin).
  *
- * Omzet bulanan adalah data komersial sensitif milik UMKM. /search memakai
- * optionalAuth dan dipanggil landing tanpa token, jadi menyertakannya tanpa
- * syarat berarti omzet setiap UMKM terbuka untuk siapa pun di internet.
- * Mockup menampilkannya pada kartu due diligence investor yang sudah masuk,
- * bukan di halaman publik.
+ * Omzet bulanan adalah data komersial sensitif milik UMKM, dan mockup b6
+ * menampilkannya di layar due diligence milik investor. Dua pagar yang mudah
+ * terlewat:
+ *   - /search memakai optionalAuth dan dipanggil landing tanpa token, jadi
+ *     tanpa syarat omzet setiap UMKM terbuka untuk siapa pun di internet;
+ *   - "sudah masuk" saja tidak cukup — dengan syarat itu sesama UMKM bisa
+ *     membaca omzet pesaingnya, padahal mereka bukan pihak yang perlu menilai.
  */
 function serialize(row: ListedRequest, withRevenue = false) {
   const profile = row.business.owner.profile;
@@ -168,7 +170,13 @@ const searchSchema = z.object({
 type SearchFilters = z.infer<typeof searchSchema>;
 
 /** Sisi UMKM: permintaan pendanaan yang sedang terbuka. */
-async function searchOpportunities(f: SearchFilters, viewerId: string | null) {
+async function searchOpportunities(
+  f: SearchFilters,
+  viewerId: string | null,
+  viewerRole: Role | null = null,
+) {
+  // Hanya pihak yang memang menilai usaha yang melihat omzet.
+  const forRevenue = viewerRole === Role.INVESTOR || viewerRole === Role.ADMIN;
   const where: Prisma.FundingRequestWhereInput = {
     status: FundingStatus.ACTIVE,
     ...(f.minAmount !== undefined ? { targetAmount: { gte: new Prisma.Decimal(f.minAmount) } } : {}),
@@ -213,7 +221,7 @@ async function searchOpportunities(f: SearchFilters, viewerId: string | null) {
   }
 
   return {
-    items: rows.slice(0, f.limit).map((row) => serialize(row, Boolean(viewerId))),
+    items: rows.slice(0, f.limit).map((row) => serialize(row, forRevenue)),
     emptyMessage:
       'Belum ada peluang yang cocok dengan filter ini. Coba longgarkan rentang dana atau hapus filter lokasi.',
   };
@@ -292,7 +300,9 @@ matchmakingRouter.get(
     const audience = f.audience ?? (req.user?.role === Role.UMKM ? 'pemodal' : 'peluang');
 
     const result =
-      audience === 'pemodal' ? await searchInvestors(f, viewerId) : await searchOpportunities(f, viewerId);
+      audience === 'pemodal'
+        ? await searchInvestors(f, viewerId)
+        : await searchOpportunities(f, viewerId, req.user?.role ?? null);
 
     // FR-05 mewajibkan pesan yang jelas saat kombinasi filter tidak menghasilkan apa pun.
     res.json({
