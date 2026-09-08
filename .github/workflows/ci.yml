@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm --workspace backend run test
+      - run: npm run build --workspaces
+        env:
+          # Build frontend tanpa backend hidup: cukup agar vite build lolos.
+          # URL asli diisi saat deploy via Secrets.VITE_API_URL.
+          VITE_API_URL: https://modalin-api.onrender.com
