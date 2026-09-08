@@ -136,8 +136,7 @@ chatRouter.post(
 
 /**
  * FR-09 — ringkasan indikator in-app. Diturunkan dari data yang sudah ada
- * (Message.readAt dan Connection.status), tanpa tabel Notification tersendiri
- * — lihat catatan penyimpangan #4 di specs/modalin-erd.dbml.
+ * (Message.readAt dan Connection.status), tanpa tabel Notification tersendiri.
  */
 chatRouter.get(
   '/notifications/summary',

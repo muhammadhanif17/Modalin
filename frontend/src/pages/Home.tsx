@@ -50,7 +50,7 @@ export function HomePage() {
               tanpa perantara.
             </p>
             <div className="hero-actions">
-              <Link className="btn btn-cream" to="/register">
+              <Link className="btn btn-cream" to="/pilih-peran">
                 Mulai sekarang
               </Link>
               <Link
@@ -180,7 +180,7 @@ export function HomePage() {
           <h2>
             Ceritakan usahamu. Kami carikan <em>pemodalnya</em>.
           </h2>
-          <Link className="btn btn-cream" to="/register">
+          <Link className="btn btn-cream" to="/pilih-peran">
             Mulai sekarang
           </Link>
           <footer className="night-foot">Modalin — dibangun untuk UMKM Indonesia.</footer>

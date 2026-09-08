@@ -6,7 +6,6 @@ Setup pengembangan lokal end-to-end. Backend, frontend, dan database MySQL.
 
 - Node.js 20+
 - Docker (untuk MySQL lokal) — atau MySQL 8.4 terkelola
-- Python 3 (opsional, untuk preview mockup)
 
 ## 2. Clone & install
 
@@ -80,15 +79,7 @@ Password semua akun seed: `Modalin2026!`
 | `batik.pekalongan@modalin.id` | UMKM | Verifikasi PENDING |
 | `budidaya.nila@modalin.id` | UMKM | Verifikasi REJECTED |
 
-## 7. Preview mockup HTML (opsional)
-
-Untuk membuka file mockup di browser tanpa menjalankan app:
-
-```bash
-npm run mock             # http://localhost:5500 — buka Mockup/INDEX.md dulu
-```
-
-## 8. Verifikasi
+## 7. Verifikasi
 
 ```bash
 npm run typecheck        # typecheck semua workspace
@@ -100,8 +91,6 @@ npm run build            # build produksi
 
 ```
 .
-├── Mockup/              # 28 mockup HTML + logo (sumber kebenaran visual)
-├── specs/               # Dokumen acuan (proposal, ARCHITECTURE, ERD, ringkasan, design token)
 ├── frontend/            # SPA/PWA Vite + React + TypeScript
 │   ├── src/
 │   │   ├── pages/       # Halaman publik + ter-autentikasi (lazy)
@@ -121,8 +110,3 @@ npm run build            # build produksi
 ├── render.yaml          # Konfig deploy backend
 └── RUN.md               # File ini
 ```
-
-## Mockup → Route
-
-Lihat `Mockup/INDEX.md` untuk pemetaan lengkap 28 mockup ke route dan halaman TSX.
-Lihat `specs/IMPLEMENTATION_MAP.md` untuk status implementasi.

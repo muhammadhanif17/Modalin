@@ -32,6 +32,12 @@
   box-shadow: var(--shadow-sm);
 }
 .card-pad { padding: 20px; }
+.grid { display: grid; gap: 16px; }
+/* Beranda pola index.html: angka skor raksasa + judul seksi */
+.rec-gap-top { margin-top: 16px; }
+.rec-score-big { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.rec-score-big > span { font-size: 16px; color: var(--text-2); }
+.rec-h { margin: 0 0 12px; }
 
 /* ---------- Opportunity cards ---------- */
 .opp-card {
@@ -60,6 +66,50 @@
 .opp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 12px; flex-wrap: wrap; }
 .opp-amount { font-weight: 800; font-size: 17px; }
 .opp-amount small { display: block; color: var(--text-3); font-weight: 600; font-size: 11px; }
+
+/*
+ * Kartu rekomendasi pola index.html (cover gradien + badan kartu):
+ * dipakai seragam di Cari (InvestorCard/OpportunityCard) dan Beranda.
+ * Nama satu baris dengan ellipsis yang dijamin oleh .rec-title (min-width: 0)
+ * — tidak bergantung pada rantai truncate Tailwind yang sempat membuat nama
+ * pemodal menimpa foto avatar di layar sempit.
+ */
+.rec-card { overflow: hidden; }
+.rec-cover {
+  position: relative;
+  min-height: 96px;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  color: #fff;
+  background: linear-gradient(120deg, #0f2419 10%, #2d6a4f 55%, #6b8f7c 100%);
+}
+.rec-cover::after {
+  content: attr(data-initial);
+  position: absolute;
+  right: 8px;
+  top: 0;
+  font-size: 80px;
+  font-weight: 800;
+  opacity: 0.18;
+  line-height: 1;
+  pointer-events: none;
+}
+.rec-cover .badge-primary { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.rec-body { padding: 16px 20px 20px; display: grid; gap: 12px; }
+.rec-id { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 0; }
+.rec-avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+.rec-title { min-width: 0; flex: 1 1 0; }
+.rec-name { margin: 0; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rec-name-wrap {
+  margin: 0;
+  font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 
 /* ---------- Avatar ---------- */
 .avatar {

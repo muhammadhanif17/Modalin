@@ -167,10 +167,11 @@ export function PartnerPage() {
   }
 
   function toggleSave() {
+    const sideLabel = data?.role === 'INVESTOR' ? 'Investor' : 'Usaha';
     setSaved((prev) => {
       showToast(
         !prev
-          ? `${firstNameOf(data?.profile.fullName ?? 'Pemodal')} disimpan ke Daftar Pantau Investor`
+          ? `${firstNameOf(data?.profile.fullName ?? 'Mitra')} disimpan ke Daftar Pantau ${sideLabel}`
           : 'Dihapus dari Daftar Pantau',
       );
       return !prev;
@@ -178,8 +179,12 @@ export function PartnerPage() {
   }
 
   async function shareProfile() {
-    const title = `Profil Calon Investor - ${data?.profile.fullName ?? 'Modalin'} | Modalin`;
-    const text = `Tinjau rekam jejak dan trust score ${data?.profile.fullName ?? 'pemodal ini'} di Modalin.`;
+    const sideLabel = data?.role === 'INVESTOR' ? 'Calon Investor' : 'Prospektus UMKM';
+    const title = `Profil ${sideLabel} - ${data?.profile.fullName ?? 'Modalin'} | Modalin`;
+    const text =
+      data?.role === 'INVESTOR'
+        ? `Tinjau rekam jejak dan trust score ${data?.profile.fullName ?? 'pemodal ini'} di Modalin.`
+        : `Tinjau prospektus usaha ${data?.business?.name ?? data?.profile.fullName ?? 'ini'} di Modalin.`;
     try {
       if (navigator.share) {
         await navigator.share({ title, text, url: window.location.href });
@@ -297,14 +302,26 @@ export function PartnerPage() {
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center gap-1">
-                <h1 className="font-headline-sm text-headline-sm text-primary font-bold truncate">{fullName}</h1>
+                <h1 className="font-headline-sm text-headline-sm text-primary font-bold truncate">
+                  {!isInvestorSide && data.business ? data.business.name : fullName}
+                </h1>
               </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 line-clamp-2 leading-relaxed">
-                {data.profile.bio ?? 'Angel Investor & Praktisi Bisnis F&B \u2022 Anggota Asosiasi Angel Investor Indonesia'}
+                {data.profile.bio ??
+                  (isInvestorSide
+                    ? 'Angel Investor & Praktisi Bisnis F&B \u2022 Anggota Asosiasi Angel Investor Indonesia'
+                    : (data.business?.description ?? 'Pelaku UMKM terverifikasi Modalin'))}
               </p>
+              {!isInvestorSide && data.business && (
+                <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 truncate">
+                  Owner: {fullName}
+                </p>
+              )}
               <div className="flex items-center gap-1 mt-2 text-on-surface-variant font-label-md text-label-md">
                 <span className="material-symbols-outlined text-[16px] text-secondary">location_on</span>
-                <span className="truncate">{location}</span>
+                <span className="truncate">
+                  {!isInvestorSide && data.business ? data.business.location : location}
+                </span>
               </div>
             </div>
           </div>
@@ -313,7 +330,9 @@ export function PartnerPage() {
             <span className="material-symbols-outlined text-[20px] text-on-secondary-fixed flex-shrink-0">task_alt</span>
             <p className="font-label-sm text-label-sm text-on-secondary-fixed font-bold leading-tight">
               {verified
-                ? 'Terverifikasi KYC KTP, NPWP & Rekening Escrow Bank Mandiri'
+                ? isInvestorSide
+                  ? 'Terverifikasi KYC KTP, NPWP & Rekening Escrow Bank Mandiri'
+                  : 'Terverifikasi NIB, KTP & Rekening Escrow Bank Mandiri'
                 : VERIFICATION_LABEL[data.profile.verificationStatus]}
             </p>
           </div>
@@ -342,27 +361,33 @@ export function PartnerPage() {
             <span className="font-title-md text-title-md text-primary-fixed-dim font-semibold">/ 100</span>
             <span className="ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-lowest/15 text-secondary-fixed font-label-md text-label-md font-bold">
               <span className="material-symbols-outlined text-[14px]">star</span>
-              {isInvestorSide ? grade.tag : 'Mitra Terverifikasi Modalin'}
+              {isInvestorSide ? grade.tag : grade.badge}
             </span>
           </div>
           <div className="flex flex-col gap-2.5 pt-1 relative z-10">
             <div className="flex items-center gap-2.5 bg-surface-container-lowest/10 rounded-xl p-2.5">
               <span className="material-symbols-outlined text-[18px] text-secondary-fixed flex-shrink-0">
-                account_balance_wallet
+                {isInvestorSide ? 'account_balance_wallet' : 'policy'}
               </span>
               <div className="flex flex-col min-w-0">
-                <span className="font-label-sm text-label-sm text-primary-fixed-dim">Kesiapan Dana Bersertifikat</span>
+                <span className="font-label-sm text-label-sm text-primary-fixed-dim">
+                  {isInvestorSide ? 'Kesiapan Dana Bersertifikat' : 'Legalitas & Perizinan'}
+                </span>
                 <span className="font-body-sm text-body-sm text-on-primary font-semibold truncate">
-                  Rekening Escrow Siaga (Proof of Funds Valid)
+                  {isInvestorSide ? 'Rekening Escrow Siaga (Proof of Funds Valid)' : 'NIB & KTP Valid Dukcapil'}
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-2.5 bg-surface-container-lowest/10 rounded-xl p-2.5">
-              <span className="material-symbols-outlined text-[18px] text-secondary-fixed flex-shrink-0">gavel</span>
+              <span className="material-symbols-outlined text-[18px] text-secondary-fixed flex-shrink-0">
+                {isInvestorSide ? 'gavel' : 'query_stats'}
+              </span>
               <div className="flex flex-col min-w-0">
-                <span className="font-label-sm text-label-sm text-primary-fixed-dim">Transparansi Kontrak</span>
+                <span className="font-label-sm text-label-sm text-primary-fixed-dim">
+                  {isInvestorSide ? 'Transparansi Kontrak' : 'Pembukuan & Laporan Kas'}
+                </span>
                 <span className="font-body-sm text-body-sm text-on-primary font-semibold truncate">
-                  100% Menggunakan Kontrak Standar Modalin
+                  {isInvestorSide ? '100% Menggunakan Kontrak Standar Modalin' : 'Arus kas tercatat berkala'}
                 </span>
               </div>
             </div>
@@ -520,10 +545,18 @@ export function PartnerPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px] text-secondary">history_edu</span>
-              <h2 className="font-headline-sm text-headline-sm text-primary font-bold">Portofolio & Rekam Jejak</h2>
+              <h2 className="font-headline-sm text-headline-sm text-primary font-bold">
+                {isInvestorSide ? 'Portofolio & Rekam Jejak' : 'Dokumen & Berkas Due Diligence'}
+              </h2>
             </div>
             <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">
-              {data.portfolios.length > 0 ? `${data.portfolios.length} UMKM Terbuka` : '3 UMKM Terbuka'}
+              {data.portfolios.length > 0
+                ? isInvestorSide
+                  ? `${data.portfolios.length} UMKM Terbuka`
+                  : `${data.portfolios.length} Dokumen Lengkap`
+                : isInvestorSide
+                  ? '3 UMKM Terbuka'
+                  : 'Dokumen Lengkap'}
             </span>
           </div>
           <div className="flex flex-col gap-space-sm">
@@ -584,7 +617,9 @@ export function PartnerPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px] text-secondary">forum</span>
-              <h2 className="font-headline-sm text-headline-sm text-primary font-bold">Ulasan Mitra UMKM</h2>
+              <h2 className="font-headline-sm text-headline-sm text-primary font-bold">
+                {isInvestorSide ? 'Ulasan Mitra UMKM' : 'Ulasan Investor Sebelumnya'}
+              </h2>
             </div>
             <div className="flex items-center gap-1 text-secondary font-label-md text-label-md font-bold">
               <span className="material-symbols-outlined text-[16px] text-secondary [font-variation-settings:'FILL'_1]">
@@ -700,7 +735,7 @@ export function PartnerPage() {
         <div className="fixed bottom-16 inset-x-0 z-40 bg-surface/95 backdrop-blur-md px-gutter-mobile py-2.5 shadow-[0_-4px_16px_rgba(15,36,25,0.06)]">
           <div className="max-w-[430px] mx-auto flex items-center gap-space-xs">
             <button
-              aria-label="Simpan Pemodal"
+              aria-label="Simpan Profil"
               className="h-[50px] w-[50px] min-w-[50px] rounded-xl bg-surface-container-highest text-primary flex items-center justify-center hover:bg-surface-container-high transition-transform active:scale-95"
               type="button"
               onClick={toggleSave}
@@ -716,6 +751,7 @@ export function PartnerPage() {
               fundingRequestId={pref ? undefined : funding[0]?.id}
               existingStatus={existing?.status}
               variant="sticky"
+              stickyLabel={isInvestorSide ? undefined : 'Mulai Negosiasi & Buka Chat'}
             />
           </div>
         </div>
@@ -747,11 +783,13 @@ function InterestButton({
   fundingRequestId,
   existingStatus,
   variant = 'block',
+  stickyLabel,
 }: {
   receiverId: string;
   fundingRequestId?: string;
   existingStatus?: string;
   variant?: 'sticky' | 'block';
+  stickyLabel?: string;
 }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -809,7 +847,7 @@ function InterestButton({
   return (
     <>
       <button type="button" className={variant === 'sticky' ? stickyCta : blockCta} onClick={() => setOpen(true)}>
-        <span>{variant === 'sticky' ? 'Kirim Prospektus & Mulai Chat' : 'Kirim Ketertarikan'}</span>
+        <span>{variant === 'sticky' ? (stickyLabel ?? 'Kirim Prospektus & Mulai Chat') : 'Kirim Ketertarikan'}</span>
         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
       </button>
 

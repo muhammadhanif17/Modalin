@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logoUrl from '../assets/logo.png';
 
 /**
  * Port 1:1 dari Mockup/2. Pilih Peran Akun & Masuk (Mobile).html
@@ -35,9 +36,9 @@ export function RoleSelectPage() {
                 </span>
               </div>
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2qJwG25EcRlaMeUJIRHiHnWMpJJjekhw2o8XjE8OOqwqxicBgfdWphuMrMGAIoq1NFgQg7xz8Qj0WNCDtcSarOTJoYWk8qgmxPlfVv3UBwqLOn6tAei4Q01YJfvskL7WvwVlnO7n_ZEXlB17_MecepvBbU1vsYWKhMtZNqsQxrc5fJSaS5Tbd7TUJKZPL3uF0fqQKyrwN8byto3mEfAFzEz1sAB4V2b1cIgdfwZXnLUECrbcNa6q7kmBdVOA_ysESUw"
-                alt="Modalin Logo"
-                className="w-8 h-8 rounded-lg object-contain shadow-xs shrink-0"
+                src={logoUrl}
+                alt="Logo Modalin"
+                className="w-8 h-8 rounded-full object-cover shadow-xs shrink-0"
               />
             </div>
           </header>
@@ -135,7 +136,7 @@ export function RoleSelectPage() {
                   </span>
                 </div>
                 <p className="text-[12px] text-[#626864] leading-snug mb-2.5">
-                  Saya ingin mendanai bisnis UMKM terkurasi, terverifikasi OJK sandboxing, dan
+                  Saya ingin mendanai bisnis UMKM terkurasi dan terverifikasi, dan
                   mendapatkan imbal hasil transparan.
                 </p>
                 <div className="flex flex-wrap gap-1.5">

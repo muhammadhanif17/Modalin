@@ -9,9 +9,14 @@ import {
 } from '../lib/api';
 import { Spinner } from '../components/ui';
 import { formatRupiah, initials } from '../lib/format';
+import { readSession } from '../lib/session';
 
 /**
- * Port 1:1 dari Mockup/a12. Ulasan & Rating Kemitraan Selesai.html.
+ * Port 1:1 dari Mockup/a12. Ulasan & Rating Kemitraan Selesai.html
+ * (perspektif UMKM) + Mockup/b10 (perspektif investor): judul Beri Ulasan
+ * Mitra UMKM, label Pengalaman Kemitraan & Due Diligence, set tag investor,
+ * banner Dampak Skor Kepercayaan Mitra, dan CTA Kirim Ulasan & Rekomendasi
+ * bercabang via peran sesi. Klaim OJK mockup tidak diport (footer jujur UU ITE).
  * Section, class Tailwind, copy, dan ikon Material Symbols dipertahankan
  * verbatim. Bottom nav + <script> mockup tidak disalin: navigasi bawah sudah
  * dirender Layout global, logika bintang/tag/counter ditulis ulang sebagai
@@ -51,7 +56,7 @@ const RATING_LABELS = [
   { text: 'Sangat Memuaskan & Profesional', icon: 'sentiment_very_satisfied' },
 ];
 
-/** Tag karakteristik — copy verbatim dari mockup a12. */
+/** Tag karakteristik — copy verbatim dari mockup a12 (perspektif UMKM). */
 const REVIEW_TAGS = [
   'Komunikasi Sangat Responsif',
   'Pencairan Tepat Waktu',
@@ -59,10 +64,20 @@ const REVIEW_TAGS = [
   'Kemitraan Sangat Terbuka',
 ];
 
+/** Tag karakteristik — copy verbatim dari mockup b10 (perspektif investor). */
+const INVESTOR_TAGS = [
+  'Bagi Hasil Disiplin & Tepat Waktu',
+  'Laporan Keuangan Transparan',
+  'Operasional & Omzet Bertumbuh',
+  'Komunikasi Sangat Baik',
+  'Rekomendasikan ke Pemodal Lain',
+];
+
 const REVIEW_MAX = 300;
 
 export function RatingPage() {
   const { agreementId } = useParams();
+  const isInvestor = readSession()?.role === 'INVESTOR';
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['pending-ratings'],
@@ -103,7 +118,7 @@ export function RatingPage() {
   // Tanpa id: daftar kerja sama selesai yang menunggu ulasan, dengan bahasa
   // visual yang sama dengan kartu ringkasan mockup a12.
   if (!agreementId) {
-    return <PendingList rows={(data ?? []) as PendingRow[]} />;
+    return <PendingList rows={(data ?? []) as PendingRow[]} isInvestor={isInvestor} />;
   }
 
   const target = (data as PendingRow[] | undefined)?.find(
@@ -135,12 +150,12 @@ export function RatingPage() {
     );
   }
 
-  return <ReviewForm key={target.agreementId} target={target} />;
+  return <ReviewForm key={target.agreementId} target={target} isInvestor={isInvestor} />;
 }
 
 /* ---------------- Daftar pending ---------------- */
 
-function PendingList({ rows }: { rows: PendingRow[] }) {
+function PendingList({ rows, isInvestor }: { rows: PendingRow[]; isInvestor: boolean }) {
   const navigate = useNavigate();
 
   return (
@@ -156,12 +171,17 @@ function PendingList({ rows }: { rows: PendingRow[] }) {
             </span>
           </div>
           <h2 className="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">
-            Beri Ulasan Kemitraan
+            {isInvestor ? 'Beri Ulasan Mitra UMKM' : 'Beri Ulasan Kemitraan'}
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             {rows.length > 0
-              ? `${rows.length} kemitraan selesai menunggu ulasanmu. Ulasanmu memperbarui skor kepercayaan mitra.`
-              : 'Ulasanmu memperbarui skor kepercayaan mitra.'}
+              ? `${rows.length} kemitraan selesai menunggu ulasanmu. ` +
+                (isInvestor
+                  ? 'Ulasanmu selaku investor terverifikasi langsung meningkatkan Skor Kepercayaan mitra.'
+                  : 'Ulasanmu memperbarui skor kepercayaan mitra.')
+              : isInvestor
+                ? 'Ulasanmu selaku investor terverifikasi langsung meningkatkan Skor Kepercayaan mitra.'
+                : 'Ulasanmu memperbarui skor kepercayaan mitra.'}
           </p>
         </div>
         <button
@@ -231,21 +251,22 @@ function PendingList({ rows }: { rows: PendingRow[] }) {
         </div>
       )}
 
-      <TrustBanner />
+      <TrustBanner isInvestor={isInvestor} />
     </div>
   );
 }
 
 /* ---------------- Form ulasan (detail a12) ---------------- */
 
-function ReviewForm({ target }: { target: PendingRow }) {
+function ReviewForm({ target, isInvestor }: { target: PendingRow; isInvestor: boolean }) {
   const { agreementId } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const tagOptions = isInvestor ? INVESTOR_TAGS : REVIEW_TAGS;
 
   const [score, setScore] = useState(0);
   const [review, setReview] = useState('');
-  const [tags, setTags] = useState<string[]>(REVIEW_TAGS.slice(0, 3));
+  const [tags, setTags] = useState<string[]>(tagOptions.slice(0, 3));
   const [error, setError] = useState('');
 
   const name = target.partner.fullName ?? 'Mitra';
@@ -288,10 +309,12 @@ function ReviewForm({ target }: { target: PendingRow }) {
             </span>
           </div>
           <h2 className="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">
-            Beri Ulasan Kemitraan
+            {isInvestor ? 'Beri Ulasan Mitra UMKM' : 'Beri Ulasan Kemitraan'}
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Kerja sama {target.agreementNumber} telah selesai dengan sukses.
+            {isInvestor
+              ? `Siklus investasi ${target.agreementNumber} telah tuntas dengan hasil memuaskan.`
+              : `Kerja sama ${target.agreementNumber} telah selesai dengan sukses.`}
           </p>
         </div>
         <button
@@ -384,7 +407,7 @@ function ReviewForm({ target }: { target: PendingRow }) {
         {/* Interactive Star Rating Block */}
         <div className="flex flex-col items-center text-center gap-space-xs">
           <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
-            Pengalaman Kerja Sama
+            {isInvestor ? 'Pengalaman Kemitraan & Due Diligence' : 'Pengalaman Kerja Sama'}
           </span>
           {/* Stars Row */}
           <div
@@ -431,7 +454,7 @@ function ReviewForm({ target }: { target: PendingRow }) {
             Karakteristik Kemitraan (Pilih yang relevan):
           </span>
           <div className="flex flex-wrap gap-space-xs">
-            {REVIEW_TAGS.map((tag) => {
+            {tagOptions.map((tag) => {
               const selected = tags.includes(tag);
               return (
                 <button
@@ -489,7 +512,7 @@ function ReviewForm({ target }: { target: PendingRow }) {
         </div>
       </div>
 
-      <TrustBanner />
+      <TrustBanner isInvestor={isInvestor} />
 
       {/* Submit Action Button Shelf */}
       <div className="flex flex-col gap-space-xs pt-space-xs pb-space-sm">
@@ -508,7 +531,7 @@ function ReviewForm({ target }: { target: PendingRow }) {
             </>
           ) : (
             <>
-              <span>Kirim Ulasan &amp; Rating</span>
+              <span>{isInvestor ? 'Kirim Ulasan & Rekomendasi' : 'Kirim Ulasan & Rating'}</span>
               <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
             </>
           )}
@@ -521,7 +544,7 @@ function ReviewForm({ target }: { target: PendingRow }) {
         <div className="flex items-center justify-center gap-1 text-center">
           <span className="material-symbols-outlined text-secondary text-[14px]">policy</span>
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-            Sesuai Panduan Tata Kelola OJK &amp; Modalin PWA
+            Sesuai UU ITE &amp; Tata Kelola Modalin
           </span>
         </div>
       </div>
@@ -549,7 +572,7 @@ function PartnerAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string |
   );
 }
 
-function TrustBanner() {
+function TrustBanner({ isInvestor }: { isInvestor: boolean }) {
   return (
     <div className="bg-surface-container rounded-xl p-space-md flex gap-space-sm items-start">
       <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-on-secondary flex-shrink-0 mt-0.5">
@@ -557,12 +580,12 @@ function TrustBanner() {
       </div>
       <div className="flex flex-col gap-1 min-w-0">
         <h3 className="font-title-md text-title-md text-on-surface font-bold">
-          Dampak Skor Reputasi Komunitas
+          {isInvestor ? 'Dampak Skor Kepercayaan Mitra (Modalin Trust Index™)' : 'Dampak Skor Reputasi Komunitas'}
         </h3>
         <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-          Ulasan Anda akan langsung memperbarui Skor Kepercayaan &amp; Reputasi mitra di ekosistem
-          Modalin. Penilaian bersifat permanen guna menjaga transparansi antara pengusaha dan
-          pemodal dampak.
+          {isInvestor
+            ? 'Ulasan dari Anda selaku investor terverifikasi akan langsung meningkatkan Skor Kepercayaan (Trust Score) mitra dan membuka akses pendanaan skala lebih besar. Penilaian bersifat permanen guna menjaga transparansi.'
+            : 'Ulasan Anda akan langsung memperbarui Skor Kepercayaan & Reputasi mitra di ekosistem Modalin. Penilaian bersifat permanen guna menjaga transparansi antara pengusaha dan pemodal dampak.'}
         </p>
       </div>
     </div>

@@ -11,6 +11,7 @@ import {
   type MyProfile,
 } from '../lib/api';
 import { Notice, Spinner, type BadgeTone } from '../components/ui';
+import { AppHeader } from '../components/AppHeader';
 import { disconnectSocket } from '../lib/socket';
 import { readSession, saveSession } from '../lib/session';
 import { formatRupiah, formatRupiahSingkat, formatTanggal } from '../lib/format';
@@ -92,7 +93,7 @@ export function PortfolioPage() {
 
 /* ---------------- Investor (mockup b2) ---------------- */
 
-function InvestorPortfolio() {
+export function InvestorPortfolio() {
   const navigate = useNavigate();
   const location = useLocation();
   const qc = useQueryClient();
@@ -148,11 +149,12 @@ function InvestorPortfolio() {
     disconnectSocket();
     qc.clear();
     endpoints.logout().catch(() => undefined);
-    navigate('/login');
+    navigate('/');
   }
 
   return (
     <div className="flex flex-col w-full space-y-space-md px-gutter-mobile pt-4 pb-6 max-w-md mx-auto">
+      <AppHeader />
       {notice && <Notice tone="success">{notice}</Notice>}
 
       {/* Top Utility Context Bar */}
@@ -222,16 +224,13 @@ function InvestorPortfolio() {
               <div className="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
                 <span className="material-symbols-outlined text-[18px]">verified_user</span>
               </div>
-              <div>
-                <div className="flex items-center gap-1">
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-1">
                   <span className="font-headline-sm text-headline-sm text-primary font-bold">{score}</span>
                   <span className="font-label-sm text-label-sm text-on-surface-variant">/ 100</span>
-                  <span className="font-label-sm text-label-sm text-secondary font-bold px-1.5 py-0.5 bg-surface-container-lowest rounded-full ml-1">
-                    Investor Sangat Terpercaya
-                  </span>
                 </div>
                 <span className="font-body-sm text-body-sm text-on-surface-variant">
-                  Kredibilitas Pemodal (Peringkat A+)
+                  Kredibilitas Pemodal
                 </span>
               </div>
             </div>

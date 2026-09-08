@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, setToken, endpoints, VERIFICATION_LABEL, type VerificationStatus } from '../lib/api';
 import { VERIFICATION_TONE, type BadgeTone, Field, Notice } from '../components/ui';
+import { AppHeader } from '../components/AppHeader';
 import { disconnectSocket } from '../lib/socket';
 import { saveSession } from '../lib/session';
 
@@ -88,11 +89,12 @@ export function ProfilePage() {
     disconnectSocket();
     qc.clear();
     endpoints.logout().catch(() => undefined);
-    navigate('/login');
+    navigate('/');
   }
 
   return (
     <div className="flex flex-col w-full space-y-space-md px-gutter-mobile pt-4 pb-6 max-w-md mx-auto">
+      <AppHeader />
       {/* Top Utility Context Bar */}
       <div className="flex items-center justify-between py-space-2xs">
         <div className="flex flex-col">
@@ -111,23 +113,6 @@ export function ProfilePage() {
           <span className="font-body-sm text-body-sm text-on-surface-variant">
             Kelola profil usaha dan kelayakan pendanaan
           </span>
-        </div>
-        <div className="flex items-center gap-space-xs">
-          <Link
-            aria-label="Notifikasi Profil"
-            to="/app/chat"
-            className="relative w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary active:scale-95 transition-transform"
-          >
-            <span className="material-symbols-outlined text-[20px]">notifications</span>
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary"></span>
-          </Link>
-          <Link
-            aria-label="Pengaturan Akun"
-            to="/app/verifikasi"
-            className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary active:scale-95 transition-transform"
-          >
-            <span className="material-symbols-outlined text-[20px]">settings</span>
-          </Link>
         </div>
       </div>
 
@@ -329,81 +314,7 @@ export function ProfilePage() {
 
       {/* Profile Management Groups */}
       <div className="space-y-space-md pt-space-xs">
-        {/* Group 1: Informasi Bisnis & Portofolio */}
-        <div className="space-y-space-xs">
-          <span className="px-1 font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-            Informasi Bisnis &amp; Portofolio
-          </span>
-          <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
-            <Link
-              to="/app/profile/edit"
-              className="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors"
-            >
-              <div className="flex items-center gap-space-sm min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[20px]">badge</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="font-title-md text-title-md text-primary font-semibold truncate">
-                    Data Dasar &amp; Legalitas Usaha
-                  </div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                    NIB, KTP, Alamat Gerai Terdaftar
-                  </div>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0 ml-2">
-                chevron_right
-              </span>
-            </Link>
-            <div className="h-[1px] bg-surface-container-high mx-space-md"></div>
-            <Link
-              to="/app/profile/edit"
-              className="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors"
-            >
-              <div className="flex items-center gap-space-sm min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[20px]">handshake</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="font-title-md text-title-md text-primary font-semibold truncate">
-                    Kebutuhan Dana &amp; Skema Kerja Sama
-                  </div>
-                  <div className="font-body-sm text-body-sm text-secondary font-semibold truncate">
-                    Bagi Hasil 18% • Target Rp 75.000.000
-                  </div>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0 ml-2">
-                chevron_right
-              </span>
-            </Link>
-            <div className="h-[1px] bg-surface-container-high mx-space-md"></div>
-            <Link
-              to="/app/rekam-jejak"
-              className="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors"
-            >
-              <div className="flex items-center gap-space-sm min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[20px]">folder_special</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="font-title-md text-title-md text-primary font-semibold truncate">
-                    Berkas &amp; Portofolio Produk
-                  </div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                    Pitch Deck PDF, Foto Gerai, Lapkeu Q2
-                  </div>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0 ml-2">
-                chevron_right
-              </span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Group 2: Reputasi & Kemitraan */}
+        {/* Group 1: Reputasi & Kemitraan */}
         <div className="space-y-space-xs">
           <span className="px-1 font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
             Reputasi &amp; Kemitraan
@@ -433,7 +344,7 @@ export function ProfilePage() {
             </Link>
             <div className="h-[1px] bg-surface-container-high mx-space-md"></div>
             <Link
-              to="/app/agreements"
+              to="/app/dokumen"
               className="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors"
             >
               <div className="flex items-center gap-space-sm min-w-0">
@@ -445,7 +356,7 @@ export function ProfilePage() {
                     Dokumen Perjanjian &amp; SPK Digital
                   </div>
                   <div className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                    Arsip Akad Musyarakah &amp; Lembar OJK
+                    Riwayat SPK disepakati &amp; status masa berlaku
                   </div>
                 </div>
               </div>
@@ -456,7 +367,7 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* Group 3: Akun & Keamanan */}
+        {/* Group 2: Akun & Keamanan */}
         <div className="space-y-space-xs">
           <span className="px-1 font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
             Akun &amp; Keamanan
@@ -476,28 +387,6 @@ export function ProfilePage() {
                   </div>
                   <div className="font-body-sm text-body-sm text-on-surface-variant truncate">
                     Autentikasi 2 Langkah Aktif
-                  </div>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0 ml-2">
-                chevron_right
-              </span>
-            </Link>
-            <div className="h-[1px] bg-surface-container-high mx-space-md"></div>
-            <Link
-              to="/app/chat"
-              className="flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors"
-            >
-              <div className="flex items-center gap-space-sm min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[20px]">support_agent</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="font-title-md text-title-md text-primary font-semibold truncate">
-                    Bantuan &amp; Layanan Pengusaha
-                  </div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                    Pusat Edukasi Akad &amp; Konsultasi FAQ
                   </div>
                 </div>
               </div>

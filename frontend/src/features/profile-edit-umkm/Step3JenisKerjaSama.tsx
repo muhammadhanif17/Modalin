@@ -16,7 +16,7 @@ const SCHEMES: {
   {
     key: 'BAGI_HASIL',
     title: 'Bagi Hasil',
-    badge: 'Dipilih',
+    badge: 'Syirkah',
     sub: 'Sistem Syirkah / Pendapatan Bersama',
     desc: 'Investor menerima bagi hasil dari laba bersih bulanan, tanpa bunga tetap. Sangat cocok bila omzet penjualan warung atau kafe Anda fluktuatif mengikuti musim.',
     footIcon: 'verified_user',
@@ -77,9 +77,9 @@ export function Step3JenisKerjaSama({
   const docCount = (portfolio ?? []).length - photoCount;
   const infoScheme = SCHEMES.find((s) => s.key === info) ?? null;
 
-  // Lebar slider panel Bagi Hasil mengikuti ROI langkah 2 (tampilan saja).
+  // Slider porsi terikat ke estimatedRoi langkah 2 (10–40%); bisa digeser.
   const roiNum = Number(estimatedRoi);
-  const sliderPct = estimatedRoi && Number.isFinite(roiNum) ? Math.min(100, Math.max(5, ((roiNum - 10) / 30) * 100)) : 60;
+  const sliderValue = estimatedRoi && Number.isFinite(roiNum) ? Math.min(40, Math.max(10, roiNum)) : 25;
 
   return (
     <>
@@ -152,7 +152,9 @@ export function Step3JenisKerjaSama({
               <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed pl-8">
                 {scheme.desc}
               </p>
-              <div className="flex items-center justify-between pl-8 pt-2">
+              {/* Tombol "Pelajari Skema" teks dihapus sesuai permintaan —
+                  edukasi cukup lewat tombol (i) di pojok kanan atas kartu. */}
+              <div className="flex items-center pl-8 pt-2">
                 <span
                   className={
                     active
@@ -163,17 +165,6 @@ export function Step3JenisKerjaSama({
                   <span className="material-symbols-outlined text-[15px]">{scheme.footIcon}</span>
                   {scheme.footText}
                 </span>
-                <button
-                  className={
-                    active
-                      ? 'font-label-md text-label-md text-secondary font-semibold hover:underline'
-                      : 'font-label-md text-label-md text-on-surface-variant font-semibold hover:underline'
-                  }
-                  type="button"
-                  onClick={() => setInfo(scheme.key)}
-                >
-                  Pelajari Skema →
-                </button>
               </div>
 
               {scheme.key === 'BAGI_HASIL' && active && (
@@ -188,13 +179,16 @@ export function Step3JenisKerjaSama({
                   </div>
                   <div className="w-full flex items-center gap-space-xs">
                     <span className="font-label-sm text-label-sm text-outline">10%</span>
-                    <div className="flex-1 h-2 rounded-full bg-surface-container-highest relative">
-                      <div className="h-full rounded-full bg-secondary" style={{ width: `${sliderPct}%` }}></div>
-                      <div
-                        className="w-4 h-4 rounded-full bg-secondary shadow-sm absolute top-1/2 -translate-y-1/2 -ml-2"
-                        style={{ left: `${sliderPct}%` }}
-                      ></div>
-                    </div>
+                    <input
+                      aria-label="Tawaran porsi bagi hasil investor (persen dari laba bersih)"
+                      className="flex-1 h-2 accent-secondary cursor-pointer"
+                      type="range"
+                      min={10}
+                      max={40}
+                      step={1}
+                      value={sliderValue}
+                      onChange={(e) => set('estimatedRoi', e.target.value)}
+                    />
                     <span className="font-label-sm text-label-sm text-outline">40%</span>
                   </div>
                   <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">

@@ -161,14 +161,8 @@ export function ConversationPage({ conversationId }: { conversationId: string })
             {partnerVerified && (
               <span className="conv-verified" title="Terverifikasi">
                 <Icon name="verified" size={15} />
-                Terverifikasi
               </span>
             )}
-          </div>
-          <div className="chat-presence">
-            <span className="presence-dot" aria-hidden="true" />
-            Terhubung via Modalin
-            {meta?.fundingRequest ? ` · ${meta.fundingRequest.title}` : ''}
           </div>
         </div>
       </header>
@@ -194,7 +188,7 @@ export function ConversationPage({ conversationId }: { conversationId: string })
             const newDay =
               !prev || new Date(prev.createdAt).toDateString() !== new Date(m.createdAt).toDateString();
             return (
-              <div key={m.id}>
+              <div key={m.id} className="msg-wrap">
                 {newDay && (
                   <div className="chat-day">
                     <span>{formatTanggal(m.createdAt)}</span>

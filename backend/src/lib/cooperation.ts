@@ -3,8 +3,7 @@ import { z } from 'zod';
 
 /**
  * Prisma/MySQL tidak punya tipe array-of-enum, jadi `cooperationTypes` disimpan
- * sebagai kolom Json (lihat catatan penyimpangan #3 di specs/modalin-erd.dbml).
- * Semua baca/tulis harus lewat helper di sini supaya isinya tetap terjaga.
+ * sebagai kolom Json. Semua baca/tulis harus lewat helper di sini supaya isinya tetap terjaga.
  */
 
 export const cooperationTypeSchema = z.nativeEnum(CooperationType);

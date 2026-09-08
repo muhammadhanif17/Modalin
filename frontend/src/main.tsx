@@ -31,6 +31,15 @@ const CheckoutPage = lazy(() => import('./pages/Checkout').then((m) => ({ defaul
 const AdminPage = lazy(() => import('./pages/Admin').then((m) => ({ default: m.AdminPage })));
 const InvestorPage = lazy(() => import('./pages/Investor').then((m) => ({ default: m.InvestorPage })));
 const InvestorEditPage = lazy(() => import('./features/investor-edit').then((m) => ({ default: m.InvestorEditPage })));
+const InvestorProfilePage = lazy(() =>
+  import('./pages/Portfolio').then((m) => ({ default: m.InvestorPortfolio })),
+);
+const NotificationsPage = lazy(() =>
+  import('./pages/Notifications').then((m) => ({ default: m.NotificationsPage })),
+);
+const DocumentsPage = lazy(() =>
+  import('./pages/Documents').then((m) => ({ default: m.DocumentsPage })),
+);
 const PortfolioPage = lazy(() => import('./pages/Portfolio').then((m) => ({ default: m.PortfolioPage })));
 
 const queryClient = new QueryClient({
@@ -80,6 +89,14 @@ function PublicOnly() {
   return <Outlet />;
 }
 
+/** Tab Profil mengikuti peran: investor melihat profil investor (mockup b2),
+ *  UMKM melihat profil usaha (mockup a2). Sebelumnya semua peran mendarat di
+ *  halaman UMKM sehingga profil investor tidak pernah terlihat. */
+function ProfileRoute() {
+  const session = readSession();
+  if (session?.role === 'INVESTOR') return lazyRoute(InvestorProfilePage);
+  return lazyRoute(ProfilePage);
+}
 /** Rute chat memakai conversationId. */
 function ConversationView() {
   const { id } = useParams();
@@ -120,9 +137,11 @@ function AppRoutes() {
 
           {/* Fondasi */}
           <Route path="beranda" element={lazyRoute(DashboardPage)} />
+          <Route path="notifikasi" element={lazyRoute(NotificationsPage)} />
+          <Route path="dokumen" element={lazyRoute(DocumentsPage)} />
           <Route path="verifikasi" element={lazyRoute(VerificationPage)} />
           <Route path="verifikasi/status" element={<Navigate to="/app/verifikasi" replace />} />
-          <Route path="profile" element={lazyRoute(ProfilePage)} />
+          <Route path="profile" element={<ProfileRoute />} />
           <Route path="profile/edit" element={lazyRoute(ProfileEditUmkmPage)} />
           <Route path="rekam-jejak" element={lazyRoute(PortfolioPage)} />
           <Route path="rekam-danai" element={<Navigate to="/app/rekam-jejak" replace />} />

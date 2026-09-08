@@ -1,6 +1,6 @@
 /**
  * Satu-satunya tempat bobot skoring didefinisikan (FR-03 dan FR-07).
- * Kalau angka di sini berubah, update juga README dan specs/ARCHITECTURE.md.
+ * Kalau angka di sini berubah, update juga README.
  */
 
 // ---------------------------------------------------------------------------

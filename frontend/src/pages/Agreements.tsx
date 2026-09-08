@@ -15,6 +15,10 @@ import { readSession } from '../lib/session';
 
 /**
  * Port 1:1 dari Mockup/a11. Form Kesepakatan & Tanda Tangan Digital.html
+ * (perspektif UMKM) + Mockup/b9 (perspektif investor): label TTD Pemodal,
+ * Ringkasan Komitmen Investasi, Plafon Komitmen Modal, Pihak 1 (Mitra Usaha)
+/ Pihak 2 (Pemodal), dan Lihat Dokumen Penuh bercabang via peran sesi.
+ * Klaim OJK/PSrE mockup tidak diport (disclaimer jujur UU ITE dipertahankan).
  * (route /app/agreements). Section, class Tailwind, copy, dan ikon Material
  * Symbols dipertahankan verbatim; angka, nama pihak, status, dan aksi diisi
  * dari API.
@@ -182,6 +186,9 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
   const senderName = c.sender.profile?.fullName ?? 'Pihak 1';
   const receiverName = c.receiver.profile?.fullName ?? 'Mitra';
   const mySignature = agreement.signatures.find((s) => s.userId === session?.id);
+  // b9 (perspektif investor): label TTD, ringkasan komitmen, dan penanda
+  // pihak mengikuti copy mockup investor; alur FR-10/FR-11 tidak berubah.
+  const isInvestor = session?.role === 'INVESTOR';
   const signatureCount = agreement.signatures.length;
   const status = STATUS_LABEL[agreement.status];
   const canPublish = signatureCount >= 2;
@@ -254,7 +261,7 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
             { label: '1. Skema', icon: null as string | null },
             { label: '2. Detail', icon: null as string | null },
             { label: '3. Pratinjau', icon: null as string | null },
-            { label: '4. TTD', icon: 'draw' as string | null },
+            { label: isInvestor ? '4. TTD Pemodal' : '4. TTD', icon: 'draw' as string | null },
           ].map((step, idx) => {
             const done = idx < doneCount;
             const current = idx === doneCount && doneCount < 4;
@@ -314,7 +321,7 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
       <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-[0_2px_8px_-2px_rgba(15,36,25,0.05),0_8px_16px_-4px_rgba(15,36,25,0.03)] flex flex-col gap-space-sm">
         <div className="flex items-center justify-between">
           <span className="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">
-            Ringkasan Poin Akad
+            {isInvestor ? 'Ringkasan Komitmen Investasi' : 'Ringkasan Poin Akad'}
           </span>
           <span className="font-label-sm text-label-sm bg-surface-container-low px-2 py-0.5 rounded text-on-surface-variant">
             Auto-Generated
@@ -322,7 +329,9 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
         </div>
         <div className="grid grid-cols-2 gap-space-xs bg-surface-container-low p-space-xs rounded-lg">
           <div className="flex flex-col p-1.5">
-            <span className="font-label-sm text-label-sm text-on-surface-variant">Plafon Modal</span>
+            <span className="font-label-sm text-label-sm text-on-surface-variant">
+              {isInvestor ? 'Plafon Komitmen Modal' : 'Plafon Modal'}
+            </span>
             <span className="font-headline-sm text-headline-sm text-on-surface mt-0.5" data-money>
               {formatRupiah(Number(agreement.amount))}
             </span>
@@ -338,7 +347,9 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
           <div className="flex items-center justify-between py-1 bg-surface-container-lowest">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="material-symbols-outlined text-[16px] text-on-surface-variant shrink-0">store</span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant truncate">Pihak 1:</span>
+              <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
+                {isInvestor ? 'Pihak 1 (Mitra Usaha):' : 'Pihak 1:'}
+              </span>
             </div>
             <span className="font-label-md text-label-md text-on-surface font-semibold shrink-0">{senderName}</span>
           </div>
@@ -347,7 +358,9 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
               <span className="material-symbols-outlined text-[16px] text-on-surface-variant shrink-0">
                 account_balance_wallet
               </span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant truncate">Pihak 2:</span>
+              <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
+                {isInvestor ? 'Pihak 2 (Pemodal):' : 'Pihak 2:'}
+              </span>
             </div>
             <span className="font-label-md text-label-md text-on-surface font-semibold shrink-0">{receiverName}</span>
           </div>
@@ -458,7 +471,7 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
                 rel="noopener noreferrer"
               >
                 <span className="material-symbols-outlined text-[18px] text-on-surface-variant">open_in_full</span>
-                <span>Layar Penuh</span>
+                <span>{isInvestor ? 'Lihat Dokumen Penuh' : 'Layar Penuh'}</span>
               </a>
             </div>
           ) : (
@@ -513,7 +526,9 @@ function AgreementCard({ agreement }: { agreement: Agreement }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-space-2xs">
             <span className="material-symbols-outlined text-secondary text-[20px]">gesture</span>
-            <h2 className="font-title-md text-title-md text-on-surface">Tanda Tangan Digital</h2>
+            <h2 className="font-title-md text-title-md text-on-surface">
+              {isInvestor ? 'Tanda Tangan Digital Pemodal' : 'Tanda Tangan Digital'}
+            </h2>
           </div>
           <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">
             Tahap 4

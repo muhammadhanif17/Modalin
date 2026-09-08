@@ -136,6 +136,10 @@
 .chat-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line); font-weight: 700; }
 .chat-body { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); }
 .msg { max-width: 78%; padding: 10px 14px; border-radius: var(--r-md); font-size: 14px; line-height: 1.45; }
+/* Pembungkus per pesan: tanpa flex column di sini, .msg.mine (align-self)
+   tidak berpengaruh karena .msg bukan flex item langsung .conv-body —
+   semua bubble menempel kiri. */
+.msg-wrap { display: flex; flex-direction: column; }
 .msg.mine { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
 .msg.theirs { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
 /* 11px — 10px sudah di bawah ambang baca, dan ini satu-satunya titik segitu */

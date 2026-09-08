@@ -133,40 +133,35 @@ export function ProfileEditUmkmPage() {
       {/* Progress header + step pills mengikuti mockup tiap langkah */}
       {draft.step === 1 && (
         <>
-          <div className="w-full bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-xs">
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider">
-                {meta.step}
-              </span>
-              <span className="inline-flex items-center gap-1 font-label-md text-label-md text-primary font-bold bg-secondary-container/60 px-2.5 py-0.5 rounded-full text-on-secondary-container">
-                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  check_circle
-                </span>
+          <section className="w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-sm">
+            <div className="flex items-center justify-between gap-space-xs mb-space-sm">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+                <span className="material-symbols-outlined text-[15px]">{meta.icon}</span>
+                <span>{meta.step}</span>
+              </div>
+              <span className="font-label-md text-label-md text-secondary font-bold text-right leading-tight">
                 {meta.pctLabel}
               </span>
             </div>
-            <div className="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden mt-1">
-              <div className="h-full bg-secondary rounded-full transition-all duration-500" style={{ width: `${meta.pct}%` }}></div>
+            <div className="w-full h-2 rounded-full bg-surface-container overflow-hidden flex mb-space-sm">
+              <div className="h-full rounded-full bg-secondary w-1/4 transition-all duration-500"></div>
             </div>
-          </div>
-          <div className="flex items-center gap-space-xs overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
-            <div className="shrink-0 flex items-center gap-1.5 px-space-md py-2 rounded-full bg-primary-container text-on-primary shadow-sm">
-              <span className="material-symbols-outlined text-[16px]">storefront</span>
-              <span className="font-label-md text-label-md font-bold whitespace-nowrap">1. Data Dasar</span>
+            <div className="flex items-center gap-space-xs overflow-x-auto no-scrollbar pt-1">
+              <div className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+                <span>1. Data Dasar</span>
+              </div>
+              <div className="shrink-0 px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+                2. Dana
+              </div>
+              <div className="shrink-0 px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+                3. Kerja Sama
+              </div>
+              <div className="shrink-0 px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+                4. Berkas
+              </div>
             </div>
-            <div className="shrink-0 flex items-center gap-1.5 px-space-md py-2 rounded-full bg-surface-container text-on-surface-variant">
-              <span className="material-symbols-outlined text-[16px]">monetization_on</span>
-              <span className="font-label-md text-label-md whitespace-nowrap">2. Dana</span>
-            </div>
-            <div className="shrink-0 flex items-center gap-1.5 px-space-md py-2 rounded-full bg-surface-container text-on-surface-variant">
-              <span className="material-symbols-outlined text-[16px]">handshake</span>
-              <span className="font-label-md text-label-md whitespace-nowrap">3. Kerja Sama</span>
-            </div>
-            <div className="shrink-0 flex items-center gap-1.5 px-space-md py-2 rounded-full bg-surface-container text-on-surface-variant">
-              <span className="material-symbols-outlined text-[16px]">folder_shared</span>
-              <span className="font-label-md text-label-md whitespace-nowrap">4. Berkas</span>
-            </div>
-          </div>
+          </section>
           <div className="w-full bg-secondary-container/30 rounded-xl p-space-md flex items-start gap-space-sm shadow-sm">
             <div className="w-10 h-10 rounded-lg bg-secondary/15 flex items-center justify-center shrink-0 text-secondary">
               <span className="material-symbols-outlined text-[24px]">storefront</span>
@@ -183,16 +178,18 @@ export function ProfileEditUmkmPage() {
       )}
 
       {draft.step === 2 && (
-        <section className="flex flex-col gap-space-xs">
-          <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
-              <span className="material-symbols-outlined text-[14px]">tune</span>
+        <section className="w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between gap-space-xs mb-space-sm">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+              <span className="material-symbols-outlined text-[15px]">{meta.icon}</span>
               <span>{meta.step}</span>
             </div>
-            <span className="font-label-md text-label-md text-secondary font-bold">{meta.pctLabel}</span>
+            <span className="font-label-md text-label-md text-secondary font-bold text-right leading-tight">
+              {meta.pctLabel}
+            </span>
           </div>
-          <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden flex">
-            <div className="h-full bg-secondary w-1/2 rounded-full transition-all duration-500"></div>
+          <div className="w-full h-2 rounded-full bg-surface-container overflow-hidden flex mb-space-sm">
+            <div className="h-full rounded-full bg-secondary w-1/2 transition-all duration-500"></div>
           </div>
           <div className="flex items-center gap-space-xs overflow-x-auto no-scrollbar pt-1">
             <button
@@ -203,7 +200,7 @@ export function ProfileEditUmkmPage() {
               <span className="material-symbols-outlined text-[14px]">check_circle</span>
               <span>1. Data Dasar</span>
             </button>
-            <div className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm shadow-sm">
+            <div className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
               <span>2. Dana</span>
             </div>

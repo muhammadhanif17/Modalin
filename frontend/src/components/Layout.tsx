@@ -5,6 +5,7 @@ import { setToken, isAuthed, endpoints } from '../lib/api';
 import { subscribeToNotifications, disconnectSocket } from '../lib/socket';
 import { readSession, saveSession } from '../lib/session';
 import { Icon, type IconName } from './ui/Icon';
+import logoUrl from '../assets/logo.png';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
@@ -72,12 +73,12 @@ function TopNav() {
   const bellCount = (notif?.pendingConnections ?? 0) + (notif?.unreadMessages ?? 0);
 
   return (
-    <header className="topnav">
+    <header className={authed ? 'topnav topnav-app' : 'topnav'}>
       <div className="topnav-inner">
-        {/* Lambang merek mengikuti welcome screen Stitch: sparkline naik, bukan huruf M */}
+        {/* Lambang merek: logo jabat tangan + tunas, tulisan modalin.id tetap */}
         <button className="brand" onClick={() => navigate('/')} aria-label="Ke beranda Modalin">
           <span className="brand-mark">
-            <Icon name="trend" size={20} />
+            <img src={logoUrl} alt="Logo Modalin" />
           </span>
           <span className="brand-text">
             <span className="brand-name">
@@ -106,7 +107,7 @@ function TopNav() {
                 {role === 'INVESTOR' ? 'Pemodal' : role === 'ADMIN' ? 'Admin' : 'UMKM'}
               </span>
             )}
-            <Link className="icon-btn" to="/app/chat" aria-label="Notifikasi">
+            <Link className="icon-btn" to="/app/notifikasi" aria-label="Notifikasi">
               <Icon name="bell" size={20} />
               {bellCount > 0 && <span className="dot bell-dot">{bellCount}</span>}
             </Link>
@@ -120,7 +121,7 @@ function TopNav() {
             <Link className="btn btn-ghost btn-sm" to="/login">
               Masuk
             </Link>
-            <Link className="btn btn-primary btn-sm" to="/register">
+            <Link className="btn btn-primary btn-sm" to="/pilih-peran">
               Daftar
             </Link>
           </div>
@@ -144,7 +145,7 @@ export function LogoutButton() {
         disconnectSocket();
         qc.clear();
         endpoints.logout().catch(() => undefined);
-        navigate('/login');
+        navigate('/');
       }}
     >
       Keluar

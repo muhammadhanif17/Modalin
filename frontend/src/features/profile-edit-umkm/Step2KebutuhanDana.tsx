@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 const QUICK_AMOUNTS = [
   { label: 'Rp 25 Jt', value: '25000000' },
@@ -9,6 +9,60 @@ const QUICK_AMOUNTS = [
 
 const TENORS = ['6', '12', '24', '36', '48'] as const;
 
+/* Pos alokasi yang diatur sendiri oleh UMKM (nama + porsi bisa diubah,
+   baris bisa ditambah/dihapus). Sistem hanya menghitung nominal tiap pos
+   (= porsi × target) dan menjaga total porsi maksimal 100%. */
+type Pos = { name: string; desc: string; pct: number };
+
+const DEFAULT_POS: Pos[] = [
+  {
+    name: 'Renovasi & Penambahan Area Duduk',
+    desc: 'Memperluas kapasitas dari 24 menjadi 48 kursi',
+    pct: 46,
+  },
+  {
+    name: 'Mesin Espresso Komersial 2-Group',
+    desc: 'Menaikkan laju seduh peak-hour s/d 120 cup/jam',
+    pct: 33,
+  },
+  {
+    name: 'Bahan Baku & Modal Kas Awal',
+    desc: 'Stok green beans Flores & susu fresh 3 bulan',
+    pct: 21,
+  },
+];
+
+const BAR_COLORS = ['bg-primary-container', 'bg-secondary', 'bg-secondary-container', 'bg-primary'] as const;
+const MAX_POS = 8;
+
+function sanitizePos(raw: unknown): Pos[] {
+  if (!Array.isArray(raw)) return DEFAULT_POS.map((p) => ({ ...p }));
+  const list = (raw as Record<string, unknown>[])
+    .filter((p) => p && typeof p.name === 'string' && p.name.trim())
+    .map((p) => ({
+      name: String(p.name).slice(0, 80),
+      desc: typeof p.desc === 'string' ? String(p.desc).slice(0, 140) : '',
+      pct: Math.max(0, Math.min(100, Math.round(Number(p.pct) || 0))),
+    }));
+  if (list.length === 0) return DEFAULT_POS.map((p) => ({ ...p }));
+  /* Kunci total maksimal 100% berurutan dari pos pertama. */
+  let acc = 0;
+  for (const p of list) {
+    p.pct = Math.min(p.pct, 100 - acc);
+    acc += p.pct;
+  }
+  return list;
+}
+
+/* Kandidat nominal tiket. Yang ditawarkan hanya yang habis membagi target
+   (jumlah slot selalu bulat — tidak ada 7,5 slot) dan total slot ≤ 60. */
+const TICKET_CANDIDATES = [1000000, 2500000, 5000000, 10000000, 25000000, 50000000] as const;
+const MAX_SLOTS = 60;
+
+function formatRp(n: number): string {
+  return `Rp ${n.toLocaleString('id-ID')}`;
+}
+
 function formatDigits(digits: string): string {
   if (!digits) return '';
   return Number(digits).toLocaleString('id-ID');
@@ -18,8 +72,11 @@ function formatDigits(digits: string): string {
  * Port 1:1 dari Mockup/a4. Edit Profil Usaha - Kebutuhan Dana.html.
  * Class, copy, ikon Material Symbols dipertahankan verbatim (emoji lampu
  * diganti ikon lightbulb). Nominal tersimpan sebagai digit agar validasi
- * dan payload API tidak berubah; tiket, alokasi, dan performa adalah
- * placeholder visual karena belum ada endpoint-nya.
+ * dan payload API tidak berubah. Opsi tiket dibangkitkan dari target sehingga
+ * jumlah slot selalu bulat, dan nominal tiap pos alokasi = porsi × target —
+ * pos dan porsinya diatur sendiri oleh UMKM (total dikunci maks 100%).
+ * Performa finansial adalah placeholder visual karena belum ada
+ * endpoint-nya.
  * Kartu "Tenor, Lokasi & Imbal Hasil" memakai bahasa visual yang sama agar
  * field wajib validateStep langkah 2 (tenor, lokasi, ROI) tetap terisi.
  */
@@ -38,6 +95,60 @@ export function Step2KebutuhanDana({
   const tenorMonths = (values.tenorMonths as string) ?? '';
   const location = (values.location as string) ?? '';
   const estimatedRoi = (values.estimatedRoi as string) ?? '';
+
+  const target = Number(digits) || 0;
+
+  /* Opsi tiket valid untuk target saat ini: hanya nominal yang menghasilkan
+     jumlah slot bulat. Pilihan tersimpan lokal; ikut ter-reset otomatis bila
+     target berubah sehingga opsi lama tak lagi valid. */
+  const [ticket, setTicket] = useState('5000000');
+  const validTickets = target > 0
+    ? TICKET_CANDIDATES.filter((t) => target % t === 0 && target / t >= 1 && target / t <= MAX_SLOTS)
+    : [];
+  const effectiveTicket = validTickets.some((t) => String(t) === ticket) ? ticket : 'single';
+  const activeSlots = effectiveTicket === 'single' ? 0 : target / Number(effectiveTicket);
+
+  /* Alokasi bikinan pengguna — tersimpan di draf agar tidak hilang saat
+     pindah langkah. Total porsi dikunci maksimal 100%: setiap ubahan porsi
+     dijepit ke sisa yang tersedia. */
+  const [posList, setPosList] = useState<Pos[]>(() => sanitizePos(values.allocation));
+  function commitPos(next: Pos[]) {
+    setPosList(next);
+    set('allocation', next);
+  }
+  const totalPct = posList.reduce((s, p) => s + p.pct, 0);
+  function setPosPct(i: number, raw: number) {
+    const others = totalPct - posList[i]!.pct;
+    const pct = Math.max(0, Math.min(100 - others, Math.round(raw || 0)));
+    if (pct === posList[i]!.pct) return;
+    commitPos(posList.map((p, j) => (j === i ? { ...p, pct } : p)));
+  }
+  function setPosField(i: number, field: 'name' | 'desc', value: string) {
+    commitPos(posList.map((p, j) => (j === i ? { ...p, [field]: value } : p)));
+  }
+  function addPos() {
+    if (posList.length >= MAX_POS) return;
+    commitPos([...posList, { name: `Pos ${posList.length + 1}`, desc: '', pct: 0 }]);
+  }
+  function removePos(i: number) {
+    if (posList.length <= 1) return;
+    commitPos(posList.filter((_, j) => j !== i));
+  }
+
+  /* Nominal tiap pos = porsi × target (dibulatkan ke bawah per ribuan).
+     Pos terakhir yang berporsi menyerap sisa pembulatan bila total sudah
+     100% supaya pas dengan target; sisanya ditampilkan sebagai dana yang
+     belum dialokasikan. */
+  let lastNonZero = -1;
+  posList.forEach((p, i) => {
+    if (p.pct > 0) lastNonZero = i;
+  });
+  const floored = posList.map((p) => (target > 0 && p.pct > 0 ? Math.floor((target * p.pct) / 100 / 1000) * 1000 : 0));
+  const nominals = floored.map((f, i) =>
+    i === lastNonZero && totalPct === 100 ? target - floored.reduce((s, v, j) => (j === i ? s : s + v), 0) : f,
+  );
+  const mapped = nominals.reduce((s, v) => s + v, 0);
+  const remainder = target > 0 ? target - mapped : 0;
 
   return (
     <>
@@ -225,23 +336,38 @@ export function Step2KebutuhanDana({
           <select
             className="w-full h-12 px-4 rounded-xl bg-surface-container-low font-title-md text-title-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest focus:shadow-sm transition-all pr-10"
             id="ticket-size"
-            defaultValue="5000000"
+            value={effectiveTicket}
+            onChange={(e) => setTicket(e.target.value)}
+            disabled={target <= 0}
           >
-            <option value="2500000">Rp 2.500.000 / slot (30 slot)</option>
-            <option value="5000000">Rp 5.000.000 / slot (15 slot tersedia)</option>
-            <option value="10000000">Rp 10.000.000 / slot (7.5 slot)</option>
-            <option value="single">Investor Tunggal (100% kepemilikan komitmen)</option>
+            {target <= 0 && <option value="single">Isi target nominal dulu…</option>}
+            {validTickets.map((t) => (
+              <option key={t} value={String(t)}>
+                {formatRp(t)} / slot ({(target / t).toLocaleString('id-ID')} slot)
+              </option>
+            ))}
+            {target > 0 && <option value="single">Investor Tunggal (100% kepemilikan komitmen)</option>}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-on-surface-variant">
             <span className="material-symbols-outlined text-[20px]">expand_more</span>
           </div>
         </div>
         <span className="font-body-sm text-body-sm text-on-surface-variant">
-          Dengan Rp 5 Jt / slot, usaha Anda memiliki fleksibilitas hingga 15 pemodal aktif.
+          {target <= 0 ? (
+            'Pilih atau ketik target nominal di atas untuk melihat opsi tiket.'
+          ) : effectiveTicket === 'single' ? (
+            `Dengan investor tunggal, seluruh ${formatRp(target)} ditanggung 1 pemodal.`
+          ) : (
+            <>
+              Dengan {formatRp(Number(effectiveTicket))} / slot, usaha Anda memiliki fleksibilitas hingga{' '}
+              {activeSlots.toLocaleString('id-ID')} pemodal aktif.
+            </>
+          )}
         </span>
       </div>
 
-      {/* Section 3: Rencana Alokasi Modal (placeholder — belum ada endpoint) */}
+      {/* Section 3: Rencana Alokasi Modal — pos dan porsi diatur sendiri,
+          nominal tiap pos dihitung dari target nominal di atas. */}
       <div className="flex flex-col gap-space-sm p-4 rounded-xl bg-surface-container-lowest shadow-sm">
         <div className="flex items-center justify-between">
           <div>
@@ -249,75 +375,91 @@ export function Step2KebutuhanDana({
               Alokasi &amp; Pos Penggunaan Dana
             </h3>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Total alokasi terpetakan: Rp 75.000.000 (100%)
+              Total alokasi terpetakan:{' '}
+              {target > 0 ? `${formatRp(mapped)} (${totalPct}%)` : '— (isi target dulu)'}
             </p>
           </div>
           <span className="px-2 py-1 rounded-md bg-secondary/10 text-secondary font-label-sm text-label-sm font-bold">
-            100% Berimbang
+            {totalPct === 100 ? '100% Berimbang' : totalPct > 0 ? `${totalPct}% Terpetakan` : 'Belum Diatur'}
           </span>
         </div>
         <div className="w-full h-3 rounded-full overflow-hidden flex bg-surface-container">
-          <div className="h-full bg-primary-container w-[46%]" title="Renovasi (46%)"></div>
-          <div className="h-full bg-secondary w-[33%]" title="Mesin Espresso (33%)"></div>
-          <div className="h-full bg-secondary-container w-[21%]" title="Bahan Baku (21%)"></div>
+          {posList.map((p, i) =>
+            p.pct > 0 ? (
+              <div
+                key={i}
+                className={`h-full ${BAR_COLORS[i % BAR_COLORS.length]}`}
+                style={{ width: `${p.pct}%` }}
+                title={`${p.name} (${p.pct}%)`}
+              ></div>
+            ) : null,
+          )}
         </div>
         <div className="flex flex-col gap-2 pt-1">
-          <div className="flex items-start justify-between p-3 rounded-xl bg-surface-container-low">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <span className="w-3 h-3 rounded-full bg-primary-container mt-1 shrink-0"></span>
-              <div className="flex flex-col min-w-0">
-                <span className="font-title-md text-title-md text-on-surface font-semibold truncate">
-                  Renovasi &amp; Penambahan Area Duduk
-                </span>
-                <span className="font-body-sm text-body-sm text-on-surface-variant">
-                  Memperluas kapasitas dari 24 menjadi 48 kursi
-                </span>
+          {posList.map((p, i) => (
+            <div key={i} className="flex items-start justify-between gap-2 p-3 rounded-xl bg-surface-container-low">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                <span className={`w-3 h-3 rounded-full ${BAR_COLORS[i % BAR_COLORS.length]} mt-1 shrink-0`}></span>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <input
+                    className="w-full bg-transparent font-title-md text-title-md text-on-surface font-semibold focus:outline-none focus:bg-surface-container-lowest rounded px-1 -mx-1"
+                    aria-label={`Nama pos alokasi ${i + 1}`}
+                    value={p.name}
+                    maxLength={80}
+                    onChange={(e) => setPosField(i, 'name', e.target.value)}
+                  />
+                  <input
+                    className="w-full bg-transparent font-body-sm text-body-sm text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest rounded px-1 -mx-1"
+                    aria-label={`Keterangan pos alokasi ${i + 1}`}
+                    placeholder="Keterangan (opsional)"
+                    value={p.desc}
+                    maxLength={140}
+                    onChange={(e) => setPosField(i, 'desc', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="text-right shrink-0 ml-2 flex flex-col items-end gap-0.5">
+                <div className="font-title-md text-title-md text-on-surface font-bold">
+                  {target > 0 ? formatRp(nominals[i]!) : '—'}
+                </div>
+                <label className="flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant font-medium">
+                  <input
+                    className="w-14 h-8 px-1.5 rounded-lg bg-surface-container-lowest text-on-surface text-right font-bold focus:outline-none focus:ring-2 focus:ring-secondary"
+                    aria-label={`Porsi persen pos ${p.name || i + 1}`}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={100 - (totalPct - p.pct)}
+                    value={p.pct}
+                    onChange={(e) => setPosPct(i, Number(e.target.value))}
+                  />
+                  <span>% porsi</span>
+                </label>
+                {posList.length > 1 && (
+                  <button
+                    className="flex items-center gap-0.5 text-on-surface-variant hover:text-error font-label-sm text-label-sm active:scale-95 transition-all"
+                    type="button"
+                    aria-label={`Hapus ${p.name || `pos ${i + 1}`}`}
+                    onClick={() => removePos(i)}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    <span>Hapus</span>
+                  </button>
+                )}
               </div>
             </div>
-            <div className="text-right shrink-0 ml-2">
-              <div className="font-title-md text-title-md text-on-surface font-bold">Rp 35.000.000</div>
-              <div className="font-label-sm text-label-sm text-on-surface-variant font-medium">46% porsi</div>
-            </div>
-          </div>
-          <div className="flex items-start justify-between p-3 rounded-xl bg-surface-container-low">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <span className="w-3 h-3 rounded-full bg-secondary mt-1 shrink-0"></span>
-              <div className="flex flex-col min-w-0">
-                <span className="font-title-md text-title-md text-on-surface font-semibold truncate">
-                  Mesin Espresso Komersial 2-Group
-                </span>
-                <span className="font-body-sm text-body-sm text-on-surface-variant">
-                  Menaikkan laju seduh peak-hour s/d 120 cup/jam
-                </span>
-              </div>
-            </div>
-            <div className="text-right shrink-0 ml-2">
-              <div className="font-title-md text-title-md text-on-surface font-bold">Rp 25.000.000</div>
-              <div className="font-label-sm text-label-sm text-on-surface-variant font-medium">33% porsi</div>
-            </div>
-          </div>
-          <div className="flex items-start justify-between p-3 rounded-xl bg-surface-container-low">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <span className="w-3 h-3 rounded-full bg-secondary-container mt-1 shrink-0"></span>
-              <div className="flex flex-col min-w-0">
-                <span className="font-title-md text-title-md text-on-surface font-semibold truncate">
-                  Bahan Baku &amp; Modal Kas Awal
-                </span>
-                <span className="font-body-sm text-body-sm text-on-surface-variant">
-                  Stok green beans Flores &amp; susu fresh 3 bulan
-                </span>
-              </div>
-            </div>
-            <div className="text-right shrink-0 ml-2">
-              <div className="font-title-md text-title-md text-on-surface font-bold">Rp 15.000.000</div>
-              <div className="font-label-sm text-label-sm text-on-surface-variant font-medium">21% porsi</div>
-            </div>
-          </div>
+          ))}
         </div>
+        {target > 0 && totalPct < 100 && (
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            Sisa {formatRp(remainder)} ({100 - totalPct}%) belum dialokasikan — naikkan porsi atau tambah pos baru.
+          </p>
+        )}
         <button
-          className="w-full h-11 rounded-xl bg-surface-container font-label-md text-label-md text-secondary font-bold flex items-center justify-center gap-1.5 hover:bg-surface-container-high active:scale-98 transition-all"
+          className="w-full h-11 rounded-xl bg-surface-container font-label-md text-label-md text-secondary font-bold flex items-center justify-center gap-1.5 hover:bg-surface-container-high active:scale-98 transition-all disabled:opacity-50"
           type="button"
-          title="Segera hadir"
+          disabled={posList.length >= MAX_POS}
+          onClick={addPos}
         >
           <span className="material-symbols-outlined text-[18px]">add_circle</span>
           <span>Tambah Pos Alokasi</span>
