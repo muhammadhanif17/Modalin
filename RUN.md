@@ -35,6 +35,19 @@ docker compose up -d db
 
 Opsi B: pakai MySQL sendiri — set `DATABASE_URL` di `backend/.env`.
 
+Opsi C: Windows tanpa Docker — MySQL 8.4 via winget, jalan sebagai proses biasa:
+
+```powershell
+winget install --id Oracle.MySQL -e --silent --accept-package-agreements --accept-source-agreements
+$dataDir = "$env:LOCALAPPDATA\Modalin\mysql-data"
+New-Item -ItemType Directory -Path $dataDir -Force
+& "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" --initialize-insecure --datadir="$dataDir"
+Start-Process -FilePath "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe" -ArgumentList "--datadir=$dataDir","--port=3306","--bind-address=127.0.0.1" -WindowStyle Hidden
+& "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS modalin; CREATE USER IF NOT EXISTS 'modalin'@'localhost' IDENTIFIED BY 'modalin'; CREATE USER IF NOT EXISTS 'modalin'@'127.0.0.1' IDENTIFIED BY 'modalin'; GRANT ALL PRIVILEGES ON modalin.* TO 'modalin'@'localhost'; GRANT ALL PRIVILEGES ON modalin.* TO 'modalin'@'127.0.0.1'; FLUSH PRIVILEGES;"
+```
+
+Ulangi baris `Start-Process` itu setiap habis restart PC (data tersimpan di `%LOCALAPPDATA%\Modalin\mysql-data`).
+
 Jalankan migrasi dan seed:
 
 ```bash

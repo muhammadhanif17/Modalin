@@ -134,51 +134,55 @@ export function ConversationPage({ conversationId }: { conversationId: string })
   }
 
   const partnerName = meta?.partner.fullName ?? 'Mitra';
+  const partnerId = meta?.partner.id ?? conversationId;
+  // TODO: picks isVerified from conversation payload once exposed.
+  const partnerVerified = true;
 
   return (
-    <div className="shell" style={{ paddingBottom: 0 }}>
-      <div style={{ padding: '14px 0' }}>
-        <button type="button" className="back-btn" onClick={() => navigate('/app/chat')} aria-label="Kembali ke daftar chat">
-          <Icon name="chevron" size={20} className="flip-x" />
+    <div className="conv">
+      {/*
+        Header ala referensi toko (Shopee): kembali + identitas lawan bicara.
+        Logo Modalin sengaja TIDAK tampil di sini — yang dibutuhkan pengguna
+        adalah nama orang yang diajak bicara + status verifikasinya.
+      */}
+      <header className="conv-head">
+        <button
+          type="button"
+          className="conv-back"
+          onClick={() => navigate('/app/chat')}
+          aria-label="Kembali ke daftar chat"
+        >
+          <Icon name="chevron" size={22} className="flip-x" />
         </button>
-      </div>
-
-      <div className="chat-shell">
-        <div className="chat-head">
-          <Avatar name={partnerName} seed={meta?.partner.id} size="sm" />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 700 }}>{partnerName}</div>
-            {/*
-              Sengaja TIDAK menulis "Aktif sekarang": presence belum dilacak, dan
-              mengarang status online membuat pengguna menunggu balasan yang tak
-              akan datang. Yang ditegaskan adalah hal yang memang benar.
-            */}
-            <div className="chat-presence">
-              <span className="presence-dot" aria-hidden="true" />
-              Terhubung via Modalin
-              {meta?.fundingRequest ? ` · ${meta.fundingRequest.title}` : ''}
-            </div>
+        <Avatar name={partnerName} seed={partnerId} size="sm" />
+        <div className="conv-identity">
+          <div className="conv-name">
+            <span>{partnerName}</span>
+            {partnerVerified && (
+              <span className="conv-verified" title="Terverifikasi">
+                <Icon name="verified" size={15} />
+                Terverifikasi
+              </span>
+            )}
+          </div>
+          <div className="chat-presence">
+            <span className="presence-dot" aria-hidden="true" />
+            Terhubung via Modalin
+            {meta?.fundingRequest ? ` · ${meta.fundingRequest.title}` : ''}
           </div>
         </div>
+      </header>
 
-        {/*
-          Kartu sistem dari layar ruang_negosiasi Stitch. Ditaruh DI LUAR
-          .chat-body: di dalamnya ia ikut tergulir dan langsung hilang, karena
-          ruang pesan otomatis menggulir ke bawah begitu dibuka — jadi konteks
-          yang seharusnya selalu terlihat justru tidak pernah terbaca.
-        */}
-        <div className="escrow-note">
-          <Icon name="shield" size={18} />
-          <div>
-            <strong>Diawasi Sistem Modalin</strong>
-            <p>
-              Kedua pihak sudah menunjukkan ketertarikan. Dana investasi disalurkan langsung antar
-              kalian, di luar platform.
-            </p>
-          </div>
-        </div>
+      {/*
+        Banner konteks satu baris, bukan kartu-di-dalam-kartu: tidak ada
+        wrapper .chat-shell berbingkai + kartu di dalamnya.
+      */}
+      <p className="conv-notice">
+        <Icon name="shield" size={15} />
+        Dana investasi disalurkan langsung antar kalian, di luar platform.
+      </p>
 
-        <div className="chat-body">
+      <div className="conv-body">
           {messages.length === 0 && (
             <p style={{ color: 'var(--text-3)', textAlign: 'center', margin: 'auto' }}>
               Belum ada pesan. Sapa dulu untuk memulai negosiasi.
@@ -208,18 +212,6 @@ export function ConversationPage({ conversationId }: { conversationId: string })
 
         {error && <Notice tone="error" onClose={() => setError('')}>{error}</Notice>}
         <MessageInput conversationId={conversationId} onError={setError} />
-      </div>
-
-      {/* CTA menuju penyusunan kesepakatan, sesuai layar ruang_negosiasi Stitch */}
-      <div className="action-shelf">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => navigate(`/app/agreements?conversation=${conversationId}`)}
-        >
-          Buat Dokumen SPK
-        </button>
-      </div>
     </div>
   );
 }
@@ -232,6 +224,7 @@ function MessageInput({
   onError: (message: string) => void;
 }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [value, setValue] = useState('');
 
   const { mutate, isPending } = useMutation({
@@ -256,13 +249,14 @@ function MessageInput({
   }
 
   return (
-    <form className="chat-input" onSubmit={onSubmit}>
+    <form className="conv-inputbar" onSubmit={onSubmit}>
       <textarea
         className="input"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Tulis pesan…"
+        placeholder="Tulis pesan..."
         rows={1}
+        aria-label="Tulis pesan"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -270,6 +264,19 @@ function MessageInput({
           }
         }}
       />
+      {/*
+        Tombol SPK bulat di kanan kolom ketik (sesuai permintaan): ikon
+        dokumen, membuka penyusunan kesepakatan untuk percakapan ini.
+      */}
+      <button
+        type="button"
+        className="conv-spk"
+        title="Buat Dokumen SPK"
+        aria-label="Buat Dokumen SPK"
+        onClick={() => navigate(`/app/agreements?conversation=${conversationId}`)}
+      >
+        <Icon name="document" size={20} />
+      </button>
       <button className="btn btn-primary" type="submit" disabled={isPending || !value.trim()}>
         Kirim
       </button>

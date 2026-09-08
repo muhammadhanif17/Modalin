@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { formatSavedAt } from '../../lib/useDraft';
 
-/** Indikator "Tersimpan otomatis · 14:32" ala Google Docs. */
+/** Indikator draf otomatis — logika sama, visual mengikuti mockup a3-a7 (ikon cloud_done + teks). */
 export function AutoSaveIndicator({ savedAt, isDirty }: { savedAt: number | null; isDirty: boolean }) {
   const [, force] = useState(0);
   // Perbarui label "Baru saja" setiap 30 detik tanpa membuat hook lain.
@@ -22,9 +22,12 @@ export function AutoSaveIndicator({ savedAt, isDirty }: { savedAt: number | null
   }
 
   return (
-    <span className="autosave" aria-live="polite">
-      <span className={`autosave-dot ${isDirty ? 'autosave-dot-pending' : ''}`} aria-hidden="true" />
-      {label}
+    <span
+      className="inline-flex items-center justify-center gap-1.5 font-body-sm text-body-sm text-on-surface-variant"
+      aria-live="polite"
+    >
+      <span className="material-symbols-outlined text-[16px] text-secondary">cloud_done</span>
+      <span>{label}</span>
     </span>
   );
 }

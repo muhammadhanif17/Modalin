@@ -69,3 +69,13 @@
   color: var(--text);
 }
 .bell-dot { position: absolute; top: 5px; right: 5px; }
+
+/* --- Topnav di HP sempit: brand + 2 tombol harus muat 360px tanpa wrap --- */
+@media (max-width: 640px) {
+  .topnav-inner { gap: 10px; }
+  /* Tagline memakan ~110px; tanpa ini tombol Daftar terdesak keluar layar */
+  .brand-tagline { display: none; }
+  .brand { min-width: 0; flex: none; }
+  .brand-name { font-size: 17px; white-space: nowrap; }
+  .topnav-inner .btn { flex: none; white-space: nowrap; }
+}

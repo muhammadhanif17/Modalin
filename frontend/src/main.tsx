@@ -12,6 +12,9 @@ import { readSession } from './lib/session';
 const HomePage = lazy(() => import('./pages/Home').then((m) => ({ default: m.HomePage })));
 const LoginPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/Auth').then((m) => ({ default: m.RegisterPage })));
+const RoleSelectPage = lazy(() =>
+  import('./pages/RoleSelect').then((m) => ({ default: m.RoleSelectPage })),
+);
 const DashboardPage = lazy(() => import('./features/dashboard').then((m) => ({ default: m.DashboardPage })));
 const VerificationPage = lazy(() => import('./pages/Verification').then((m) => ({ default: m.VerificationPage })));
 const ExplorePage = lazy(() => import('./pages/Explore').then((m) => ({ default: m.ExplorePage })));
@@ -105,8 +108,10 @@ function AppRoutes() {
       {/* Publik — tertutup untuk yang sudah masuk */}
       <Route element={<PublicOnly />}>
         <Route path="/" element={<Layout>{lazyRoute(HomePage)}</Layout>} />
-        <Route path="/login" element={<Layout>{lazyRoute(LoginPage)}</Layout>} />
-        <Route path="/register" element={<Layout>{lazyRoute(RegisterPage)}</Layout>} />
+        {/* Auth 1:1 dari Mockup: standalone mobile container, tanpa TopNav/BottomNav global */}
+        <Route path="/login" element={lazyRoute(LoginPage)} />
+        <Route path="/register" element={lazyRoute(RegisterPage)} />
+        <Route path="/pilih-peran" element={lazyRoute(RoleSelectPage)} />
       </Route>
 
       <Route element={<AuthGuard />}>

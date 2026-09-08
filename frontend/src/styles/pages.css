@@ -128,6 +128,8 @@
 .bottomnav a svg { width: 22px; height: 22px; }
 
 .page-with-nav { padding-bottom: 76px; }
+/* Landing publik tanpa bottomnav: tanpa ini ada strip kosong di bawah footer */
+.page-public { padding-bottom: 0; }
 
 /* ---------- Chat ---------- */
 .chat-shell { display: flex; flex-direction: column; height: calc(100vh - 72px); max-height: 640px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
@@ -734,7 +736,9 @@ p, .body { line-height: 1.5; }
   grid-template-columns: 1.05fr 0.95fr;
   gap: 48px;
   align-items: center;
-  padding: clamp(56px, 9vh, 100px) var(--gutter) clamp(40px, 6vh, 64px);
+  /* Horizontal 0: .shell induk sudah memberi gutter. Nilai gutter di sini
+     menumpuk dua kali dan menjepit hero ~32px di layar 360px. */
+  padding: clamp(56px, 9vh, 100px) 0 clamp(40px, 6vh, 64px);
 }
 .hero-night h1 {
   font-size: clamp(38px, 6vw, 58px);
@@ -743,6 +747,8 @@ p, .body { line-height: 1.5; }
   letter-spacing: -0.02em;
   margin: 0 0 20px;
   color: #fbf8f3;
+  /* Jangan biarkan satu kata ("tumbuh.") yatim di baris sendiri */
+  text-wrap: balance;
 }
 .hero-night h1 em { font-style: italic; color: var(--tint); }
 .night-sub { color: rgba(243, 238, 227, 0.78); font-size: 17px; line-height: 1.6; max-width: 44ch; }
@@ -836,7 +842,7 @@ a.opp-card:hover { border-color: var(--primary); text-decoration: none; }
 .opp-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .opp-cover .badge { position: absolute; left: 12px; bottom: 12px; }
 .opp-card-body { padding: 0; display: grid; gap: 4px; min-width: 0; }
-.opp-card-body h3 { font-size: 17px; margin: 0; }
+.opp-card-body h3 { font-size: 17px; margin: 0; overflow-wrap: anywhere; }
 .opp-amount { font-weight: 800; font-size: 16px; margin-top: 6px; font-variant-numeric: tabular-nums; }
 
 /* --- Kutipan misi --- */
@@ -851,6 +857,7 @@ a.opp-card:hover { border-color: var(--primary); text-decoration: none; }
   font-style: italic;
   letter-spacing: -0.015em;
   color: #fbf8f3;
+  text-wrap: balance;
 }
 .night-quote p { margin: 20px 0 0; color: var(--tint); font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 
@@ -883,6 +890,7 @@ a.opp-card:hover { border-color: var(--primary); text-decoration: none; }
   max-width: 18ch;
   margin: 0 0 28px;
   color: #fbf8f3;
+  text-wrap: balance;
 }
 .night-cta h2 em { font-style: italic; color: var(--tint); }
 .night-foot {
@@ -999,3 +1007,123 @@ a.opp-card:hover { border-color: var(--primary); text-decoration: none; }
   .explore-bar .filter-toggle { display: none; }
   .filter-pane { display: grid; margin-top: 0; }
 }
+
+/* =========================================================================
+   Ruang chat fullscreen (tanpa logo + navbar global).
+   Pola header mengikuti referensi toko: kembali + identitas lawan bicara.
+   Flat: tanpa kartu-di-dalam-kartu, radius maksimal var(--r-md).
+   Anti-zoom HP: lebar dikunci max 480px, font input >=16px, dvh + safe-area.
+   ========================================================================= */
+.conv-fullscreen {
+  min-height: 100dvh;
+  background: var(--bg);
+  overflow-x: clip;
+}
+.conv {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow-x: clip;
+}
+.conv-head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.conv-back {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+}
+.conv-back:hover { background: var(--surface-2); }
+.conv-identity { flex: 1; min-width: 0; }
+.conv-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.conv-name > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.conv-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.conv-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.conv-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.conv-inputbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.conv-inputbar .input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  max-height: 120px;
+  font-size: 16px;
+  border-radius: var(--r-md);
+  resize: none;
+}
+.conv-spk {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--primary-strong);
+}
+.conv-spk:hover { border-color: var(--primary); }
+.conv-inputbar .btn { flex: none; min-height: 44px; }

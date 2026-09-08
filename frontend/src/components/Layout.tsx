@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { setToken, isAuthed, endpoints } from '../lib/api';
 import { subscribeToNotifications, disconnectSocket } from '../lib/socket';
@@ -7,8 +7,20 @@ import { readSession, saveSession } from '../lib/session';
 import { Icon, type IconName } from './ui/Icon';
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  // Ruang chat (dan halaman fullscreen lain) mengatur headernya sendiri:
+  // logo + navbar global disembunyikan supaya tidak dobel dan tidak
+  // memakan tinggi layar HP. Contoh: /app/chat/:id menampilkan nama
+  // lawan bicara + tombol kembali, bukan logo Modalin.
+  const isFullscreen = /^\/app\/chat\/.+/.test(pathname);
+  if (isFullscreen) {
+    return <div className="conv-fullscreen">{children}</div>;
+  }
+  // Halaman publik (landing) tidak punya bottomnav: padding bawah bawaan
+  // page-with-nav menyisakan strip kosong 76-84px di bawah footer gelap.
+  const publicOnly = !isAuthed();
   return (
-    <div className="page-with-nav">
+    <div className={publicOnly ? 'page-public' : 'page-with-nav'}>
       <TopNav />
       {children}
       <BottomNav />

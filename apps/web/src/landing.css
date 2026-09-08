@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap');
+
+/*
+ * Landing Modalin — permukaan pemasaran, terpisah dari aplikasi.
+ *
+ * Idenya: ini palet aplikasi versi malam. Tidak ada satu pun warna baru —
+ * forest #0F2419 digelapkan jadi kanvas, bone #F3EEE3 yang tadinya kanvas
+ * kini jadi warna teks, dan mint #8FBFA0 jadi aksen. Aplikasi setelah masuk
+ * tetap terang, jadi sistem komponen di DESIGN.md tidak tersentuh.
+ *
+ * Referensi ritme dan tipografinya daynight.co.uk, tapi tiga hal sengaja
+ * dibedakan: label kecil memakai token label-sm Plus Jakarta Sans (bukan
+ * monospace), penomoran hanya dipakai di bagian yang memang berurutan, dan
+ * seluruh halaman rata kiri karena kalimat Indonesia panjang.
+ */
+
+.lp {
+  --night: #0b1710;
+  --night-2: #132a1e;
+  --bone: #f3eee3;
+  --mint: #8fbfa0;
+  --sage: #7e9587;
+  --hair: rgba(243, 238, 227, 0.14);
+
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+
+  background: var(--night);
+  color: var(--bone);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  max-width: var(--shell-w);
+}
+
+/* Kanvas gelap menutup seluruh viewport, bukan hanya kolom terpusat */
+body:has(.lp) { background: #0b1710; }
+
+/* Topnav ikut gelap selama halaman ini terbuka */
+body:has(.lp) .topnav {
+  background: color-mix(in srgb, #0b1710 86%, transparent);
+  border-bottom-color: rgba(243, 238, 227, 0.12);
+}
+body:has(.lp) .brand { color: #f3eee3; }
+body:has(.lp) .brand-mark { background: #132a1e; color: #8fbfa0; }
+body:has(.lp) .brand-tagline { color: #7e9587; }
+body:has(.lp) .brand .spark { color: #8fbfa0; }
+body:has(.lp) .topnav-links a { color: #cfd8d0; }
+body:has(.lp) .topnav-links a:hover { background: rgba(243, 238, 227, 0.08); color: #fff; }
+body:has(.lp) .btn-ghost { background: transparent; color: #f3eee3; border: 1px solid rgba(243, 238, 227, 0.28); }
+body:has(.lp) .btn-ghost:hover:not(:disabled) { background: rgba(243, 238, 227, 0.1); }
+body:has(.lp) .btn-primary { background: #f3eee3; color: #0b1710; }
+body:has(.lp) .btn-primary:hover:not(:disabled) { background: #8fbfa0; color: #0b1710; }
+
+/* ---------- Tipografi ---------- */
+.lp-display {
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.06;
+  margin: 0;
+}
+/* Italic dipakai dua kali di seluruh halaman, dan selalu pada bagian kalimat
+   yang memang menjadi poinnya — bukan hiasan di setiap judul. */
+.lp-turn { font-style: italic; color: var(--mint); }
+
+.lp-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--sage);
+}
+.lp-label b { color: var(--mint); font-weight: 700; }
+
+.lp-body { color: #cfd8d0; font-size: 16px; line-height: 1.6; max-width: 54ch; }
+
+/* ---------- Hero ---------- */
+.lp-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  padding: clamp(56px, 10vh, 104px) 0 clamp(40px, 7vh, 72px);
+}
+.lp-hero h1 { font-size: clamp(40px, 6.4vw, 76px); }
+.lp-hero .lp-body { margin-top: 22px; }
+.lp-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+
+.lp-figure {
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--night-2);
+  aspect-ratio: 4 / 5;
+}
+.lp-figure img { width: 100%; height: 100%; object-fit: cover; }
+/* Satu-satunya gerak di halaman ini: foto hero masuk perlahan sekali saat muat */
+.lp-hero .lp-figure img { animation: lp-settle 1.1s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes lp-settle { from { transform: scale(1.06); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Angka nyata dari database, mengalir sebaris — bukan tiga kartu */
+.lp-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  padding: 22px 0 0;
+  margin-top: 34px;
+  border-top: 1px solid var(--hair);
+}
+.lp-stat b {
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.lp-stat span { color: var(--sage); font-size: 12px; font-weight: 600; margin-left: 8px; }
+
+/* ---------- Dua sisi yang dipertemukan ---------- */
+.lp-sides { padding: clamp(48px, 9vh, 96px) 0; border-top: 1px solid var(--hair); }
+.lp-sides h2 { font-size: clamp(30px, 4.6vw, 52px); max-width: 20ch; }
+.lp-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-top: 40px;
+}
+.lp-side { position: relative; overflow: hidden; background: var(--night-2); aspect-ratio: 3 / 4; margin: 0; }
+.lp-side img { width: 100%; height: 100%; object-fit: cover; opacity: 0.82; }
+.lp-side figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 60px 22px 22px;
+  background: linear-gradient(to top, rgba(11, 23, 16, 0.94), transparent);
+}
+.lp-side h3 { font-family: var(--serif); font-size: 26px; font-weight: 400; margin: 6px 0 6px; }
+.lp-side p { color: #cfd8d0; font-size: 14px; line-height: 1.5; max-width: 34ch; }
+
+/* ---------- Empat langkah: satu-satunya urutan asli di halaman ini ---------- */
+.lp-steps { padding: clamp(48px, 9vh, 96px) 0; border-top: 1px solid var(--hair); }
+.lp-steps h2 { font-size: clamp(28px, 4vw, 44px); }
+.lp-step {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 20px;
+  align-items: baseline;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.lp-step:first-of-type { border-top: 1px solid var(--hair); margin-top: 36px; }
+.lp-step-n {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 300;
+  color: var(--mint);
+  font-variant-numeric: tabular-nums;
+}
+.lp-step h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
+.lp-step p { color: #cfd8d0; font-size: 14.5px; line-height: 1.6; max-width: 62ch; }
+
+/* ---------- Batas yang berlaku, ditulis apa adanya ---------- */
+.lp-terms { padding: clamp(48px, 9vh, 96px) 0; border-top: 1px solid var(--hair); }
+.lp-terms h2 { font-size: clamp(26px, 3.4vw, 38px); max-width: 22ch; }
+.lp-term {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.lp-term:first-of-type { border-top: 1px solid var(--hair); margin-top: 32px; }
+.lp-term dt { color: var(--mint); font-size: 13px; font-weight: 700; }
+.lp-term dd { margin: 0; color: #cfd8d0; font-size: 14.5px; line-height: 1.6; max-width: 62ch; }
+
+/* ---------- Penutup ---------- */
+.lp-end { padding: clamp(56px, 10vh, 104px) 0; border-top: 1px solid var(--hair); }
+.lp-end h2 { font-size: clamp(32px, 5vw, 58px); max-width: 16ch; }
+.lp-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 26px 0 40px;
+  border-top: 1px solid var(--hair);
+  color: var(--sage);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---------- Ringkas ---------- */
+@media (max-width: 900px) {
+  .lp-hero { grid-template-columns: 1fr; gap: 34px; padding-top: 40px; }
+  .lp-hero .lp-figure { aspect-ratio: 3 / 2; }
+  .lp-term { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 620px) {
+  .lp-pair { grid-template-columns: 1fr; gap: 3px; }
+  .lp-side { aspect-ratio: 4 / 3; }
+  .lp-step { grid-template-columns: 44px 1fr; gap: 14px; }
+  .lp-stats { gap: 6px 20px; }
+  .lp-stat b { font-size: 23px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-hero .lp-figure img { animation: none; }
+}
