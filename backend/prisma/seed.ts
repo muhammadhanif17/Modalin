@@ -26,6 +26,10 @@ import { calculateTrustScore } from '../src/modules/trust-score/trust-score.calc
 const prisma = new PrismaClient();
 const DEMO_PASSWORD = 'Modalin2026!';
 
+// Basis URL file contoh. Lokal default localhost; produksi diisi dari
+// PUBLIC_BASE_URL Railway agar URL seed tidak menunjuk ke localhost.
+const FILE_BASE = (process.env.PUBLIC_BASE_URL ?? 'http://localhost:4000').replace(/\/$/, '');
+
 const SECTORS = [
   'Kuliner',
   'Kriya & Kerajinan',
@@ -427,7 +431,7 @@ async function main() {
   await reset();
 
   const hash = await argon2.hash(DEMO_PASSWORD);
-  const placeholder = (name: string) => `http://localhost:4000/api/files/portfolio/contoh-${name}.pdf`;
+  const placeholder = (name: string) => `${FILE_BASE}/api/files/portfolio/contoh-${name}.pdf`;
 
   console.log('Membuat sektor...');
   const sectors = new Map<string, string>();
@@ -457,8 +461,8 @@ async function main() {
     if (!seed.withKyc) return {};
     const submitted = daysAgo(10 - (idx % 7));
     return {
-      ktpUrl: `http://localhost:4000/api/files/kyc/contoh-ktp-${idx}.jpg`,
-      ...(isUmkm ? { nibUrl: `http://localhost:4000/api/files/kyc/contoh-nib-${idx}.jpg` } : {}),
+      ktpUrl: `${FILE_BASE}/api/files/kyc/contoh-ktp-${idx}.jpg`,
+      ...(isUmkm ? { nibUrl: `${FILE_BASE}/api/files/kyc/contoh-nib-${idx}.jpg` } : {}),
       kycSubmittedAt: submitted,
       ...(seed.verification === VerificationStatus.VERIFIED
         ? { verifiedAt: daysAgo(5), verifiedById: admin.id }
@@ -697,8 +701,8 @@ async function main() {
   });
   await prisma.agreementSignature.createMany({
     data: [
-      { agreementId: agreementAktif.id, userId: rotan.userId, signatureUrl: 'http://localhost:4000/api/files/signature/contoh-ttd-1.png', signedAt: daysAgo(16) },
-      { agreementId: agreementAktif.id, userId: gunawan, signatureUrl: 'http://localhost:4000/api/files/signature/contoh-ttd-2.png', signedAt: daysAgo(15) },
+      { agreementId: agreementAktif.id, userId: rotan.userId, signatureUrl: `${FILE_BASE}/api/files/signature/contoh-ttd-1.png`, signedAt: daysAgo(16) },
+      { agreementId: agreementAktif.id, userId: gunawan, signatureUrl: `${FILE_BASE}/api/files/signature/contoh-ttd-2.png`, signedAt: daysAgo(15) },
     ],
   });
   await prisma.fundingRequest.update({
@@ -738,14 +742,14 @@ async function main() {
       equityPercentage: new Prisma.Decimal(12),
       terms: 'Pemodal memperoleh hak informasi bulanan dan satu kursi penasihat tanpa hak suara.',
       status: AgreementStatus.COMPLETED,
-      documentUrl: 'http://localhost:4000/api/files/agreement/MLN-2026-000002.pdf',
+      documentUrl: `${FILE_BASE}/api/files/agreement/MLN-2026-000002.pdf`,
       createdAt: daysAgo(72),
     },
   });
   await prisma.agreementSignature.createMany({
     data: [
-      { agreementId: agreementSelesai.id, userId: kasir.userId, signatureUrl: 'http://localhost:4000/api/files/signature/contoh-ttd-3.png', signedAt: daysAgo(71) },
-      { agreementId: agreementSelesai.id, userId: rizky, signatureUrl: 'http://localhost:4000/api/files/signature/contoh-ttd-4.png', signedAt: daysAgo(70) },
+      { agreementId: agreementSelesai.id, userId: kasir.userId, signatureUrl: `${FILE_BASE}/api/files/signature/contoh-ttd-3.png`, signedAt: daysAgo(71) },
+      { agreementId: agreementSelesai.id, userId: rizky, signatureUrl: `${FILE_BASE}/api/files/signature/contoh-ttd-4.png`, signedAt: daysAgo(70) },
     ],
   });
   await prisma.rating.createMany({

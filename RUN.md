@@ -106,7 +106,8 @@ npm run build            # build produksi
 │   └── Dockerfile
 ├── docker-compose.yml   # MySQL 8.4 lokal
 ├── package.json         # workspaces: frontend, backend
-├── vercel.json          # Konfig deploy frontend
-├── render.yaml          # Konfig deploy backend
 └── RUN.md               # File ini
 ```
+
+Deploy tidak pakai file khusus di repo: frontend dikonfig di dashboard Vercel
+(root `frontend/`), backend di dashboard Railway (memakai `backend/Dockerfile`).

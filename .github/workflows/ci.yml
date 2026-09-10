@@ -19,6 +19,7 @@ jobs:
       - run: npm --workspace backend run test
       - run: npm run build --workspaces
         env:
-          # Build frontend tanpa backend hidup: cukup agar vite build lolos.
-          # URL asli diisi saat deploy via Secrets.VITE_API_URL.
-          VITE_API_URL: https://modalin-api.onrender.com
+          # Agar `vite build` lolos tanpa backend hidup. Nilai ini memang
+          # disamakan dengan URL produksi Railway; URL asli untuk deploy
+          # diisi di dashboard Vercel (VITE_API_URL) lalu redeploy frontend.
+          VITE_API_URL: https://modalin-api-production.up.railway.app

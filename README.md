@@ -87,7 +87,15 @@ Dokumen sensitif (KTP, NIB, tanda tangan, PDF perjanjian) tidak pernah dilayani 
 
 ## Deployment
 
-Frontend ke Vercel dengan root repositori sebagai project root; set `VITE_API_URL` ke URL API publik. API ke host yang mendukung Docker (Render, Railway, Fly.io, Cloud Run, atau VPS) memakai `backend/Dockerfile`; `render.yaml` tersedia sebagai titik awal.
+Produksi saat ini: frontend di **Vercel**, backend di **Railway**. Keduanya auto-deploy
+dari GitHub branch `main` — bukan dari folder lokal. Perubahan lokal baru live
+setelah `git push origin main`.
+
+- **Frontend (Vercel):** project root diarahkan ke `frontend/`; set `VITE_API_URL`
+  ke URL publik Railway. Karena Vite menanam env saat build, tiap ganti URL
+  wajib redeploy frontend.
+- **Backend (Railway):** service memakai `backend/Dockerfile`; `render.yaml` sudah
+  dihapus karena hanya dipakai Render.
 
 1. Siapkan MySQL terkelola, salin connection string ke `DATABASE_URL`.
 2. Set `JWT_SECRET`, `JWT_REFRESH_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`, `WEB_ORIGIN`, `PUBLIC_BASE_URL`, dan `API_PORT=4000`.
